@@ -1,0 +1,10 @@
+BZINC            = @BZ2INC@
+BZLIB            = @BZ2LIB@
+CXX              = @CXX@
+CXXFLAGS         = @CXXFLAGS@
+DWMDIR           = @DWMDIR@
+DWMINCS          = @DWMINCS@
+DWMLIBS          = @DWMLIBS@
+INSTALLPREFIX    = @prefix@
+PTHREADCXXFLAGS  = @PTHREADCXXFLAGS@
+SODIUMLIB        = -lsodium
