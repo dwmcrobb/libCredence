@@ -39,10 +39,10 @@ endif
 %.o: %.cc deps/%_deps
 	${CXX} ${CXXFLAGS} ${PTHREADCXXFLAGS} ${ALLINC} -c $<
 
-%: %.o ../lib/libMcrover.a
+%: %.o ../lib/libDwmCredence.a
 	${CXX} ${LDFLAGS} -o $@ $< ${ALLLIBS}
 
-../lib/libMcrover.a::
+../lib/libDwmCredence.a::
 	${MAKE} -C ../src
 
 clean:
