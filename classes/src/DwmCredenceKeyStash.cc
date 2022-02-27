@@ -65,7 +65,7 @@ namespace Dwm {
     KeyStash::KeyStash(const string & dirName)
         : _dirName(dirName)
     {
-      static const regex  rgx("^~.*");
+      static const regex  rgx("^~\\/.*");
       if (regex_match(_dirName, rgx)) {
         string  homeDir = Utils::UserHomeDirectory();
         if (! homeDir.empty()) {
