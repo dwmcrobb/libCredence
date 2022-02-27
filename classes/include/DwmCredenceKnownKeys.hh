@@ -58,6 +58,7 @@ namespace Dwm {
     public:
       KnownKeys(const std::string & dirName = "~/.credence");
       std::string Find(const std::string & id) const;
+      const std::map<std::string,std::string> & Keys() const;
       
     private:
       std::string                        _dirName;
