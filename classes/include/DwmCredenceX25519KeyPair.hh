@@ -36,7 +36,7 @@
 //---------------------------------------------------------------------------
 //!  \file DwmCredenceX25519KeyPair.hh
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief Dwm::Credence::X25519KeyPair class declaration
 //---------------------------------------------------------------------------
 
 #ifndef _DWMCREDENCEX25519KEYPAIR_HH_
@@ -49,7 +49,7 @@ namespace Dwm {
   namespace Credence {
 
     //------------------------------------------------------------------------
-    //!  
+    //!  Encapsulates an X25519 key pair.
     //------------------------------------------------------------------------
     class X25519KeyPair
     {

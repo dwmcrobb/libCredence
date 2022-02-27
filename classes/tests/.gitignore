@@ -2,6 +2,7 @@ TestChallenge
 TestKeyStash
 TestKnownKeys
 TestKXKeyPair
+TestSessionClientKeyPair
 TestSigner
 TestX25519KeyPair
 *.o

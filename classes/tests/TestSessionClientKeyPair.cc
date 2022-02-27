@@ -34,38 +34,43 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceKXKeyPair.hh
+//!  \file TestSessionClientKeyPair.cc
 //!  \author Daniel W. McRobb
-//!  \brief Dwm::Credence::KXKeyPair class declaration
+//!  \brief Dwm::Credence::SessionClientKeyPair unit tests
 //---------------------------------------------------------------------------
 
-#ifndef _DWMCREDENCEKXKEYPAIR_HH_
-#define _DWMCREDENCEKXKEYPAIR_HH_
+extern "C" {
+  #include <sodium.h>
+}
 
-#include <string>
+#include "DwmUnitAssert.hh"
+#include "DwmCredenceSessionClientKeyPair.hh"
 
-namespace Dwm {
+using namespace std;
+using namespace Dwm;
 
-  namespace Credence {
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+int main(int argc, char *argv[])
+{
+  Credence::KXKeyPair  clientKeyPair;
+  UnitAssert(clientKeyPair.PublicKey().size() == crypto_kx_PUBLICKEYBYTES);
+  UnitAssert(clientKeyPair.SecretKey().size() == crypto_kx_SECRETKEYBYTES);
 
-    //------------------------------------------------------------------------
-    //!  Encapsulates a key exchange key pair.
-    //------------------------------------------------------------------------
-    class KXKeyPair
-    {
-    public:
-      KXKeyPair();
-      ~KXKeyPair();
-      const std::string & PublicKey() const;
-      const std::string & SecretKey() const;
+  Credence::KXKeyPair  serverKeyPair;
+  Credence::SessionClientKeyPair  sckp(clientKeyPair,
+                                       serverKeyPair.PublicKey());
+  UnitAssert(sckp.RxKey().size() == crypto_kx_SESSIONKEYBYTES);
+  UnitAssert(sckp.TxKey().size() == crypto_kx_SESSIONKEYBYTES);
+  
+  if (Assertions::Total().Failed()) {
+    Assertions::Print(cerr, true);
+    return 1;
+  }
+  else {
+    cout << Assertions::Total() << " passed" << endl;
+  }
+  return 0;
+}
 
-    private:
-      std::string  _publicKey;
-      std::string  _secretKey;
-    };
-    
-  }  // namespace Credence
-
-}  // namespace Dwm
-
-#endif  // _DWMCREDENCEKXKEYPAIR_HH_

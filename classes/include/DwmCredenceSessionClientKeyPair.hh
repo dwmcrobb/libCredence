@@ -34,38 +34,39 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceKXKeyPair.hh
+//!  \file DwmCredenceSessionClientKeyPair.hh
 //!  \author Daniel W. McRobb
-//!  \brief Dwm::Credence::KXKeyPair class declaration
+//!  \brief Dwm::Credence::SessionClientKeyPair class declaration
 //---------------------------------------------------------------------------
 
-#ifndef _DWMCREDENCEKXKEYPAIR_HH_
-#define _DWMCREDENCEKXKEYPAIR_HH_
+#ifndef _DWMCREDENCESESSIONCLIENTKEYPAIR_HH_
+#define _DWMCREDENCESESSIONCLIENTKEYPAIR_HH_
 
-#include <string>
+#include "DwmCredenceKXKeyPair.hh"
 
 namespace Dwm {
 
   namespace Credence {
 
     //------------------------------------------------------------------------
-    //!  Encapsulates a key exchange key pair.
+    //!  Encapsulates a client-side session key pair.
     //------------------------------------------------------------------------
-    class KXKeyPair
+    class SessionClientKeyPair
     {
     public:
-      KXKeyPair();
-      ~KXKeyPair();
-      const std::string & PublicKey() const;
-      const std::string & SecretKey() const;
+      SessionClientKeyPair(const KXKeyPair & clientKXKeys,
+                           const std::string & serverPublicKey);
+      ~SessionClientKeyPair();
+      const std::string & RxKey() const;
+      const std::string	& TxKey() const;
 
     private:
-      std::string  _publicKey;
-      std::string  _secretKey;
+      std::string  _receiveKey;
+      std::string  _sendKey;
     };
     
   }  // namespace Credence
 
 }  // namespace Dwm
 
-#endif  // _DWMCREDENCEKXKEYPAIR_HH_
+#endif  // _DWMCREDENCESESSIONCLIENTKEYPAIR_HH_

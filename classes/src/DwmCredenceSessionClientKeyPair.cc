@@ -34,38 +34,73 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceKXKeyPair.hh
+//!  \file DwmCredenceSessionClientKeyPair.cc
 //!  \author Daniel W. McRobb
-//!  \brief Dwm::Credence::KXKeyPair class declaration
+//!  \brief Dwm::Credence::SessionClientKeyPair class implementation
 //---------------------------------------------------------------------------
 
-#ifndef _DWMCREDENCEKXKEYPAIR_HH_
-#define _DWMCREDENCEKXKEYPAIR_HH_
+extern "C" {
+  #include <sodium.h>
+}
 
-#include <string>
+#include <cstdint>
+#include <cstdlib>
+
+#include "DwmCredenceKXKeyPair.hh"
+#include "DwmCredenceSessionClientKeyPair.hh"
+
+using namespace std;
 
 namespace Dwm {
 
   namespace Credence {
 
     //------------------------------------------------------------------------
-    //!  Encapsulates a key exchange key pair.
+    //!  
     //------------------------------------------------------------------------
-    class KXKeyPair
+    SessionClientKeyPair::SessionClientKeyPair(const KXKeyPair & clientKXKeys,
+                                               const string & serverPubKey)
     {
-    public:
-      KXKeyPair();
-      ~KXKeyPair();
-      const std::string & PublicKey() const;
-      const std::string & SecretKey() const;
+      unsigned char  client_rx[crypto_kx_SESSIONKEYBYTES];
+      unsigned char  client_tx[crypto_kx_SESSIONKEYBYTES];
 
-    private:
-      std::string  _publicKey;
-      std::string  _secretKey;
-    };
+      const uint8_t  *mypk = (const uint8_t *)clientKXKeys.PublicKey().c_str();
+      const uint8_t  *mysk = (const uint8_t *)clientKXKeys.SecretKey().c_str();
+      const uint8_t  *serverpk = (const uint8_t *)serverPubKey.c_str();
+      
+      if (crypto_kx_client_session_keys(client_rx, client_tx,
+                                        mypk, mysk, serverpk) != 0) {
+        abort();
+      }
+      _receiveKey.assign((const char *)client_rx, crypto_kx_SESSIONKEYBYTES);
+      _sendKey.assign((const char *)client_tx, crypto_kx_SESSIONKEYBYTES);
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    SessionClientKeyPair::~SessionClientKeyPair()
+    {
+      _receiveKey.assign(_receiveKey.size(), '\0');
+      _sendKey.assign(_sendKey.size(), '\0');
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    const std::string & SessionClientKeyPair::RxKey() const
+    {
+      return _receiveKey;
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    const std::string & SessionClientKeyPair::TxKey() const
+    {
+      return _sendKey;
+    }
     
   }  // namespace Credence
 
 }  // namespace Dwm
-
-#endif  // _DWMCREDENCEKXKEYPAIR_HH_

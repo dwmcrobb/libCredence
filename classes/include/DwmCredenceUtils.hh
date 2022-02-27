@@ -36,7 +36,7 @@
 //---------------------------------------------------------------------------
 //!  \file DwmCredenceUtils.hh
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief Dwm::Credence::Utils class declaration
 //---------------------------------------------------------------------------
 
 #ifndef _DWMCREDENCEUTILS_HH_

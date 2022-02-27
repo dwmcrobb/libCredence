@@ -4,6 +4,7 @@ OBJFILES = TestChallenge.o \
            TestKeyStash.o \
            TestKnownKeys.o \
            TestKXKeyPair.o \
+           TestSessionClientKeyPair.o \
            TestSigner.o \
            TestX25519KeyPair.o
 OBJDEPS	 = $(OBJFILES:%.o=deps/%_deps)
