@@ -131,8 +131,11 @@ namespace Dwm {
     //------------------------------------------------------------------------
     void Ed25519KeyPair::Clear()
     {
+      _id.assign(_id.size(), '\0');
       _id.clear();
+      _publicKey.assign(_publicKey.size(), '\0');
       _publicKey.clear();
+      _secretKey.assign(_secretKey.size(), '\0');
       _secretKey.clear();
       return;
     }
