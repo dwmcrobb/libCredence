@@ -67,14 +67,10 @@ namespace Dwm {
     {
       static const regex  rgx("^~.*");
       if (regex_match(_dirName, rgx)) {
-        int    buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
-        if (buflen > 0) {
-          char  buf[buflen];
-          struct passwd  pwd, *result = nullptr;
-          if (getpwuid_r(geteuid(), &pwd, buf, buflen, &result) == 0) {
-            regex  rplrgx("^~");
-            _dirName = regex_replace(_dirName, rplrgx, string(pwd.pw_dir));
-          }
+        string  homeDir = Utils::UserHomeDirectory();
+        if (! homeDir.empty()) {
+          regex  rplrgx("^~");
+          _dirName = regex_replace(_dirName, rplrgx, homeDir);
         }
       }
     }

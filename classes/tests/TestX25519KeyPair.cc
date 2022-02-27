@@ -60,6 +60,9 @@ int main(int argc, char *argv[])
   UnitAssert(! xKeyPair2.PublicKey().empty());
   UnitAssert(! xKeyPair2.SecretKey().empty());
 
+  Credence::X25519KeyPair   xKeyPair3(edKeyPair);
+  UnitAssert(xKeyPair3 == xKeyPair1);
+  
   if (Assertions::Total().Failed()) {
     Assertions::Print(cerr, true);
     return 1;

@@ -40,6 +40,11 @@
 //---------------------------------------------------------------------------
 
 extern "C" {
+#if defined(__unix__)
+  #include <unistd.h>
+  #include <sys/types.h>
+  #include <pwd.h>
+#endif
   #include <sodium.h>
 }
 
@@ -90,6 +95,41 @@ namespace Dwm {
           rc.assign((const char *)buf, binlen);
         }
       }
+      return rc;
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    std::string Utils::UserHomeDirectory()
+    {
+      std::string  rc;
+#if defined(__unix__)
+      int    buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
+      if (buflen > 0) {
+        //  Use password entry for effective user ID
+        char  buf[buflen];
+        struct passwd  pwd, *result = nullptr;
+        if (getpwuid_r(geteuid(), &pwd, buf, buflen, &result) == 0) {
+          rc = pwd.pw_dir;
+        }
+      }
+      else {
+        //  Use environment
+        char  *home = getenv("HOME");
+        if (home) {
+          rc = home;
+        }
+      }
+#elif defined(_WIN32)
+      //  Use environment
+      char  *home = getenv("USERPROFILE");
+      if (home) {
+        rc = home;
+      }
+#else
+      #error Unknown platform
+#endif
       return rc;
     }
     
