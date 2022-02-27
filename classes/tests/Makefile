@@ -1,7 +1,8 @@
 include ../../Makefile.vars
 
 OBJFILES = TestKeyStash.o \
-           TestSigner.o
+           TestSigner.o \
+           TestX25519KeyPair.o
 OBJDEPS	 = $(OBJFILES:%.o=deps/%_deps)
 TESTS	 = $(OBJFILES:%.o=%)
 CXXFLAGS += -g
@@ -39,7 +40,7 @@ endif
 %.o: %.cc deps/%_deps
 	${CXX} ${CXXFLAGS} ${PTHREADCXXFLAGS} ${ALLINC} -c $<
 
-%: %.o ../lib/libDwmCredence.a
+Test%: Test%.o ../lib/libDwmCredence.a
 	${CXX} ${LDFLAGS} -o $@ $< ${ALLLIBS}
 
 ../lib/libDwmCredence.a::

@@ -1,4 +1,5 @@
 TestKeyStash
 TestSigner
+TestX25519KeyPair
 *.o
 *~

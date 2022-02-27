@@ -4,7 +4,8 @@ ALLINC       = -I../include ${DWMINCS}
 OBJFILESNP   = DwmCredenceEd25519KeyPair.o \
                DwmCredenceKeyStash.o \
                DwmCredenceSigner.o \
-               DwmCredenceUtils.o
+               DwmCredenceUtils.o \
+               DwmCredenceX25519KeyPair.o
 OBJFILES     = $(OBJFILESNP:%=../obj/%)
 OBJDEPS      = $(OBJFILESNP:%.o=deps/%_deps)
 
