@@ -53,26 +53,15 @@ int main(int argc, char *argv[])
 {
   Credence::Ed25519KeyPair  keyPair("dwm");
   Credence::KeyStash        keyStash(".");
-  UnitAssert(keyStash.Save(keyPair));
 
-  Credence::Ed25519KeyPair  keyPair2;
-  if (UnitAssert(keyStash.Get(keyPair2))) {
-    if (! UnitAssert(keyPair2 == keyPair)) {
-      cerr << "keyPair.Id(): " << keyPair.Id() << '\n'
-           << "keyPair2.Id(): " << keyPair2.Id() << '\n'
-           << "keyPair.PublicKey(): "
-           << Credence::Utils::Bin2Base64(keyPair.PublicKey()) << '\n'
-           << "keyPair2.PublicKey(): "
-           << Credence::Utils::Bin2Base64(keyPair2.PublicKey()) << '\n'
-           << "keyPair.SecretKey(): "
-           << Credence::Utils::Bin2Base64(keyPair.SecretKey()) << '\n'
-           << "keyPair2.SecretKey(): "
-           << Credence::Utils::Bin2Base64(keyPair2.SecretKey()) << '\n';
+  if (UnitAssert(keyStash.Save(keyPair))) {
+    Credence::Ed25519KeyPair  keyPair2;
+    if (UnitAssert(keyStash.Get(keyPair2))) {
+      UnitAssert(keyPair2 == keyPair);
     }
+    std::remove("./id_ed25519");
+    std::remove("./id_ed25519.pub");
   }
-
-  std::remove("./id_ed25519");
-  std::remove("./id_ed25519.pub");
   
   if (Assertions::Total().Failed()) {
     Assertions::Print(cerr, true);

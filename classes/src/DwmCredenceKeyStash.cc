@@ -40,10 +40,15 @@
 //---------------------------------------------------------------------------
 
 extern "C" {
+  #include <unistd.h>
+  #include <sys/types.h>
+  #include <pwd.h>
   #include <sodium.h>
 }
 
+#include <filesystem>
 #include <fstream>
+#include <regex>
 
 #include "DwmCredenceKeyStash.hh"
 #include "DwmCredenceUtils.hh"
@@ -59,7 +64,28 @@ namespace Dwm {
     //------------------------------------------------------------------------
     KeyStash::KeyStash(const string & dirName)
         : _dirName(dirName)
-    {}
+    {
+      static const regex  rgx("^~.*");
+      if (regex_match(_dirName, rgx)) {
+        int    buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
+        if (buflen > 0) {
+          char  buf[buflen];
+          struct passwd  pwd, *result = nullptr;
+          if (getpwuid_r(geteuid(), &pwd, buf, buflen, &result) == 0) {
+            regex  rplrgx("^~");
+            _dirName = regex_replace(_dirName, rplrgx, string(pwd.pw_dir));
+          }
+        }
+      }
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    const std::string	& KeyStash::DirName() const
+    {
+      return _dirName;
+    }
     
     //------------------------------------------------------------------------
     //!  
@@ -67,8 +93,10 @@ namespace Dwm {
     bool KeyStash::Save(const Ed25519KeyPair & edkp)
     {
       bool  rc = false;
-      if (SavePublicKey(edkp)) {
-        rc = SaveSecretKey(edkp);
+      if (MakeStashDir()) {
+        if (SavePublicKey(edkp)) {
+          rc = SaveSecretKey(edkp);
+        }
       }
       return rc;
     }
@@ -91,12 +119,24 @@ namespace Dwm {
     //------------------------------------------------------------------------
     bool KeyStash::SavePublicKey(const Ed25519KeyPair & edkp) const
     {
+      namespace fs = std::filesystem;
+      
       bool      rc = false;
       string    savePath = _dirName + "/id_ed25519.pub";
       ofstream  os(savePath);
       if (os) {
         os << edkp.Id() << " ed25519 " << Utils::Bin2Base64(edkp.PublicKey());
-        rc = true;
+        os.close();
+        fs::perms  p =
+          fs::perms::owner_read
+          | fs::perms::owner_write
+          | fs::perms::group_read
+          | fs::perms::others_read;
+        error_code  ec;
+        fs::permissions(savePath, p, ec);
+        if (! ec) {
+          rc = true;
+        }
       }
       return rc;
     }
@@ -106,12 +146,20 @@ namespace Dwm {
     //------------------------------------------------------------------------
     bool KeyStash::SaveSecretKey(const Ed25519KeyPair & edkp) const
     {
+      namespace fs = std::filesystem;
+      
       bool      rc = false;
       string    savePath = _dirName + "/id_ed25519";
       ofstream  os(savePath);
       if (os) {
         os << edkp.Id() << " ed25519 " << Utils::Bin2Base64(edkp.SecretKey());
-        rc = true;
+        os.close();
+        fs::perms  p = fs::perms::owner_read | fs::perms::owner_write;
+        error_code  ec;
+        fs::permissions(savePath, p, ec);
+        if (! ec) {
+          rc = true;
+        }
       }
       return rc;
     }
@@ -172,7 +220,32 @@ namespace Dwm {
       }
       return rc;
     }
-    
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool KeyStash::MakeStashDir() const
+    {
+      namespace  fs = std::filesystem;
+      
+      bool        rc = false;
+      fs::path    saveDir(_dirName);
+      error_code  ec;
+      if (fs::exists(saveDir, ec) && (! ec)) {
+          if (fs::is_directory(saveDir, ec) && (! ec)) {
+            rc = true;
+          }
+      }
+      else {
+        if (fs::create_directory(saveDir, ec) && (! ec)) {
+          fs::permissions(saveDir, fs::perms::owner_all, ec);
+          if (! ec) {
+            rc = true;
+          }
+        }
+      }
+      return rc;
+    }
 
   }  // namespace Credence
 
