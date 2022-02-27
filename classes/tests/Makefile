@@ -3,6 +3,7 @@ include ../../Makefile.vars
 OBJFILES = TestChallenge.o \
            TestKeyStash.o \
            TestKnownKeys.o \
+           TestKXKeyPair.o \
            TestSigner.o \
            TestX25519KeyPair.o
 OBJDEPS	 = $(OBJFILES:%.o=deps/%_deps)

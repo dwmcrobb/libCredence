@@ -5,6 +5,7 @@ OBJFILESNP   = DwmCredenceChallenge.o \
                DwmCredenceEd25519KeyPair.o \
                DwmCredenceKeyStash.o \
                DwmCredenceKnownKeys.o \
+               DwmCredenceKXKeyPair.o \
                DwmCredenceSigner.o \
                DwmCredenceUtils.o \
                DwmCredenceX25519KeyPair.o
