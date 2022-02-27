@@ -3,6 +3,7 @@ TestKeyStash
 TestKnownKeys
 TestKXKeyPair
 TestSessionClientKeyPair
+TestSessionServerKeyPair
 TestSigner
 TestX25519KeyPair
 *.o
