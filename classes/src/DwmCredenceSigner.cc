@@ -46,6 +46,7 @@ extern "C" {
 #include <cstdlib>
 
 #include "DwmCredenceSigner.hh"
+#include "DwmSysLogger.hh"
 
 namespace Dwm {
 
@@ -73,9 +74,22 @@ namespace Dwm {
               signedMessage.assign((const char *)buf, signedMsgLen);
               rc = true;
             }
+            else {
+              Syslog(LOG_ERR, "Signed message length too long!!!");
+            }
+          }
+          else {
+            Syslog(LOG_ERR, "crypto_sign() failed");
           }
           free(buf);
         }
+        else {
+          Syslog(LOG_ERR, "Failed to allocate %ull bytes for signed messsage",
+                 buflen);
+        }
+      }
+      else {
+        Syslog(LOG_ERR, "Empty signing key");
       }
       return rc;
     }
@@ -100,10 +114,18 @@ namespace Dwm {
             message.assign((const char *)buf, unsignedMsgLen);
             rc = true;
           }
+          else {
+            Syslog(LOG_ERR, "Message length too long!!!");
+          }
+        }
+        else {
+          Syslog(LOG_ERR, "crypto_sign_open() failed");
         }
         free(buf);
       }
-      
+      else {
+        Syslog(LOG_ERR, "Failed to allocate %zu bytes for message", buflen);
+      }
       return rc;
     }
     
