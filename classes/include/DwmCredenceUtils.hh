@@ -55,6 +55,7 @@ namespace Dwm {
     {
     public:
       static std::string Bin2Base64(const std::string & s);
+      static std::string Base642Bin(const std::string & s);
     };
     
   }  // namespace Credence

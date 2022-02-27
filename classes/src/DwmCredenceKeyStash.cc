@@ -203,16 +203,12 @@ namespace Dwm {
       if (is) {
         string  id, keyType, encodedKey;
         is >> id >> keyType >> encodedKey;
+        is.close();
         if ((id == edkp.Id())
             && (keyType == "ed25519")
             && (! encodedKey.empty())) {
-          unsigned char  binaryKey[crypto_sign_ed25519_SECRETKEYBYTES];
-          if (sodium_base642bin(binaryKey, crypto_sign_ed25519_SECRETKEYBYTES,
-                                encodedKey.data(), encodedKey.size(),
-                                nullptr, 0, nullptr,
-                                sodium_base64_VARIANT_ORIGINAL) == 0) {
-            string  keyString((const char *)binaryKey,
-                              crypto_sign_ed25519_SECRETKEYBYTES);
+          string  keyString = Utils::Base642Bin(encodedKey);
+          if (! keyString.empty()) {
             edkp.SecretKey(keyString);
             rc = true;
           }

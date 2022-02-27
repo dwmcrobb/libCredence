@@ -73,6 +73,26 @@ namespace Dwm {
       return rc;
     }
 
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    std::string Utils::Base642Bin(const std::string & s)
+    {
+      static const int  variant = sodium_base64_VARIANT_ORIGINAL;
+      std::string  rc;
+      if (! s.empty()) {
+        size_t   buflen = (s.size() * 3) / 4;
+        uint8_t  buf[buflen];
+        size_t   binlen;
+        if (sodium_base642bin(buf, buflen, s.data(), s.size(),
+                              nullptr, &binlen, nullptr,
+                              sodium_base64_VARIANT_ORIGINAL) == 0) {
+          rc.assign((const char *)buf, binlen);
+        }
+      }
+      return rc;
+    }
+    
   }  // namespace Credence
 
 }  // namespace Dwm
