@@ -34,58 +34,41 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceChallenge.cc
+//!  \file TestChallenge.cc
 //!  \author Daniel W. McRobb
-//!  \brief Dwm::Credence::Challenge class implementation
+//!  \brief Dwm::Credence::Challenge unit tests
 //---------------------------------------------------------------------------
 
-extern "C" {
-  #include <sodium.h>
+#include "DwmUnitAssert.hh"
+#include "DwmCredenceChallenge.hh"
+#include "DwmCredenceEd25519KeyPair.hh"
+#include "DwmCredenceSigner.hh"
+#include "DwmCredenceUtils.hh"
+
+using namespace std;
+using namespace Dwm;
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+int main(int argc, char *argv[])
+{
+  Credence::Ed25519KeyPair  keyPair("dwm");
+  Credence::Challenge       challenge(keyPair.PublicKey());
+  string                    signedMessage;
+  
+  if (UnitAssert(Credence::Signer::Sign(challenge.ChallengeString(),
+                                        keyPair.SecretKey(), signedMessage))) {
+    UnitAssert(challenge.Verify(signedMessage));
+  }
+  
+  if (Assertions::Total().Failed()) {
+    Assertions::Print(cerr, true);
+    return 1;
+  }
+  else {
+    cout << Assertions::Total() << " passed" << endl;
+  }
+  return 0;
 }
 
-#include "DwmCredenceSigner.hh"
-#include "DwmCredenceChallenge.hh"
-
-namespace Dwm {
-
-  namespace Credence {
-
-    using namespace std;
-    
-    //------------------------------------------------------------------------
-    //!  
-    //------------------------------------------------------------------------
-    Challenge::Challenge(const string & challengeePublicKey)
-        : _challengeePublicKey(challengeePublicKey)
-    {
-      uint8_t  buf[32];
-      randombytes_buf((void *)buf, 32);
-      _challengeString.assign((const char *)buf, 32);
-    }
-
-    //------------------------------------------------------------------------
-    //!  
-    //------------------------------------------------------------------------
-    const string & Challenge::ChallengeString() const
-    {
-      return _challengeString;
-    }
-    
-    //------------------------------------------------------------------------
-    //!  
-    //------------------------------------------------------------------------
-    bool Challenge::Verify(const string & signedMessage) const
-    {
-      bool    rc = false;
-      string  message;
-      if (Signer::Open(signedMessage, _challengeePublicKey, message)) {
-        if (_challengeString == message) {
-          rc = true;
-        }
-      }
-      return rc;
-    }
-    
-  }  // namespace Credence
-
-}  // namespace Dwm

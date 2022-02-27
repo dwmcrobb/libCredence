@@ -1,6 +1,7 @@
 include ../../Makefile.vars
 
-OBJFILES = TestKeyStash.o \
+OBJFILES = TestChallenge.o \
+           TestKeyStash.o \
            TestKnownKeys.o \
            TestSigner.o \
            TestX25519KeyPair.o

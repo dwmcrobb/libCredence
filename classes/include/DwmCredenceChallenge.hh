@@ -55,11 +55,12 @@ namespace Dwm {
     {
     public:
       Challenge(const std::string & challengeePublicKey);
+      const std::string & ChallengeString() const;
       bool Verify(const std::string & message) const;
 
     private:
       std::string  _challengeePublicKey;
-      std::string  _challenge;
+      std::string  _challengeString;
     };
     
   }  // namespace Credence
