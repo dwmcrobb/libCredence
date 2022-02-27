@@ -44,6 +44,8 @@ extern "C" {
   #include <unistd.h>
   #include <sys/types.h>
   #include <pwd.h>
+#elif defined(_WIN32)
+  #include <winsock.h>
 #endif
   #include <sodium.h>
 }
@@ -55,14 +57,16 @@ namespace Dwm {
 
   namespace Credence {
 
+    using namespace std;
+    
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    std::string Utils::Bin2Base64(const std::string & s)
+    string Utils::Bin2Base64(const string & s)
     {
       static const int  variant = sodium_base64_VARIANT_ORIGINAL;
       
-      std::string  rc;
+      string  rc;
       if (! s.empty()) {
         size_t  outlen =
           sodium_base64_encoded_len(s.size(), variant);
@@ -81,10 +85,10 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    std::string Utils::Base642Bin(const std::string & s)
+    string Utils::Base642Bin(const string & s)
     {
       static const int  variant = sodium_base64_VARIANT_ORIGINAL;
-      std::string  rc;
+      string  rc;
       if (! s.empty()) {
         size_t   buflen = (s.size() * 3) / 4;
         uint8_t  buf[buflen];
@@ -101,16 +105,16 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    std::string Utils::UserHomeDirectory()
+    string Utils::UserHomeDirectory()
     {
-      std::string  rc;
+      string  rc;
 #if defined(__unix__)
       int    buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
       if (buflen > 0) {
-        //  Use password entry for effective user ID
+        //  Use password entry for user ID
         char  buf[buflen];
         struct passwd  pwd, *result = nullptr;
-        if (getpwuid_r(geteuid(), &pwd, buf, buflen, &result) == 0) {
+        if (getpwuid_r(getuid(), &pwd, buf, buflen, &result) == 0) {
           rc = pwd.pw_dir;
         }
       }
@@ -132,6 +136,55 @@ namespace Dwm {
 #endif
       return rc;
     }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    string Utils::UserName()
+    {
+      string  rc;
+#if defined(__unix__)
+      int    buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
+      if (buflen > 0) {
+        //  Use password entry for user ID
+        char  buf[buflen];
+        struct passwd  pwd, *result = nullptr;
+        if (getpwuid_r(getuid(), &pwd, buf, buflen, &result) == 0) {
+          rc = pwd.pw_name;
+        }
+      }
+      else {
+        //  Use environment
+        char  *userName = getenv("USER");
+        if (userName) {
+          rc = userName;
+        }
+      }
+#elif defined(_WIN32)
+      //  Use environment
+      char  *userName = getenv("USERNAME");
+      if (userName) {
+        rc = userName;
+      }
+#else
+      #error Unknown platform
+#endif
+      return rc;
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    string Utils::HostName()
+    {
+      string  rc;
+      char    hname[256] = {0};
+      if (gethostname(hname, 256) == 0) {
+        rc = hname;
+      }
+      return rc;
+    }
+    
     
   }  // namespace Credence
 

@@ -34,35 +34,77 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceUtils.hh
+//!  \file DwmCredenceKnownKeys.cc
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief Dwm::Credence::KnownKeys class implementation
 //---------------------------------------------------------------------------
 
-#ifndef _DWMCREDENCEUTILS_HH_
-#define _DWMCREDENCEUTILS_HH_
+#include <fstream>
 
-#include <string>
+#include "DwmCredenceKnownKeys.hh"
 
 namespace Dwm {
 
   namespace Credence {
 
+    using namespace std;
+    
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    class Utils
+    KnownKeys::KnownKeys(const string & dirName)
+        : _dirName(dirName)
     {
-    public:
-      static std::string Bin2Base64(const std::string & s);
-      static std::string Base642Bin(const std::string & s);
-      static std::string UserHomeDirectory();
-      static std::string UserName();
-      static std::string HostName();
-    };
+      LoadKeys();
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    string KnownKeys::Find(const string & id) const
+    {
+      string  rc;
+      auto  it = _keys.find(id);
+      if (it != _keys.end()) {
+        rc = it->second;
+      }
+      return rc;
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool KnownKeys::LoadKeys()
+    {
+      _keys.clear();
+      ifstream  is(_dirName + "/known_keys");
+      pair<string,string>  key;
+      while (ReadKey(is, key)) {
+        _keys[key.first] = key.second;
+      }
+      return (! _keys.empty());
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool KnownKeys::ReadKey(istream & is, pair<string,string> & key)
+    {
+      bool  rc = false;
+      if (is) {
+        string  id, keyType, keystr;
+        if (is >> id >> keyType >> keystr) {
+          if (keyType == "ed25519") {
+            key.first = id;
+            key.second = keystr;
+            rc = true;
+          }
+        }
+      }
+      return rc;
+    }
+    
     
   }  // namespace Credence
 
 }  // namespace Dwm
-
-#endif  // _DWMCREDENCEUTILS_HH_

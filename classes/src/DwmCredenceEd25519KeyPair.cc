@@ -44,6 +44,7 @@ extern "C" {
 }
 
 #include "DwmCredenceEd25519KeyPair.hh"
+#include "DwmCredenceUtils.hh"
 
 namespace Dwm {
 
@@ -57,6 +58,10 @@ namespace Dwm {
     Ed25519KeyPair::Ed25519KeyPair(const string & id)
         : _id(id)
     {
+      if (_id.empty()) {
+        _id = Utils::UserName() + '@' + Utils::HostName();
+      }
+      
       unsigned char ed25519_pk[crypto_sign_ed25519_PUBLICKEYBYTES];
       unsigned char ed25519_skpk[crypto_sign_ed25519_SECRETKEYBYTES];
       

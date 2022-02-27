@@ -36,7 +36,7 @@
 //---------------------------------------------------------------------------
 //!  \file DwmCredenceEd25519KeyPair.hh
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief Dwm::Credence::Ed25519KeyPair class declaration
 //---------------------------------------------------------------------------
 
 #ifndef _DWMCREDENCEED25519KEYPAIR_HH_
@@ -54,9 +54,8 @@ namespace Dwm {
     class Ed25519KeyPair
     {
     public:
-      Ed25519KeyPair() = default;
+      Ed25519KeyPair(const std::string & id = "");
       Ed25519KeyPair(const Ed25519KeyPair &) = default;
-      Ed25519KeyPair(const std::string & id);
       ~Ed25519KeyPair();
       const std::string & Id() const;
       const std::string & Id(const std::string & id);

@@ -3,6 +3,7 @@ include ../../Makefile.vars
 ALLINC       = -I../include ${DWMINCS}
 OBJFILESNP   = DwmCredenceEd25519KeyPair.o \
                DwmCredenceKeyStash.o \
+               DwmCredenceKnownKeys.o \
                DwmCredenceSigner.o \
                DwmCredenceUtils.o \
                DwmCredenceX25519KeyPair.o

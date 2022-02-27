@@ -34,35 +34,51 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceUtils.hh
+//!  \file credence-keygen.cc
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief credence key generator (Ed25519 keys)
 //---------------------------------------------------------------------------
 
-#ifndef _DWMCREDENCEUTILS_HH_
-#define _DWMCREDENCEUTILS_HH_
+#include "DwmArguments.hh"
+#include "DwmCredenceKeyStash.hh"
 
-#include <string>
+using namespace std;
 
-namespace Dwm {
+typedef   Dwm::Arguments<Dwm::Argument<'i',string>,
+                         Dwm::Argument<'d',string>> MyArgType;
 
-  namespace Credence {
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+static void InitArgs(MyArgType & args)
+{
+  args.SetValueName<'i'>("identity");
+  args.SetHelp<'i'>("Use the given identity");
+  args.SetValueName<'d'>("directory");
+  args.SetHelp<'d'>("directory in which to store keys");
+  args.Set<'d'>("~/.credence");
+  
+  return;
+}
 
-    //------------------------------------------------------------------------
-    //!  
-    //------------------------------------------------------------------------
-    class Utils
-    {
-    public:
-      static std::string Bin2Base64(const std::string & s);
-      static std::string Base642Bin(const std::string & s);
-      static std::string UserHomeDirectory();
-      static std::string UserName();
-      static std::string HostName();
-    };
-    
-  }  // namespace Credence
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+int main(int argc, char *argv[])
+{
+  MyArgType  args;
+  InitArgs(args);
 
-}  // namespace Dwm
+  int  argind = args.Parse(argc, argv);
+  if (argind < 0) {
+    cerr << args.Usage(argv[0],"");
+    return 1;
+  }
 
-#endif  // _DWMCREDENCEUTILS_HH_
+  Dwm::Credence::Ed25519KeyPair  keys(args.Get<'i'>());
+  Dwm::Credence::KeyStash        keyStash(args.Get<'d'>());
+  if (keyStash.Save(keys)) {
+    return 0;
+  }
+  return 1;
+}

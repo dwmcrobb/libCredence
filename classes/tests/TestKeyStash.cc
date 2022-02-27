@@ -51,7 +51,7 @@ using namespace Dwm;
 //----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-  Credence::Ed25519KeyPair  keyPair("dwm");
+  Credence::Ed25519KeyPair  keyPair;
   Credence::KeyStash        keyStash(".");
 
   if (UnitAssert(keyStash.Save(keyPair))) {

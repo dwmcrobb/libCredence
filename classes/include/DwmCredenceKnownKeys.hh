@@ -34,14 +34,16 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceUtils.hh
+//!  \file DwmCredenceKnownKeys.hh
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief Dwm::Credence::KnownKeys class declaration
 //---------------------------------------------------------------------------
 
-#ifndef _DWMCREDENCEUTILS_HH_
-#define _DWMCREDENCEUTILS_HH_
+#ifndef _DWMCREDENCEKNOWNKEYS_HH_
+#define _DWMCREDENCEKNOWNKEYS_HH_
 
+#include <iostream>
+#include <map>
 #include <string>
 
 namespace Dwm {
@@ -51,18 +53,24 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    class Utils
+    class KnownKeys
     {
     public:
-      static std::string Bin2Base64(const std::string & s);
-      static std::string Base642Bin(const std::string & s);
-      static std::string UserHomeDirectory();
-      static std::string UserName();
-      static std::string HostName();
+      KnownKeys(const std::string & dirName = "~/.credence");
+      std::string Find(const std::string & id) const;
+      
+    private:
+      std::string                        _dirName;
+      std::map<std::string,std::string>  _keys;
+
+      bool LoadKeys();
+      static bool ReadKey(std::istream & is,
+                          std::pair<std::string,std::string> & key);
     };
+    
     
   }  // namespace Credence
 
 }  // namespace Dwm
 
-#endif  // _DWMCREDENCEUTILS_HH_
+#endif  // _DWMCREDENCEKNOWNKEYS_HH_
