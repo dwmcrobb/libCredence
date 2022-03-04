@@ -43,8 +43,11 @@ extern "C" {
   #include <sodium.h>
 }
 
+#include <iostream>
+
 #include "DwmUnitAssert.hh"
 #include "DwmCredenceKXKeyPair.hh"
+#include "DwmCredenceUtils.hh"
 
 using namespace std;
 using namespace Dwm;
@@ -52,12 +55,74 @@ using namespace Dwm;
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
+string GenerateSharedKeyServer(const Credence::KXKeyPair & serverKeys,
+                               const string & clientPublicKey)
+{
+  string   rc;
+  uint8_t  scalarmult_q[crypto_scalarmult_BYTES];
+  if (crypto_scalarmult(scalarmult_q,
+                        (const uint8_t *)serverKeys.SecretKey().data(),
+                        (const uint8_t *)clientPublicKey.data())) {
+    crypto_generichash_state  h;
+    uint8_t  sharedKey[crypto_generichash_BYTES] = {0};
+    crypto_generichash_init(&h, NULL, 0U, sizeof sharedKey);
+    crypto_generichash_update(&h, scalarmult_q, sizeof(scalarmult_q));
+    crypto_generichash_update(&h, (const uint8_t *)clientPublicKey.data(),
+                              clientPublicKey.size());
+    crypto_generichash_update(&h,
+                              (const uint8_t *)serverKeys.PublicKey().data(),
+                              serverKeys.PublicKey().size());
+    crypto_generichash_final(&h, sharedKey, sizeof(sharedKey));
+    rc.assign((const char *)sharedKey, sizeof(sharedKey));
+  }
+  return rc;
+}
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+string GenerateSharedKeyClient(const Credence::KXKeyPair & clientKeys,
+                               const string & serverPublicKey)
+{
+  string   rc;
+  uint8_t  scalarmult_q[crypto_scalarmult_BYTES];
+  if (crypto_scalarmult(scalarmult_q,
+                        (const uint8_t *)clientKeys.SecretKey().data(),
+                        (const uint8_t *)serverPublicKey.data())) {
+    crypto_generichash_state  h;
+    uint8_t  sharedKey[crypto_generichash_BYTES] = {0};
+    crypto_generichash_init(&h, NULL, 0U, sizeof sharedKey);
+    crypto_generichash_update(&h, scalarmult_q, sizeof(scalarmult_q));
+    crypto_generichash_update(&h,
+                              (const uint8_t *)clientKeys.PublicKey().data(),
+                              clientKeys.PublicKey().size());
+    crypto_generichash_update(&h,
+                              (const uint8_t *)serverPublicKey.data(),
+                              serverPublicKey.size());
+    crypto_generichash_final(&h, sharedKey, sizeof(sharedKey));
+    rc.assign((const char *)sharedKey, sizeof(sharedKey));
+  }
+  return rc;
+}
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-  Credence::KXKeyPair  keyPair;
-  UnitAssert(keyPair.PublicKey().size() == crypto_kx_PUBLICKEYBYTES);
-  UnitAssert(keyPair.SecretKey().size() == crypto_kx_SECRETKEYBYTES);
-  
+  Credence::KXKeyPair  clientKeys, serverKeys;
+  UnitAssert(clientKeys.PublicKey().size() == crypto_box_PUBLICKEYBYTES);
+  UnitAssert(clientKeys.SecretKey().size() == crypto_box_SECRETKEYBYTES);
+  UnitAssert(serverKeys.PublicKey().size() == crypto_box_PUBLICKEYBYTES);
+  UnitAssert(serverKeys.SecretKey().size() == crypto_box_SECRETKEYBYTES);
+
+  string clientSharedKey = clientKeys.ClientSharedKey(serverKeys.PublicKey());
+  string serverSharedKey = serverKeys.ServerSharedKey(clientKeys.PublicKey());
+  if (UnitAssert((! clientSharedKey.empty())
+                 && (! serverSharedKey.empty()))) {
+    UnitAssert(clientSharedKey == serverSharedKey);
+  }
+
   if (Assertions::Total().Failed()) {
     Assertions::Print(cerr, true);
     return 1;

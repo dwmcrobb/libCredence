@@ -54,8 +54,8 @@ namespace Dwm {
     //!  
     //------------------------------------------------------------------------
     bool SessionEncryptor::Encrypt(const std::string & message,
-                                   const SessionKeyPair & keys,
-                                   const SessionNonce & nonce,
+                                   const std::string & txKey,
+                                   const Nonce & nonce,
                                    std::string & encryptedMessage)
     {
       bool     rc = false;
@@ -63,7 +63,7 @@ namespace Dwm {
       uint8_t  cipherbuf[cipherlen];
       if (crypto_secretbox_easy(cipherbuf, (const uint8_t *)message.data(),
                                 message.size(), nonce,
-                                (const uint8_t *)keys.TxKey().data())
+                                (const uint8_t *)txKey.data())
           == 0) {
         encryptedMessage.assign((const char *)cipherbuf, cipherlen);
         rc = true;
@@ -79,8 +79,8 @@ namespace Dwm {
     //!  
     //------------------------------------------------------------------------
     bool SessionEncryptor::Decrypt(const std::string & encryptedMessage,
-                                   const SessionKeyPair & keys,
-                                   const SessionNonce & nonce,
+                                   const std::string & rxKey,
+                                   const Nonce & nonce,
                                    std::string & message)
     {
       bool     rc = false;
@@ -89,7 +89,7 @@ namespace Dwm {
       if (crypto_secretbox_open_easy(msgbuf,
                                      (const uint8_t *)encryptedMessage.data(),
                                      encryptedMessage.size(), nonce,
-                                     (const uint8_t *)keys.RxKey().data())
+                                     (const uint8_t *)rxKey.data())
           == 0) {
         message.assign((const char *)msgbuf, msglen);
         rc = true;

@@ -184,7 +184,25 @@ namespace Dwm {
       }
       return rc;
     }
-    
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool Utils::ScalarMult(const std::string & sk, const std::string & pk,
+                           std::string & q)
+    {
+      bool     rc = false;
+      uint8_t  qbuf[crypto_scalarmult_BYTES];
+      if (crypto_scalarmult(qbuf, (const uint8_t *)sk.data(),
+                            (const uint8_t *)pk.data()) == 0) {
+        q.assign((const char *)qbuf, sizeof(qbuf));
+        rc = true;
+      }
+      else {
+        q.clear();
+      }
+      return rc;
+    }
     
   }  // namespace Credence
 

@@ -44,11 +44,45 @@ extern "C" {
 }
 
 #include "DwmUnitAssert.hh"
+#include "DwmCredenceSessionClientKeyPair.hh"
 #include "DwmCredenceSessionServerKeyPair.hh"
+#include "DwmCredenceSessionEncryptor.hh"
 
 using namespace std;
 using namespace Dwm;
 
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+void TestEncryptDecrypt()
+{
+  Credence::KXKeyPair  clientKeyPair, serverKeyPair;
+  Credence::SessionServerKeyPair  sskp(serverKeyPair,
+                                       clientKeyPair.PublicKey());
+  Credence::SessionClientKeyPair  sckp(clientKeyPair,
+                                       serverKeyPair.PublicKey());
+
+  string           msg;
+  string           cipher;
+  Credence::Nonce  nonce;
+
+  string         c2sMsg("Client to server message.");
+  UnitAssert(Credence::SessionEncryptor::Encrypt(c2sMsg, sckp.TxKey(),
+                                                 nonce, cipher));
+  UnitAssert(Credence::SessionEncryptor::Decrypt(cipher, sskp.RxKey(),
+                                                 nonce, msg));
+  UnitAssert(msg == c2sMsg);
+
+  string         s2cMsg("Server to client message.");
+  UnitAssert(Credence::SessionEncryptor::Encrypt(s2cMsg, sskp.TxKey(),
+                                                 nonce, cipher));
+  UnitAssert(Credence::SessionEncryptor::Decrypt(cipher, sckp.RxKey(),
+                                                 nonce, msg));
+  UnitAssert(msg == s2cMsg);
+  
+  return;
+}
+  
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
@@ -63,6 +97,8 @@ int main(int argc, char *argv[])
                                        clientKeyPair.PublicKey());
   UnitAssert(sckp.RxKey().size() == crypto_kx_SESSIONKEYBYTES);
   UnitAssert(sckp.TxKey().size() == crypto_kx_SESSIONKEYBYTES);
+
+  TestEncryptDecrypt();
   
   if (Assertions::Total().Failed()) {
     Assertions::Print(cerr, true);

@@ -34,19 +34,18 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceUtils.hh
+//!  \file DwmCredenceGenericHash.hh
 //!  \author Daniel W. McRobb
-//!  \brief Dwm::Credence::Utils class declaration
+//!  \brief NOT YET DOCUMENTED
 //---------------------------------------------------------------------------
 
-#ifndef _DWMCREDENCEUTILS_HH_
-#define _DWMCREDENCEUTILS_HH_
+#ifndef _DWMCREDENCEGENERICHASH_HH_
+#define _DWMCREDENCEGENERICHASH_HH_
 
 extern "C" {
   #include <sodium.h>
 }
 
-#include <array>
 #include <cstdint>
 #include <string>
 
@@ -55,23 +54,50 @@ namespace Dwm {
   namespace Credence {
 
     //------------------------------------------------------------------------
-    //!  
+    //!  Class template that wraps sodium's crypto_generichash_* functions.
+    //!  The template paramater @c OutLen is the desired length (in bytes) of
+    //!  the hash returned by Final().
     //------------------------------------------------------------------------
-    class Utils
+    template <size_t OutLen>
+    class GenericHash
     {
     public:
-      static std::string Bin2Base64(const std::string & s);
-      static std::string Base642Bin(const std::string & s);
-      static std::string UserHomeDirectory();
-      static std::string UserName();
-      static std::string HostName();
-      static bool ScalarMult(const std::string & sk, const std::string & pk,
-                             std::string & q);
+      //----------------------------------------------------------------------
+      //!  Initializes the hash.
+      //----------------------------------------------------------------------
+      GenericHash(const std::string & key = "")
+      {
+        const uint8_t  *kp =
+          (key.empty() ? nullptr : (const uint8_t *)key.data());
+        crypto_generichash_init(&_h, kp, key.size(), OutLen);
+      }
       
+      //----------------------------------------------------------------------
+      //!  Updates the hash.
+      //----------------------------------------------------------------------
+      void Update(const std::string & chunk)
+      {
+        crypto_generichash_update(&_h, (const uint8_t *)chunk.data(),
+                                  chunk.size());
+        return;
+      }
+        
+      //----------------------------------------------------------------------
+      //!  Returns the final hash.
+      //----------------------------------------------------------------------
+      std::string Final()
+      {
+        uint8_t  finalbuf[OutLen] = {0};
+        crypto_generichash_final(&_h, finalbuf, sizeof(finalbuf));
+        return std::string((const char *)finalbuf, OutLen);
+      }
+      
+    private:
+      crypto_generichash_state  _h;
     };
     
   }  // namespace Credence
 
 }  // namespace Dwm
 
-#endif  // _DWMCREDENCEUTILS_HH_
+#endif  // _DWMCREDENCEGENERICHASH_HH_

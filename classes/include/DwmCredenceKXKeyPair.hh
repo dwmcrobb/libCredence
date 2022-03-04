@@ -54,14 +54,46 @@ namespace Dwm {
     class KXKeyPair
     {
     public:
+      //----------------------------------------------------------------------
+      //!  Creates a key exchange key pair with random content.
+      //----------------------------------------------------------------------
       KXKeyPair();
+      
+      //----------------------------------------------------------------------
+      //!  Clears the keys before destroying them.
+      //----------------------------------------------------------------------
       ~KXKeyPair();
+      
+      //----------------------------------------------------------------------
+      //!  Returns a const reference to the public key.
+      //----------------------------------------------------------------------
       const std::string & PublicKey() const;
+      
+      //----------------------------------------------------------------------
+      //!  Returns a const reference to the secret key.
+      //----------------------------------------------------------------------
       const std::string & SecretKey() const;
-
+      
+      //----------------------------------------------------------------------
+      //!  Given a client's public key, returns a shared key that will
+      //!  match the shared key created on the client side with
+      //!  ClientSharedKey().
+      //----------------------------------------------------------------------
+      std::string ServerSharedKey(const std::string & clientPublicKey) const;
+      
+      //----------------------------------------------------------------------
+      //!  Given a server's public key, returns a shared key that will
+      //!  match the shared key created on the server side with
+      //!  ServerSharedKey().
+      //----------------------------------------------------------------------
+      std::string ClientSharedKey(const std::string & serverPublicKey) const;
+      
     private:
       std::string  _publicKey;
       std::string  _secretKey;
+
+      std::string SharedKey(const std::string & theirPublicKey,
+                            bool isClient) const;
     };
     
   }  // namespace Credence

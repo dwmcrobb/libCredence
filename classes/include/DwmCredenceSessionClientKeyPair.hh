@@ -42,6 +42,7 @@
 #ifndef _DWMCREDENCESESSIONCLIENTKEYPAIR_HH_
 #define _DWMCREDENCESESSIONCLIENTKEYPAIR_HH_
 
+#include "DwmCredenceSessionKeyPair.hh"
 #include "DwmCredenceKXKeyPair.hh"
 
 namespace Dwm {
@@ -52,13 +53,14 @@ namespace Dwm {
     //!  Encapsulates a client-side session key pair.
     //------------------------------------------------------------------------
     class SessionClientKeyPair
+      : public SessionKeyPair
     {
     public:
       SessionClientKeyPair(const KXKeyPair & clientKXKeys,
                            const std::string & serverPublicKey);
       ~SessionClientKeyPair();
-      const std::string & RxKey() const;
-      const std::string	& TxKey() const;
+      const std::string & RxKey() const override;
+      const std::string & TxKey() const override;
 
     private:
       std::string  _receiveKey;

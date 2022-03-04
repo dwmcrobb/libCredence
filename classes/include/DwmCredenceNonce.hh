@@ -34,21 +34,20 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceUtils.hh
+//!  \file DwmCredenceNonce.hh
 //!  \author Daniel W. McRobb
-//!  \brief Dwm::Credence::Utils class declaration
+//!  \brief Dwm::Credende::Nonce class declaration
 //---------------------------------------------------------------------------
 
-#ifndef _DWMCREDENCEUTILS_HH_
-#define _DWMCREDENCEUTILS_HH_
+#ifndef _DWMCREDENCENONCE_HH_
+#define _DWMCREDENCENONCE_HH_
 
 extern "C" {
   #include <sodium.h>
 }
 
-#include <array>
 #include <cstdint>
-#include <string>
+#include <iostream>
 
 namespace Dwm {
 
@@ -57,21 +56,58 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    class Utils
+    class Nonce
     {
     public:
-      static std::string Bin2Base64(const std::string & s);
-      static std::string Base642Bin(const std::string & s);
-      static std::string UserHomeDirectory();
-      static std::string UserName();
-      static std::string HostName();
-      static bool ScalarMult(const std::string & sk, const std::string & pk,
-                             std::string & q);
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
+      Nonce(bool init = true)
+      {
+        if (init) {
+          randombytes_buf(_nonce, sizeof(_nonce));
+        }
+      }
+
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
+      std::istream & Read(std::istream & is)
+      {
+        if (is) {
+          is.read((char *)_nonce, crypto_secretbox_NONCEBYTES);
+        }
+        return is;
+      }
+
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
+      std::ostream & Write(std::ostream & os) const
+      {
+        if (os) {
+          os.write((const char *)_nonce, crypto_secretbox_NONCEBYTES);
+        }
+        return os;
+      }
       
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
+      Nonce(const Nonce &) = default;
+      
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
+      operator const uint8_t * () const   { return _nonce; }
+
+    private:
+      uint8_t  _nonce[crypto_secretbox_NONCEBYTES];
     };
+      
     
   }  // namespace Credence
 
 }  // namespace Dwm
 
-#endif  // _DWMCREDENCEUTILS_HH_
+#endif  // _DWMCREDENCENONCE_HH_

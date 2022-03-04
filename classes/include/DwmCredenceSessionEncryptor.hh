@@ -43,6 +43,7 @@
 #define _DWMCREDENCESESSIONENCRYPTOR_HH_
 
 #include "DwmCredenceSessionKeyPair.hh"
+#include "DwmCredenceNonce.hh"
 
 namespace Dwm {
 
@@ -55,10 +56,12 @@ namespace Dwm {
     {
     public:
       static bool Encrypt(const std::string & message,
-                          const SessionKeyPair & sessionKeys,
+                          const std::string & txKey,
+                          const Nonce & nonce,
                           std::string & encryptedMessage);
-      static bool Decrypt(const std::string & encrypedMessage,
-                          const SessionKeyPair & sessionKeys,
+      static bool Decrypt(const std::string & encryptedMessage,
+                          const std::string & rxKey,
+                          const Nonce & nonce,
                           std::string & message);
     };
     

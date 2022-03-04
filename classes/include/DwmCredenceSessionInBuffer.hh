@@ -34,19 +34,19 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceSessionNonce.hh
+//!  \file DwmCredenceSessionInBuffer.hh
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief Dwm::Credence::SessionInBuffer class declaration
 //---------------------------------------------------------------------------
 
-#ifndef _DWMCREDENCESESSIONNONCE_HH_
-#define _DWMCREDENCESESSIONNONCE_HH_
+#ifndef _DWMCREDENCESESSIONINBUFFER_HH_
+#define _DWMCREDENCESESSIONINBUFFER_HH_
 
-extern "C" {
-  #include <sodium.h>
-}
+#include <iostream>
+#include <memory>
+#include <string>
 
-#include <cstdint>
+#include "DwmCredenceSessionEncryptor.hh"
 
 namespace Dwm {
 
@@ -55,34 +55,28 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    class SessionNonce
-    {
-    public:
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      SessionNonce()
+    class SessionInBuffer
+        : public std::streambuf
       {
-        randombytes_buf(_nonce, sizeof(_nonce));
-      }
+      public:
+        SessionInBuffer(std::istream & is, const std::string & key);
+        
+      protected:
+        int_type underflow() override;
+        
+      private:
+        std::istream                  &_is;
+        std::unique_ptr<char_type[]>   _buffer;
+        std::string                    _key;
 
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      SessionNonce(const SessionNonce &) = default;
-      
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      operator const uint8_t * () const   { return _nonce; }
+        int Reload();
 
-    private:
-      uint8_t  _nonce[crypto_secretbox_NONCEBYTES];
-    };
-      
+        bool LoadNonceAndCipherText(SessionNonce & nonce,
+                                    std::string & cipherText);
+      };
     
   }  // namespace Credence
 
 }  // namespace Dwm
 
-#endif  // _DWMCREDENCESESSIONNONCE_HH_
+#endif  // _DWMCREDENCESESSIONINBUFFER_HH_

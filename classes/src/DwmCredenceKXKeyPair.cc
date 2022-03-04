@@ -44,21 +44,26 @@ extern "C" {
 }
 
 #include "DwmCredenceKXKeyPair.hh"
+#include "DwmCredenceGenericHash.hh"
+#include "DwmCredenceUtils.hh"
 
 namespace Dwm {
 
   namespace Credence {
 
+    using namespace std;
+    
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
     KXKeyPair::KXKeyPair()
     {
-      uint8_t  pkbuf[crypto_kx_PUBLICKEYBYTES];
-      uint8_t  skbuf[crypto_kx_SECRETKEYBYTES];
-      crypto_kx_keypair(pkbuf, skbuf);
-      _publicKey.assign((const char *)pkbuf, crypto_kx_PUBLICKEYBYTES);
-      _secretKey.assign((const char *)skbuf, crypto_kx_SECRETKEYBYTES);
+      uint8_t  pkbuf[crypto_box_PUBLICKEYBYTES];
+      uint8_t  skbuf[crypto_box_SECRETKEYBYTES];
+      randombytes_buf(skbuf, sizeof(skbuf));
+      crypto_scalarmult_base(pkbuf, skbuf);
+      _publicKey.assign((const char *)pkbuf, crypto_box_PUBLICKEYBYTES);
+      _secretKey.assign((const char *)skbuf, crypto_box_SECRETKEYBYTES);
     }
       
     //------------------------------------------------------------------------
@@ -73,7 +78,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    const std::string & KXKeyPair::PublicKey() const
+    const string & KXKeyPair::PublicKey() const
     {
       return _publicKey;
     }
@@ -81,11 +86,51 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    const std::string & KXKeyPair::SecretKey() const
+    const string & KXKeyPair::SecretKey() const
     {
       return _secretKey;
     }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    string KXKeyPair::ServerSharedKey(const string & clientPublicKey) const
+    {
+      return SharedKey(clientPublicKey, false);
+    }
     
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    string KXKeyPair::ClientSharedKey(const string & serverPublicKey) const
+    {
+      return SharedKey(serverPublicKey, true);
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+      string KXKeyPair::SharedKey(const string & theirPublicKey,
+                                  bool isClient) const
+    {
+      string   rc;
+      string   scalarmult_q;
+      if (Utils::ScalarMult(_secretKey, theirPublicKey, scalarmult_q)) {
+        GenericHash<crypto_generichash_BYTES>  h;
+        h.Update(scalarmult_q);
+        if (isClient) {
+          h.Update(_publicKey);
+          h.Update(theirPublicKey);
+        }
+        else {
+          h.Update(theirPublicKey);
+          h.Update(_publicKey);
+        }
+        rc = h.Final();
+      }
+      return rc;
+    }
+
   }  // namespace Credence
 
 }  // namespace Dwm
