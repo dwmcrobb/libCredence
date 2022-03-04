@@ -1,0 +1,23 @@
+msc {
+    client,server;
+    client => client [label="create KXKeypair"];
+    server => server [label="create KXKeyPair"];
+    client -> server [label="KXKeyPair public key"];
+    server -> client [label="KXKeyPair public key"];
+    client => client [label="compute shared key"];
+    server => server [label="compute shared key"];
+    client note server [label="encrypt session with shared key",
+                        textbgcolor="#f5deb3"];
+
+    client -> server [label="client_id"];
+    server -> client [label="server_id"];
+
+    server => server [label="Find client_id in authorized keys"];
+    client => client [label="Find server_id in authorized keys"];
+
+    client => client [label="create server_challenge with server public key"];
+    server => server [label="create client_challenge with client public key"];
+
+    client -> server [label="server_challenge"];
+    server -> client [label="client_challenge"];
+}
