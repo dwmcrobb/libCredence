@@ -13,11 +13,13 @@ msc {
     server -> client [label="server_id"];
 
     server => server [label="Find client_id in authorized keys"];
-    client => client [label="Find server_id in authorized keys"];
-
-    client => client [label="create server_challenge with server public key"];
     server => server [label="create client_challenge with client public key"];
-
-    client -> server [label="server_challenge"];
     server -> client [label="client_challenge"];
+
+    client => client [label="Find server_id in authorized keys"];
+    client => client [label="create server_challenge with server public key"];
+    client -> server [label="server_challenge"];
+
+    server => server [label="decrypt server_challenge with secret key"];
+    client => client [label="decrypt client_challenge with secret key"];
 }
