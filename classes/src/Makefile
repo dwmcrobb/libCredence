@@ -11,7 +11,8 @@ OBJFILESNP   = DwmCredenceChallenge.o \
                DwmCredenceSessionServerKeyPair.o \
                DwmCredenceSigner.o \
                DwmCredenceUtils.o \
-               DwmCredenceX25519KeyPair.o
+               DwmCredenceX25519KeyPair.o \
+               DwmCredenceXChaCha20Poly1305.o
 OBJFILES     = $(OBJFILESNP:%=../obj/%)
 OBJDEPS      = $(OBJFILESNP:%.o=deps/%_deps)
 

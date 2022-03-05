@@ -34,19 +34,14 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file TestKXKeyPair.cc
+//!  \file TestXChaCha20Poly1305.cc
 //!  \author Daniel W. McRobb
-//!  \brief Dwm::Credence::KXKeyPair unit tests
+//!  \brief NOT YET DOCUMENTED
 //---------------------------------------------------------------------------
-
-extern "C" {
-  #include <sodium.h>
-}
-
-#include <iostream>
 
 #include "DwmUnitAssert.hh"
 #include "DwmCredenceKXKeyPair.hh"
+#include "DwmCredenceXChaCha20Poly1305.hh"
 
 using namespace std;
 using namespace Dwm;
@@ -62,13 +57,18 @@ int main(int argc, char *argv[])
   UnitAssert(serverKeys.PublicKey().size() == crypto_box_PUBLICKEYBYTES);
   UnitAssert(serverKeys.SecretKey().size() == crypto_box_SECRETKEYBYTES);
 
-  string clientSharedKey = clientKeys.ClientSharedKey(serverKeys.PublicKey());
-  string serverSharedKey = serverKeys.ServerSharedKey(clientKeys.PublicKey());
-  if (UnitAssert((! clientSharedKey.empty())
-                 && (! serverSharedKey.empty()))) {
-    UnitAssert(clientSharedKey == serverSharedKey);
-  }
+  string  sharedKey = clientKeys.ClientSharedKey(serverKeys.PublicKey());
 
+  string  cipherText;
+  Credence::Nonce  nonce;
+  UnitAssert(Credence::XChaCha20Poly1305::Encrypt(cipherText,
+                                                  "An encrypted message.",
+                                                  nonce, sharedKey));
+  string  clearText;
+  UnitAssert(Credence::XChaCha20Poly1305::Decrypt(clearText, cipherText,
+                                                  nonce, sharedKey));
+  UnitAssert(clearText == "An encrypted message.");
+  
   if (Assertions::Total().Failed()) {
     Assertions::Print(cerr, true);
     return 1;
@@ -78,4 +78,3 @@ int main(int argc, char *argv[])
   }
   return 0;
 }
-

@@ -7,7 +7,8 @@ OBJFILES = TestChallenge.o \
            TestSessionClientKeyPair.o \
            TestSessionServerKeyPair.o \
            TestSigner.o \
-           TestX25519KeyPair.o
+           TestX25519KeyPair.o \
+           TestXChaCha20Poly1305.o
 OBJDEPS	 = $(OBJFILES:%.o=deps/%_deps)
 TESTS	 = $(OBJFILES:%.o=%)
 CXXFLAGS += -g

@@ -6,5 +6,6 @@ TestSessionClientKeyPair
 TestSessionServerKeyPair
 TestSigner
 TestX25519KeyPair
+TestXChaCha20Poly1305
 *.o
 *~

@@ -34,48 +34,35 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file TestKXKeyPair.cc
+//!  \file DwmCredenceXChaCha20Poly1305.hh
 //!  \author Daniel W. McRobb
-//!  \brief Dwm::Credence::KXKeyPair unit tests
+//!  \brief NOT YET DOCUMENTED
 //---------------------------------------------------------------------------
 
-extern "C" {
-  #include <sodium.h>
-}
+#ifndef _DWMCREDENCEXCHACHA20POLY1305_HH_
+#define _DWMCREDENCEXCHACHA20POLY1305_HH_
 
-#include <iostream>
+#include "DwmCredenceNonce.hh"
 
-#include "DwmUnitAssert.hh"
-#include "DwmCredenceKXKeyPair.hh"
+namespace Dwm {
 
-using namespace std;
-using namespace Dwm;
+  namespace Credence {
 
-//----------------------------------------------------------------------------
-//!  
-//----------------------------------------------------------------------------
-int main(int argc, char *argv[])
-{
-  Credence::KXKeyPair  clientKeys, serverKeys;
-  UnitAssert(clientKeys.PublicKey().size() == crypto_box_PUBLICKEYBYTES);
-  UnitAssert(clientKeys.SecretKey().size() == crypto_box_SECRETKEYBYTES);
-  UnitAssert(serverKeys.PublicKey().size() == crypto_box_PUBLICKEYBYTES);
-  UnitAssert(serverKeys.SecretKey().size() == crypto_box_SECRETKEYBYTES);
+    class XChaCha20Poly1305
+    {
+    public:
+      static bool Encrypt(std::string & cipherText,
+                          const std::string & message,
+                          const Nonce & nonce,
+                          const std::string & secretKey);
+      static bool Decrypt(std::string & message,
+                          const std::string & cipherText,
+                          const Nonce & nonce,
+                          const std::string & secretKey);
+    };
+    
+  }  // namespace Credence
 
-  string clientSharedKey = clientKeys.ClientSharedKey(serverKeys.PublicKey());
-  string serverSharedKey = serverKeys.ServerSharedKey(clientKeys.PublicKey());
-  if (UnitAssert((! clientSharedKey.empty())
-                 && (! serverSharedKey.empty()))) {
-    UnitAssert(clientSharedKey == serverSharedKey);
-  }
+}  // namespace Dwm
 
-  if (Assertions::Total().Failed()) {
-    Assertions::Print(cerr, true);
-    return 1;
-  }
-  else {
-    cout << Assertions::Total() << " passed" << endl;
-  }
-  return 0;
-}
-
+#endif  // _DWMCREDENCEXCHACHA20POLY1305_HH_
