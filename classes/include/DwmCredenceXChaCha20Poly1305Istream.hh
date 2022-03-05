@@ -34,14 +34,15 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceXChaCha20Poly1305OutBuffer.cc
+//!  \file DwmCredenceXChaCha20Poly1305Istream.hh
 //!  \author Daniel W. McRobb
-//!  \brief Dwm::Credence::XChaCha20Poly1305::OutBuffer class implementation
+//!  \brief NOT YET DOCUMENTED
 //---------------------------------------------------------------------------
 
-#include "DwmPortability.hh"
-#include "DwmCredenceXChaCha20Poly1305.hh"
-#include "DwmCredenceXChaCha20Poly1305OutBuffer.hh"
+#ifndef _DWMCREDENCEXCHACHA20POLY1305ISTREAM_HH_
+#define _DWMCREDENCEXCHACHA20POLY1305ISTREAM_HH_
+
+#include "DwmCredenceXChaCha20Poly1305InBuffer.hh"
 
 namespace Dwm {
 
@@ -49,70 +50,47 @@ namespace Dwm {
 
     namespace XChaCha20Poly1305 {
 
-      using namespace std;
+      //----------------------------------------------------------------------
+      //!  This class is essentially a filter for an istream.  It allows the
+      //!  user of this class to read and decrypt an encrypted stream, hiding
+      //!  all the details of decryption.  Think of it as a decrypting proxy
+      //!  for any istream that sources encrypted data.
+      //!
+      //!  Since the C++ standard library does not include any socket
+      //!  abstractions, the first argument to the constructor of this class
+      //!  is usually an asio::ip::tcp::iostream (in the boost namespace if
+      //!  you're using asio as bundled in Boost instead of standalone).  It
+      //!  might also be an ifstream if we're reading encrypted data at rest.
+      //!
+      //!  Note how tiny this code is; all of the real extensibility is in the
+      //!  std::streambuf, per the design of C++ iostreams.
+      //----------------------------------------------------------------------
+      class Istream
+        : public std::istream
+      {
+      public:
+        //--------------------------------------------------------------------
+        //!  Construct with a reference to an existing encrypted istream @c is
+        //!  and a 32-byte shared secret key which will be used to decrypt the
+        //!  contents of @c is.
+        //--------------------------------------------------------------------
+        Istream(std::istream & is, const std::string & key)
+            : std::istream(new InBuffer(is, key))
+        {}
       
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      OutBuffer::OutBuffer(std::ostream & os, const std::string & key)
-          : _os(os)
-      {
-        if (crypto_generichash_BYTES <= key.size()) {
-          _key = key;
+        //--------------------------------------------------------------------
+        //!  Destructor.
+        //--------------------------------------------------------------------
+        virtual ~Istream()
+        {
+          delete rdbuf();
         }
-        else {
-          throw std::logic_error("key not long enough!");
-        }
-      }
-
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      OutBuffer::int_type OutBuffer::overflow(int_type c)
-      {
-        if (! traits_type::eq_int_type(c, traits_type::eof())) {
-          _plainbuf += traits_type::to_char_type(c);
-          return c;
-        }
-        return traits_type::eof();
-      }
-
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      std::streamsize OutBuffer::xsputn(const char *p, std::streamsize n)
-      {
-        _plainbuf.append(p, n);
-        return n;
-      }
-
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      int OutBuffer::sync()
-      {
-        int  rc = -1;
-        Nonce  nonce;
-        if (nonce.Write(_os)) {
-          string  cipherText;
-          if (Encrypt(cipherText, _plainbuf, nonce, _key)) {
-            uint64_t len = cipherText.size();
-            len = htobe64(len);
-            if (_os.write((const char *)&len, sizeof(len))) {
-              if (_os.write(cipherText.c_str(), cipherText.size())) {
-                if (_os.flush()) {
-                  rc = 0;
-                }
-              }
-            }
-          }
-        }
-        _plainbuf.clear();
-        return rc;
-      }
-      
+      };
+    
     }  // namespace XChaCha20Poly1305
 
   }  // namespace Credence
 
 }  // namespace Dwm
+
+#endif  // _DWMCREDENCEXCHACHA20POLY1305ISTREAM_HH_

@@ -34,14 +34,21 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceXChaCha20Poly1305OutBuffer.cc
+//!  \file DwmCredenceXChaCha20Poly1305InBuffer.cc
 //!  \author Daniel W. McRobb
-//!  \brief Dwm::Credence::XChaCha20Poly1305::OutBuffer class implementation
+//!  \brief NOT YET DOCUMENTED
 //---------------------------------------------------------------------------
 
+extern "C" {
+  #include <sodium.h>
+}
+
+#include <cstring>
+
 #include "DwmPortability.hh"
+#include "DwmSysLogger.hh"
 #include "DwmCredenceXChaCha20Poly1305.hh"
-#include "DwmCredenceXChaCha20Poly1305OutBuffer.hh"
+#include "DwmCredenceXChaCha20Poly1305InBuffer.hh"
 
 namespace Dwm {
 
@@ -54,63 +61,96 @@ namespace Dwm {
       //----------------------------------------------------------------------
       //!  
       //----------------------------------------------------------------------
-      OutBuffer::OutBuffer(std::ostream & os, const std::string & key)
-          : _os(os)
+      InBuffer::InBuffer(std::istream & is, const std::string & key)
+          : _is(is)
       {
         if (crypto_generichash_BYTES <= key.size()) {
           _key = key;
         }
         else {
-          throw std::logic_error("key not long enough!");
+          throw std::logic_error("Key not long enough!");
         }
+      
+        _buffer = nullptr;
+        setg(0, 0, 0);
       }
-
+    
       //----------------------------------------------------------------------
       //!  
       //----------------------------------------------------------------------
-      OutBuffer::int_type OutBuffer::overflow(int_type c)
+      InBuffer::int_type InBuffer::underflow()
       {
-        if (! traits_type::eq_int_type(c, traits_type::eof())) {
-          _plainbuf += traits_type::to_char_type(c);
-          return c;
+        int_type  rc = traits_type::eof();
+        if (gptr() < egptr()) {
+          rc = traits_type::to_int_type(*gptr());
         }
-        return traits_type::eof();
+        else if (Reload() > 0) {
+          rc = traits_type::to_int_type(*gptr());
+        }
+        return rc;
       }
-
+    
       //----------------------------------------------------------------------
       //!  
       //----------------------------------------------------------------------
-      std::streamsize OutBuffer::xsputn(const char *p, std::streamsize n)
-      {
-        _plainbuf.append(p, n);
-        return n;
-      }
-
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      int OutBuffer::sync()
+      int InBuffer::Reload()
       {
         int  rc = -1;
-        Nonce  nonce;
-        if (nonce.Write(_os)) {
-          string  cipherText;
-          if (Encrypt(cipherText, _plainbuf, nonce, _key)) {
-            uint64_t len = cipherText.size();
-            len = htobe64(len);
-            if (_os.write((const char *)&len, sizeof(len))) {
-              if (_os.write(cipherText.c_str(), cipherText.size())) {
-                if (_os.flush()) {
-                  rc = 0;
-                }
+        Nonce   nonce;
+        string  cipherText;
+        if (LoadNonceAndCipherText(nonce, cipherText)) {
+          size_t  bufLen =
+            cipherText.size() - crypto_aead_xchacha20poly1305_ietf_ABYTES;
+          _buffer = std::make_unique<char_type[]>(bufLen);
+          if (_buffer != nullptr) {
+            string  msg;
+            if (Decrypt(msg, cipherText, nonce, _key)) {
+              rc = bufLen;
+              memcpy(_buffer.get(), msg.data(), bufLen);
+              setg(_buffer.get(), _buffer.get(),
+                   _buffer.get() + bufLen);
+            }
+            else {
+              Syslog(LOG_ERR, "Decrypt() failed!");
+            }
+          }
+          else {
+            Syslog(LOG_ERR, "Failed to allocate _buffer");
+          }
+        }
+        else {
+          Syslog(LOG_ERR, "Failed to read message");
+        }
+        if (rc < 0) {
+          setg(0, 0, 0);
+        }
+        return rc;
+      }
+
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
+      bool InBuffer::LoadNonceAndCipherText(Nonce & nonce,
+                                            std::string & cipherText)
+      {
+        bool  rc = false;
+        if (nonce.Read(_is)) {
+          uint64_t  msgLen;
+          if (_is.read((char *)&msgLen, sizeof(msgLen))) {
+            msgLen = be64toh(msgLen);
+            try {
+              cipherText.resize(msgLen);
+              if (_is.read(cipherText.data(), msgLen)) {
+                rc = true;
               }
+            }
+            catch (...) {
             }
           }
         }
-        _plainbuf.clear();
         return rc;
       }
-      
+    
     }  // namespace XChaCha20Poly1305
 
   }  // namespace Credence

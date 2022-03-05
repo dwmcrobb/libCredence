@@ -7,5 +7,6 @@ TestSessionServerKeyPair
 TestSigner
 TestX25519KeyPair
 TestXChaCha20Poly1305
+TestXChaCha20Streams
 *.o
 *~
