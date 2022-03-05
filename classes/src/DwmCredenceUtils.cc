@@ -40,10 +40,13 @@
 //---------------------------------------------------------------------------
 
 extern "C" {
-#if defined(__unix__)
-  #include <unistd.h>
+#if (defined(__unix__) || defined(unix) || defined(__unix)) || defined(__APPLE__)
   #include <sys/types.h>
+  #include <unistd.h>
   #include <pwd.h>
+  #if defined(__APPLE__)
+    #include <uuid/uuid.h>
+  #endif
 #elif defined(_WIN32)
   #include <winsock.h>
 #endif
@@ -108,7 +111,7 @@ namespace Dwm {
     string Utils::UserHomeDirectory()
     {
       string  rc;
-#if defined(__unix__)
+#if (defined(__unix__) || defined(unix) || defined(__unix)) || defined(__APPLE__)
       int    buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
       if (buflen > 0) {
         //  Use password entry for user ID
@@ -143,7 +146,7 @@ namespace Dwm {
     string Utils::UserName()
     {
       string  rc;
-#if defined(__unix__)
+#if (defined(__unix__) || defined(unix) || defined(__unix)) || defined(__APPLE__)
       int    buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
       if (buflen > 0) {
         //  Use password entry for user ID
