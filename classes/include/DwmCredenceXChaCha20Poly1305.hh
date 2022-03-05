@@ -48,18 +48,15 @@ namespace Dwm {
 
   namespace Credence {
 
-    class XChaCha20Poly1305
-    {
-    public:
-      static bool Encrypt(std::string & cipherText,
-                          const std::string & message,
-                          const Nonce & nonce,
-                          const std::string & secretKey);
-      static bool Decrypt(std::string & message,
-                          const std::string & cipherText,
-                          const Nonce & nonce,
-                          const std::string & secretKey);
-    };
+    namespace XChaCha20Poly1305 {
+      
+      bool Encrypt(std::string & cipherText, const std::string & message,
+                   const Nonce & nonce, const std::string & secretKey);
+      
+      bool Decrypt(std::string & message, const std::string & cipherText,
+                   const Nonce & nonce, const std::string & secretKey);
+      
+    }  // namespace XChaCha20Poly1305
     
   }  // namespace Credence
 

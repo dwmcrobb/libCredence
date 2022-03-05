@@ -34,16 +34,13 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceXChaCha20Poly1305.cc
+//!  \file DwmCredenceXChaCha20Poly1305OutBuffer.cc
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief Dwm::Credence::XChaCha20Poly1305::OutBuffer class implementation
 //---------------------------------------------------------------------------
 
-extern "C" {
-  #include <sodium.h>
-}
-
 #include "DwmCredenceXChaCha20Poly1305.hh"
+#include "DwmCredenceXChaCha20Poly1305OutBuffer.hh"
 
 namespace Dwm {
 
@@ -51,70 +48,66 @@ namespace Dwm {
 
     namespace XChaCha20Poly1305 {
 
-    using namespace std;
-    
+      using namespace std;
+      
       //----------------------------------------------------------------------
       //!  
       //----------------------------------------------------------------------
-      bool Encrypt(string & cipherText, const string & message,
-                   const Nonce & nonce, const string & secretKey)
+      OutBuffer::OutBuffer(std::ostream & os, const std::string & key)
+          : _os(os)
       {
-        constexpr auto  xcc20p1305enc =
-          crypto_aead_xchacha20poly1305_ietf_encrypt;
-        
-        bool  rc = false;
-        unsigned long long  cbuflen =
-          message.size() + crypto_aead_xchacha20poly1305_ietf_ABYTES;
-        uint8_t  cbuf[cbuflen];
-      
-        if (xcc20p1305enc(cbuf, &cbuflen,
-                          (const uint8_t *)message.data(),
-                          message.size(),
-                          nullptr, 0,
-                          nullptr, nonce,
-                          (const uint8_t *)secretKey.data())
-            == 0) {
-          cipherText.assign((const char *)cbuf, cbuflen);
-          rc = true;
+        if (crypto_generichash_BYTES <= key.size()) {
+          _key = key;
         }
         else {
-          cipherText.clear();
+          throw std::logic_error("key not long enough!");
         }
-        return rc;
       }
 
       //----------------------------------------------------------------------
       //!  
       //----------------------------------------------------------------------
-      bool Decrypt(string & message, const string & cipherText,
-                   const Nonce & nonce, const string & secretKey)
+      OutBuffer::int_type OutBuffer::overflow(int_type c)
       {
-        constexpr auto  xcc20p1305dec =
-          crypto_aead_xchacha20poly1305_ietf_decrypt;
-      
-        bool  rc = false;
-        unsigned long long  msglen =
-          cipherText.size() - crypto_aead_xchacha20poly1305_ietf_ABYTES;
-        uint8_t  msgbuf[msglen];
+        if (! traits_type::eq_int_type(c, traits_type::eof())) {
+          _plainbuf += traits_type::to_char_type(c);
+          return c;
+        }
+        return traits_type::eof();
+      }
 
-        if (xcc20p1305dec(msgbuf, &msglen, nullptr,
-                          (const uint8_t *)cipherText.data(),
-                          cipherText.size(),
-                          nullptr, 0,
-                          nonce, (const uint8_t *)secretKey.data())
-            == 0) {
-          message.assign((const char *)msgbuf, msglen);
-          rc = true;
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
+      std::streamsize OutBuffer::xsputn(const char *p, std::streamsize n)
+      {
+        _plainbuf.append(p, n);
+        return n;
+      }
+
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
+      int OutBuffer::sync()
+      {
+        int  rc = -1;
+        Nonce  nonce;
+        if (nonce.Write(_os)) {
+          string  cipherText;
+          if (Encrypt(cipherText, _plainbuf, nonce, _key)) {
+            if (_os.write(cipherText.c_str(), cipherText.size())) {
+              if (_os.flush()) {
+                rc = 0;
+              }
+            }
+          }
         }
-        else {
-          message.clear();
-        }
+        _plainbuf.clear();
         return rc;
       }
-    
-
+      
     }  // namespace XChaCha20Poly1305
-    
+
   }  // namespace Credence
 
 }  // namespace Dwm

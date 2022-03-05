@@ -34,16 +34,16 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceXChaCha20Poly1305.cc
+//!  \file DwmCredenceXChaCha20Poly1305OutBuffer.hh
 //!  \author Daniel W. McRobb
 //!  \brief NOT YET DOCUMENTED
 //---------------------------------------------------------------------------
 
-extern "C" {
-  #include <sodium.h>
-}
+#ifndef _DWMCREDENCEXCHACHA20POLY1305OUTBUFFER_HH_
+#define _DWMCREDENCEXCHACHA20POLY1305OUTBUFFER_HH_
 
-#include "DwmCredenceXChaCha20Poly1305.hh"
+#include <iostream>
+#include <string>
 
 namespace Dwm {
 
@@ -51,70 +51,45 @@ namespace Dwm {
 
     namespace XChaCha20Poly1305 {
 
-    using namespace std;
-    
       //----------------------------------------------------------------------
-      //!  
+      //!  This class is a helper for encrypted stream output.  It is used as
+      //!  a streambuf for an ostream.  It will buffer internally until
+      //!  flush() is called on the ostream that owns the buffer (which will
+      //!  end up calling our sync() member).  When our sync() member is
+      //!  called, we will write a random nonce (initialization vector), the
+      //!  encrypted data and the MAC to the associated ostream that was
+      //!  passed as the first argument of the constructor.  In other words,
+      //!  message packaging and transmission occurs whenever our sync()
+      //!  member is called.
+      //!
+      //!  This class is typically not used directly, but is instead
+      //!  instantiated by Dwm::Credence::XChaCha20Poly1305::Ostream.
       //----------------------------------------------------------------------
-      bool Encrypt(string & cipherText, const string & message,
-                   const Nonce & nonce, const string & secretKey)
+      class OutBuffer
+        : public std::streambuf
       {
-        constexpr auto  xcc20p1305enc =
-          crypto_aead_xchacha20poly1305_ietf_encrypt;
+      public:
+        //--------------------------------------------------------------------
+        //!  Construct with the given ostream @c os and encryption key @c key.
+        //--------------------------------------------------------------------
+        OutBuffer(std::ostream & os, const std::string & key);
         
-        bool  rc = false;
-        unsigned long long  cbuflen =
-          message.size() + crypto_aead_xchacha20poly1305_ietf_ABYTES;
-        uint8_t  cbuf[cbuflen];
-      
-        if (xcc20p1305enc(cbuf, &cbuflen,
-                          (const uint8_t *)message.data(),
-                          message.size(),
-                          nullptr, 0,
-                          nullptr, nonce,
-                          (const uint8_t *)secretKey.data())
-            == 0) {
-          cipherText.assign((const char *)cbuf, cbuflen);
-          rc = true;
-        }
-        else {
-          cipherText.clear();
-        }
-        return rc;
-      }
+      protected:
+        int_type overflow(int_type c) override;
+        int sync() override;
+        std::streamsize xsputn(const char *p, std::streamsize n) override;
 
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      bool Decrypt(string & message, const string & cipherText,
-                   const Nonce & nonce, const string & secretKey)
-      {
-        constexpr auto  xcc20p1305dec =
-          crypto_aead_xchacha20poly1305_ietf_decrypt;
+      private:
+        std::ostream    & _os;
+        std::string       _key;
+        std::string       _plainbuf;
+      };
       
-        bool  rc = false;
-        unsigned long long  msglen =
-          cipherText.size() - crypto_aead_xchacha20poly1305_ietf_ABYTES;
-        uint8_t  msgbuf[msglen];
-
-        if (xcc20p1305dec(msgbuf, &msglen, nullptr,
-                          (const uint8_t *)cipherText.data(),
-                          cipherText.size(),
-                          nullptr, 0,
-                          nonce, (const uint8_t *)secretKey.data())
-            == 0) {
-          message.assign((const char *)msgbuf, msglen);
-          rc = true;
-        }
-        else {
-          message.clear();
-        }
-        return rc;
-      }
-    
 
     }  // namespace XChaCha20Poly1305
-    
+
   }  // namespace Credence
 
 }  // namespace Dwm
+      
+#endif  // _DWMCREDENCEXCHACHA20POLY1305OUTBUFFER_HH_
