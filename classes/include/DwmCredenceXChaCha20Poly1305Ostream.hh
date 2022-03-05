@@ -36,7 +36,7 @@
 //---------------------------------------------------------------------------
 //!  \file DwmCredenceXChaCha20Poly1305Ostream.hh
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief Dwm::Credence::XChaCha20Poly1305::Ostream class declaration
 //---------------------------------------------------------------------------
 
 #ifndef _DWMCREDENCEXCHACHA20POLY1305OSTREAM_HH_

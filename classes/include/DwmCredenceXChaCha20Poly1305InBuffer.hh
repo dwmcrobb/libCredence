@@ -36,7 +36,7 @@
 //---------------------------------------------------------------------------
 //!  \file DwmCredenceXChaCha20Poly1305InBuffer.hh
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief Dwm::Credence::XChaCha20Poly1305::InBuffer class declaration
 //---------------------------------------------------------------------------
 
 #ifndef _DWMCREDENCEXCHACHA20POLY1305INBUFFER_HH_
