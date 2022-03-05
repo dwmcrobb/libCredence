@@ -69,6 +69,12 @@ int main(int argc, char *argv[])
   string  s;
   UnitAssert(IO::Read(xis, s));
   UnitAssert(s == plainText);
+
+  plainText = "A second test message for stream testing.";
+  UnitAssert(IO::Write(xos, plainText));
+  UnitAssert(xos.flush());
+  UnitAssert(IO::Read(xis, s));
+  UnitAssert(s == plainText);
   
   if (Assertions::Total().Failed()) {
     Assertions::Print(cerr, true);
