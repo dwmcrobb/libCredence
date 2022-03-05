@@ -36,7 +36,7 @@
 //---------------------------------------------------------------------------
 //!  \file DwmCredenceXChaCha20Poly1305.hh
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief Dwm::Credence::XChaCha20Poly1305 function declarations
 //---------------------------------------------------------------------------
 
 #ifndef _DWMCREDENCEXCHACHA20POLY1305_HH_
@@ -50,9 +50,20 @@ namespace Dwm {
 
     namespace XChaCha20Poly1305 {
       
+      //----------------------------------------------------------------------
+      //!  Encrypts the given @c message using the given @c nonce and
+      //!  @c secretKey.  Stores the result in @c cipherText and returns
+      //!  true on success.  On failure, clears @c cipherText and returns
+      //!  false.
+      //----------------------------------------------------------------------
       bool Encrypt(std::string & cipherText, const std::string & message,
                    const Nonce & nonce, const std::string & secretKey);
       
+      //----------------------------------------------------------------------
+      //!  Decrypts the given @c cipherText using the given @c nonce and
+      //!  @c secretKey.  On success, stores the result in @c message and
+      //!  returns true.  On failure, clears @c message and returns false.
+      //----------------------------------------------------------------------
       bool Decrypt(std::string & message, const std::string & cipherText,
                    const Nonce & nonce, const std::string & secretKey);
       

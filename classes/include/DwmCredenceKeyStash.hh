@@ -56,8 +56,8 @@ namespace Dwm {
     public:
       KeyStash(const std::string & dirName = "~/.credence");
       const std::string & DirName() const;
-      bool Save(const Ed25519KeyPair & edkp);
-      bool Get(Ed25519KeyPair & edkp);
+      bool Save(const Ed25519KeyPair & edkp) const;
+      bool Get(Ed25519KeyPair & edkp) const;
       
     private:
       std::string  _dirName;

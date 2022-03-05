@@ -86,7 +86,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    bool KeyStash::Save(const Ed25519KeyPair & edkp)
+    bool KeyStash::Save(const Ed25519KeyPair & edkp) const
     {
       bool  rc = false;
       if (MakeStashDir()) {
@@ -100,7 +100,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    bool KeyStash::Get(Ed25519KeyPair & edkp)
+    bool KeyStash::Get(Ed25519KeyPair & edkp) const
     {
       bool  rc = false;
       edkp.Clear();
