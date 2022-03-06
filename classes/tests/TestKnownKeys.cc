@@ -51,11 +51,11 @@ using namespace Dwm;
 //----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-  Credence::KnownKeys  knownKeys(".");
+  Credence::KnownKeys  knownKeys("./inputs");
 
   UnitAssert(knownKeys.Keys().size() == 3);
   
-  string   key = knownKeys.Find("dwm");
+  string   key = knownKeys.Find("test@mcplex.net");
   UnitAssert(! key.empty());
   key = knownKeys.Find("foo@somedomain.com");
   UnitAssert(! key.empty());

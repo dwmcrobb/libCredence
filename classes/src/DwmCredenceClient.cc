@@ -40,10 +40,13 @@
 //---------------------------------------------------------------------------
 
 #include "DwmIO.hh"
+#include "DwmSysLogger.hh"
 #include "DwmCredenceKXKeyPair.hh"
 #include "DwmCredenceChallenge.hh"
+#include "DwmCredenceChallengeResponse.hh"
 #include "DwmCredenceClient.hh"
 #include "DwmCredenceSigner.hh"
+#include "DwmCredenceUtils.hh"
 
 namespace Dwm {
 
@@ -90,6 +93,12 @@ namespace Dwm {
           if (_xos->flush()) {
             rc = true;
           }
+          else {
+            Syslog(LOG_ERR, "Failed to flush _xos");
+          }
+        }
+        else {
+          Syslog(LOG_ERR, "Failed to write msg to _xos");
         }
       }
       return rc;
@@ -106,6 +115,12 @@ namespace Dwm {
           if (_xos->flush()) {
             rc = true;
           }
+          else {
+            Syslog(LOG_ERR, "Failed to flush _xos");
+          }
+        }
+        else {
+          Syslog(LOG_ERR, "Failed to write msg to _xos");
         }
       }
       return rc;
@@ -149,7 +164,7 @@ namespace Dwm {
       if (IO::Write(_ios, myKeys.PublicKey())) {
         string  clientPubKey;
         if (IO::Read(_ios, clientPubKey)) {
-          _sharedKey = myKeys.ClientSharedKey(clientPubKey);
+          _sharedKey = myKeys.ServerSharedKey(clientPubKey);
           rc = true;
         }
       }
@@ -170,8 +185,19 @@ namespace Dwm {
           string  clientId;
           if (ReceiveFrom(clientId)) {
             clientPubKey = knownKeys.Find(clientId);
-            rc = (! clientPubKey.empty());
+            if (! clientPubKey.empty()) {
+              rc = true;
+            }
+            else {
+              Syslog(LOG_ERR, "client %s not known", clientId.c_str());
+            }
           }
+          else {
+            Syslog(LOG_ERR, "Failed to read ID from client");
+          }
+        }
+        else {
+          Syslog(LOG_ERR, "Failed to send ID to client");
         }
       }
       return rc;
@@ -184,22 +210,38 @@ namespace Dwm {
                                     const std::string & clientPubKey)
     {
       bool  rc = false;
-      Challenge  clientChallenge(clientPubKey);
-      if (SendTo(clientChallenge.ChallengeString())) {
-        string  myChallenge;
+      //  Send challenge to client
+      Challenge  clientChallenge(true);
+      if (SendTo(clientChallenge)) {
+        //  Receive challenge from client
+        Challenge  myChallenge;
         if (ReceiveFrom(myChallenge)) {
-          string  myChallengeResponse;
-          if (Signer::Sign(myChallenge, mySecretKey, myChallengeResponse)) {
-            if (SendTo(myChallengeResponse)) {
-              string  clientChallengeResp;
-              if (ReceiveFrom(clientChallengeResp)) {
-                if (clientChallenge.Verify(clientChallengeResp)) {
+          //  Send my response
+          ChallengeResponse  myResponse;
+          if (myResponse.Create(mySecretKey, myChallenge)) {
+            if (SendTo(myResponse)) {
+              // Receive response from client
+              ChallengeResponse  clientResponse;
+              if (ReceiveFrom(clientResponse)) {
+                if (clientResponse.Verify(clientPubKey, clientChallenge)) {
                   rc = true;
                 }
               }
+              else {
+                Syslog(LOG_ERR, "Failed to read client challenge response");
+              }
+            }
+            else {
+              Syslog(LOG_INFO, "Failed to send challenge response to client");
             }
           }
         }
+        else {
+          Syslog(LOG_INFO, "Failed to read challenge from client");
+        }
+      }
+      else {
+        Syslog(LOG_INFO, "Failed to send challenge to client");
       }
       return rc;
     }

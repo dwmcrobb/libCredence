@@ -92,6 +92,9 @@ namespace Dwm {
       int OutBuffer::sync()
       {
         int  rc = -1;
+        if (_plainbuf.empty()) {
+          return 0;
+        }
         Nonce  nonce;
         if (nonce.Write(_os)) {
           string  cipherText;

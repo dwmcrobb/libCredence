@@ -34,83 +34,91 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceNonce.hh
+//!  \file DwmCredenceChallengeResponse.cc
 //!  \author Daniel W. McRobb
-//!  \brief Dwm::Credende::Nonce class declaration
+//!  \brief NOT YET DOCUMENTED
 //---------------------------------------------------------------------------
 
-#ifndef _DWMCREDENCENONCE_HH_
-#define _DWMCREDENCENONCE_HH_
-
-extern "C" {
-  #include <sodium.h>
-}
-
-#include <cstdint>
-#include <iostream>
-
-#include "DwmStreamIOCapable.hh"
+#include "DwmIO.hh"
+#include "DwmSysLogger.hh"
+#include "DwmCredenceChallengeResponse.hh"
+#include "DwmCredenceSigner.hh"
+#include "DwmCredenceUtils.hh"
 
 namespace Dwm {
 
   namespace Credence {
 
+    using namespace std;
+    
     //------------------------------------------------------------------------
-    //!  Encapsulates a nonce for encryption.
+    //!  
     //------------------------------------------------------------------------
-    class Nonce
-      : public StreamIOCapable
+    bool ChallengeResponse::Create(const string & signingKey,
+                                   const Challenge & challenge)
     {
-    public:
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      Nonce(bool init = true)
-      {
-        if (init) {
-          randombytes_buf(_nonce, sizeof(_nonce));
+      bool  rc = false;
+      if (! signingKey.empty()) {
+        if (! ((string)challenge).empty()) {
+          rc = Signer::Sign(challenge, signingKey, _response);
         }
       }
+      return rc;
+    }
 
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      std::istream & Read(std::istream & is)
-      {
-        if (is) {
-          is.read((char *)_nonce, crypto_secretbox_NONCEBYTES);
-        }
-        return is;
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    istream & ChallengeResponse::Read(istream & is)
+    {
+      _response.clear();
+      if (is) {
+        IO::Read(is, _response);
       }
-
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      std::ostream & Write(std::ostream & os) const
-      {
-        if (os) {
-          os.write((const char *)_nonce, crypto_secretbox_NONCEBYTES);
-        }
-        return os;
+      if (! is) {
+        Syslog(LOG_ERR, "ChallengeResponse::Read() failed");
       }
-      
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      Nonce(const Nonce &) = default;
-      
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      operator const uint8_t * () const   { return _nonce; }
-
-    private:
-      uint8_t  _nonce[crypto_secretbox_NONCEBYTES];
-    };
-      
+      return is;
+    }
+    
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    ostream & ChallengeResponse::Write(ostream & os) const
+    {
+      if (os) {
+        IO::Write(os, _response);
+      }
+      return os;
+    }
+    
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool ChallengeResponse::Verify(const string & publicKey,
+                                   const string & challengeString) const
+    {
+      bool    rc = false;
+      string  signedContent;
+      if (Signer::Open(_response, publicKey, signedContent)) {
+        if (challengeString == signedContent) {
+          rc = true;
+        }
+        else {
+          Syslog(LOG_ERR, "Challenge content mismatch: %s != %s",
+                 Utils::Bin2Base64(challengeString).c_str(),
+                 Utils::Bin2Base64(signedContent).c_str());
+        }
+      }
+      else {
+        Syslog(LOG_ERR, "ChallengeResponse::Verify(%s,%s) failed",
+               Utils::Bin2Base64(publicKey).c_str(),
+               Utils::Bin2Base64(challengeString).c_str());
+      }
+      return rc;
+    }
+    
     
   }  // namespace Credence
 
 }  // namespace Dwm
-
-#endif  // _DWMCREDENCENONCE_HH_

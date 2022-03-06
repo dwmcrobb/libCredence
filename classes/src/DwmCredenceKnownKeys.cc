@@ -42,6 +42,7 @@
 #include <fstream>
 
 #include "DwmCredenceKnownKeys.hh"
+#include "DwmCredenceUtils.hh"
 
 namespace Dwm {
 
@@ -104,7 +105,7 @@ namespace Dwm {
         if (is >> id >> keyType >> keystr) {
           if (keyType == "ed25519") {
             key.first = id;
-            key.second = keystr;
+            key.second = Utils::Base642Bin(keystr);
             rc = true;
           }
         }

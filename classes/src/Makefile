@@ -2,10 +2,13 @@ include ../../Makefile.vars
 
 ALLINC       = -I../include ${DWMINCS}
 OBJFILESNP   = DwmCredenceChallenge.o \
+               DwmCredenceChallengeResponse.o \
+               DwmCredenceClient.o \
                DwmCredenceEd25519KeyPair.o \
                DwmCredenceKeyStash.o \
                DwmCredenceKnownKeys.o \
                DwmCredenceKXKeyPair.o \
+               DwmCredenceServer.o \
                DwmCredenceSessionClientKeyPair.o \
                DwmCredenceSessionEncryptor.o \
                DwmCredenceSessionServerKeyPair.o \

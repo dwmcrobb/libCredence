@@ -44,6 +44,8 @@
 
 #include <string>
 
+#include "DwmStreamIOCapable.hh"
+
 namespace Dwm {
 
   namespace Credence {
@@ -52,15 +54,16 @@ namespace Dwm {
     //!  
     //------------------------------------------------------------------------
     class Challenge
+      : public StreamIOCapable
     {
     public:
-      Challenge(const std::string & challengeePublicKey);
-      const std::string & ChallengeString() const;
-      bool Verify(const std::string & message) const;
-
+      Challenge(bool init = false);
+      operator const std::string & () const;
+      std::istream & Read(std::istream & is) override;
+      std::ostream & Write(std::ostream & os) const override;
+      
     private:
-      std::string  _challengeePublicKey;
-      std::string  _challengeString;
+      std::string  _challenge;
     };
     
   }  // namespace Credence

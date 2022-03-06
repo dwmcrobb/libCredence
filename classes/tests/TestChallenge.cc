@@ -39,8 +39,10 @@
 //!  \brief Dwm::Credence::Challenge unit tests
 //---------------------------------------------------------------------------
 
+#include <sstream>
+
 #include "DwmUnitAssert.hh"
-#include "DwmCredenceChallenge.hh"
+#include "DwmCredenceChallengeResponse.hh"
 #include "DwmCredenceEd25519KeyPair.hh"
 #include "DwmCredenceSigner.hh"
 #include "DwmCredenceUtils.hh"
@@ -51,16 +53,41 @@ using namespace Dwm;
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
+static void TestIO()
+{
+  Credence::Ed25519KeyPair  keyPair("dwm");
+  Credence::Challenge       challenge(true);
+  Credence::ChallengeResponse  response;
+  UnitAssert(response.Create(keyPair.SecretKey(), challenge));
+
+  stringstream  ss;
+  UnitAssert(response.Write(ss));
+  Credence::ChallengeResponse  response2;
+  UnitAssert(response2.Read(ss));
+  UnitAssert(response2.Verify(keyPair.PublicKey(), challenge));
+  
+  return;
+}
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
   Credence::Ed25519KeyPair  keyPair("dwm");
-  Credence::Challenge       challenge(keyPair.PublicKey());
+  Credence::Challenge       challenge(true);
   string                    signedMessage;
   
-  if (UnitAssert(Credence::Signer::Sign(challenge.ChallengeString(),
+  if (UnitAssert(Credence::Signer::Sign(challenge,
                                         keyPair.SecretKey(), signedMessage))) {
-    UnitAssert(challenge.Verify(signedMessage));
+    Credence::ChallengeResponse  response;
+    UnitAssert(response.Create(keyPair.SecretKey(), challenge));
+    UnitAssert(response.Verify(keyPair.PublicKey(), challenge));
+    
+    // UnitAssert(challenge.Verify(signedMessage));
   }
+
+  TestIO();
   
   if (Assertions::Total().Failed()) {
     Assertions::Print(cerr, true);

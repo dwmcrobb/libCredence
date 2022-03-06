@@ -43,6 +43,7 @@ extern "C" {
   #include <sodium.h>
 }
 
+#include "DwmIO.hh"
 #include "DwmCredenceSigner.hh"
 #include "DwmCredenceChallenge.hh"
 
@@ -55,37 +56,48 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    Challenge::Challenge(const string & challengeePublicKey)
-        : _challengeePublicKey(challengeePublicKey)
+    Challenge::Challenge(bool init)
+        : _challenge()
     {
-      uint8_t  buf[32];
-      randombytes_buf((void *)buf, 32);
-      _challengeString.assign((const char *)buf, 32);
+      if (init) {
+        uint8_t  buf[32];
+        randombytes_buf((void *)buf, 32);
+        _challenge.assign((const char *)buf, 32);
+      }
     }
 
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    const string & Challenge::ChallengeString() const
+    Challenge::operator const string & () const
     {
-      return _challengeString;
+      return _challenge;
     }
     
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    bool Challenge::Verify(const string & signedMessage) const
+    std::istream & Challenge::Read(std::istream & is)
     {
-      bool    rc = false;
-      string  message;
-      if (Signer::Open(signedMessage, _challengeePublicKey, message)) {
-        if (_challengeString == message) {
-          rc = true;
-        }
+      if (is) {
+        IO::Read(is, _challenge);
       }
-      return rc;
+      return is;
     }
     
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    std::ostream & Challenge::Write(std::ostream & os) const
+    {
+      if (os) {
+        IO::Write(os, _challenge);
+        os.flush();
+      }
+      return os;
+    }
+    
+
   }  // namespace Credence
 
 }  // namespace Dwm

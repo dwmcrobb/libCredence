@@ -36,14 +36,17 @@
 //---------------------------------------------------------------------------
 //!  \file DwmCredenceServer.cc
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief Dwm::Credence::Server class implementation
 //---------------------------------------------------------------------------
 
 #include "DwmIO.hh"
+#include "DwmSysLogger.hh"
 #include "DwmCredenceKXKeyPair.hh"
 #include "DwmCredenceChallenge.hh"
+#include "DwmCredenceChallengeResponse.hh"
 #include "DwmCredenceServer.hh"
 #include "DwmCredenceSigner.hh"
+#include "DwmCredenceUtils.hh"
 
 namespace Dwm {
 
@@ -64,6 +67,14 @@ namespace Dwm {
     bool Server::Connect()
     {
       _ios.connect(_host, std::to_string(_port));
+      if (_ios.socket().is_open()) {
+        boost::system::error_code  ec;
+        _ios.socket().native_non_blocking(false, ec);
+#if 0
+        boost::asio::ip::tcp::no_delay  noDelayOption(true);
+        _ios.socket().set_option(noDelayOption, ec);
+#endif
+      }
       return (bool)_ios;
     }
     
@@ -83,6 +94,12 @@ namespace Dwm {
           if (ExchangeChallenges(myKeys.SecretKey(), serverPubKey)) {
             rc = true;
           }
+          else {
+            Syslog(LOG_ERR, "Challenge failed");
+          }
+        }
+        else {
+          Syslog(LOG_ERR, "ID exchange failed");
         }
       }
       return rc;
@@ -99,6 +116,12 @@ namespace Dwm {
           if (_xos->flush()) {
             rc = true;
           }
+          else {
+            Syslog(LOG_ERR, "Failed to flush _xos");
+          }
+        }
+        else {
+          Syslog(LOG_ERR, "Failed to write msg to _xos");
         }
       }
       return rc;
@@ -142,6 +165,7 @@ namespace Dwm {
       bool  rc = false;
       if (_xis) {
         if (msg.Read(*_xis)) {
+          // if (IO::Read(*_xis, msg)) {
           rc = true;
         }
       }
@@ -156,11 +180,18 @@ namespace Dwm {
       bool  rc = false;
       KXKeyPair  myKeys;
       if (IO::Write(_ios, myKeys.PublicKey())) {
+        _ios.flush();
         string  serverPubKey;
         if (IO::Read(_ios, serverPubKey)) {
           _sharedKey = myKeys.ClientSharedKey(serverPubKey);
           rc = true;
         }
+        else {
+          Syslog(LOG_ERR, "Failed to read public key from server");
+        }
+      }
+      else {
+        Syslog(LOG_ERR, "Failed to send public key to server");
       }
       return rc;
     }
@@ -180,7 +211,16 @@ namespace Dwm {
           if (ReceiveFrom(serverId)) {
             serverPubKey = knownKeys.Find(serverId);
             rc = (! serverPubKey.empty());
+            if (! rc) {
+              Syslog(LOG_ERR, "Unknown ID %s", serverId.c_str());
+            }
           }
+          else {
+            Syslog(LOG_ERR, "Failed to read ID from server");
+          }
+        }
+        else {
+          Syslog(LOG_ERR, "Failed to send ID to server");
         }
       }
       return rc;
@@ -193,22 +233,38 @@ namespace Dwm {
                                     const std::string & serverPubKey)
     {
       bool  rc = false;
-      Challenge  serverChallenge(serverPubKey);
-      if (SendTo(serverChallenge.ChallengeString())) {
-        string  myChallenge;
+      //  Send challenge to server
+      Challenge  serverChallenge(true);
+      if (SendTo(serverChallenge)) {
+        //  Receive challenge from server
+        Challenge  myChallenge;
         if (ReceiveFrom(myChallenge)) {
-          string  myChallengeResponse;
-          if (Signer::Sign(myChallenge, mySecretKey, myChallengeResponse)) {
-            if (SendTo(myChallengeResponse)) {
-              string  serverChallengeResp;
-              if (ReceiveFrom(serverChallengeResp)) {
-                if (serverChallenge.Verify(serverChallengeResp)) {
+          //  Send my response
+          ChallengeResponse  myResponse;
+          if (myResponse.Create(mySecretKey, myChallenge)) {
+            if (SendTo(myResponse)) {
+              // Receive response from server
+              ChallengeResponse  serverResponse;
+              if (ReceiveFrom(serverResponse)) {
+                if (serverResponse.Verify(serverPubKey, serverChallenge)) {
                   rc = true;
                 }
               }
+              else {
+                Syslog(LOG_ERR, "Failed to read server challenge response");
+              }
+            }
+            else {
+              Syslog(LOG_ERR, "Failed to send challenge response");
             }
           }
         }
+        else {
+          Syslog(LOG_ERR, "Failed to read challenge from server");
+        }
+      }
+      else {
+        Syslog(LOG_ERR, "Failed to send challenge to server");
       }
       return rc;
     }

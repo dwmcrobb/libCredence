@@ -111,7 +111,8 @@ namespace Dwm {
                    _buffer.get() + bufLen);
             }
             else {
-              Syslog(LOG_ERR, "Decrypt() failed!");
+              Syslog(LOG_ERR, "Decrypt() of %zu bytes failed!",
+                     cipherText.size());
             }
           }
           else {
@@ -143,10 +144,20 @@ namespace Dwm {
               if (_is.read(cipherText.data(), msgLen)) {
                 rc = true;
               }
+              else {
+                Syslog(LOG_ERR, "Failed to read cipherText");
+              }
             }
             catch (...) {
+              Syslog(LOG_ERR, "Failed to allocate %llu bytes", msgLen);
             }
           }
+          else {
+            Syslog(LOG_ERR, "Failed to read cipher text length");
+          }
+        }
+        else {
+          Syslog(LOG_ERR, "Failed to read nonce");
         }
         return rc;
       }

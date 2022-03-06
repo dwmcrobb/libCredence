@@ -34,83 +34,45 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceNonce.hh
+//!  \file DwmCredenceChallengeResponse.hh
 //!  \author Daniel W. McRobb
-//!  \brief Dwm::Credende::Nonce class declaration
+//!  \brief NOT YET DOCUMENTED
 //---------------------------------------------------------------------------
 
-#ifndef _DWMCREDENCENONCE_HH_
-#define _DWMCREDENCENONCE_HH_
+#ifndef _DWMCREDENCECHALLENGERESPONSE_HH_
+#define _DWMCREDENCECHALLENGERESPONSE_HH_
 
-extern "C" {
-  #include <sodium.h>
-}
-
-#include <cstdint>
-#include <iostream>
+#include <string>
 
 #include "DwmStreamIOCapable.hh"
+#include "DwmCredenceChallenge.hh"
 
 namespace Dwm {
 
   namespace Credence {
 
     //------------------------------------------------------------------------
-    //!  Encapsulates a nonce for encryption.
+    //!  
     //------------------------------------------------------------------------
-    class Nonce
+    class ChallengeResponse
       : public StreamIOCapable
     {
     public:
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      Nonce(bool init = true)
-      {
-        if (init) {
-          randombytes_buf(_nonce, sizeof(_nonce));
-        }
-      }
-
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      std::istream & Read(std::istream & is)
-      {
-        if (is) {
-          is.read((char *)_nonce, crypto_secretbox_NONCEBYTES);
-        }
-        return is;
-      }
-
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      std::ostream & Write(std::ostream & os) const
-      {
-        if (os) {
-          os.write((const char *)_nonce, crypto_secretbox_NONCEBYTES);
-        }
-        return os;
-      }
+      ChallengeResponse() = default;
+      ChallengeResponse(const ChallengeResponse &) = default;
+      bool Create(const std::string & signingKey,
+                  const Challenge & challenge);
+      std::istream & Read(std::istream & is) override;
+      std::ostream & Write(std::ostream & os) const override;
+      bool Verify(const std::string & publicKey,
+                  const std::string & challengeString) const;
       
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      Nonce(const Nonce &) = default;
-      
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      operator const uint8_t * () const   { return _nonce; }
-
     private:
-      uint8_t  _nonce[crypto_secretbox_NONCEBYTES];
+      std::string  _response;
     };
-      
     
   }  // namespace Credence
 
 }  // namespace Dwm
 
-#endif  // _DWMCREDENCENONCE_HH_
+#endif  // _DWMCREDENCECHALLENGERESPONSE_HH_
