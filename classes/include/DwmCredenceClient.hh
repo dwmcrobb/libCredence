@@ -36,7 +36,7 @@
 //---------------------------------------------------------------------------
 //!  \file DwmCredenceClient.hh
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief Dwm::Credence::Client class declaration
 //---------------------------------------------------------------------------
 
 #ifndef _DWMCREDENCECLIENT_HH_
@@ -55,7 +55,7 @@ namespace Dwm {
   namespace Credence {
 
     //------------------------------------------------------------------------
-    //!  
+    //!  Encapsulates a client from the perspective of a server.
     //------------------------------------------------------------------------
     class Client
     {
@@ -63,13 +63,17 @@ namespace Dwm {
       Client(boost::asio::ip::tcp::socket && s);
       bool Authenticate(const KeyStash & keyStash,
                         const KnownKeys & knownKeys);
-      bool SendTo(const std::string & msg);
-      bool SendTo(const StreamWritable & msg);
-      bool ReceiveFrom(std::string & msg);
-      bool ReceiveFrom(StreamReadable & msg);
+      const std::string & Id() const;
+      bool Send(const std::string & msg);
+      bool Send(const StreamWritable & msg);
+      bool Receive(std::string & msg);
+      bool Receive(StreamReadable & msg);
+      void Disconnect();
       
     private:
       boost::asio::ip::tcp::iostream               _ios;
+      boost::asio::ip::tcp::endpoint               _endPoint;
+      std::string                                  _id;
       std::string                                  _sharedKey;
       std::unique_ptr<XChaCha20Poly1305::Ostream>  _xos;
       std::unique_ptr<XChaCha20Poly1305::Istream>  _xis;

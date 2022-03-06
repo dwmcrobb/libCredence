@@ -36,7 +36,7 @@
 //---------------------------------------------------------------------------
 //!  \file DwmCredenceClient.cc
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief Dwm::Credence::Client class implementation
 //---------------------------------------------------------------------------
 
 #include "DwmIO.hh"
@@ -59,7 +59,13 @@ namespace Dwm {
     //------------------------------------------------------------------------
     Client::Client(boost::asio::ip::tcp::socket && s)
         : _ios(std::move(s)), _sharedKey()
-    {}
+    {
+      boost::system::error_code  ec;
+      _endPoint = _ios.socket().remote_endpoint(ec);
+      if (ec) {
+        Syslog(LOG_ERR, "Failed to get client endpoint");
+      }
+    }
     
     //------------------------------------------------------------------------
     //!  
@@ -81,11 +87,19 @@ namespace Dwm {
       }
       return rc;
     }
-    
+
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    bool Client::SendTo(const std::string & msg)
+    const std::string	& Client::Id() const
+    {
+      return _id;
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool Client::Send(const std::string & msg)
     {
       bool  rc = false;
       if (_xos) {
@@ -94,11 +108,11 @@ namespace Dwm {
             rc = true;
           }
           else {
-            Syslog(LOG_ERR, "Failed to flush _xos");
+            Syslog(LOG_ERR, "Failed to flush encrypted stream");
           }
         }
         else {
-          Syslog(LOG_ERR, "Failed to write msg to _xos");
+          Syslog(LOG_ERR, "Failed to write msg to encrypted stream");
         }
       }
       return rc;
@@ -107,7 +121,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    bool Client::SendTo(const StreamWritable & msg)
+    bool Client::Send(const StreamWritable & msg)
     {
       bool  rc = false;
       if (_xos) {
@@ -116,11 +130,11 @@ namespace Dwm {
             rc = true;
           }
           else {
-            Syslog(LOG_ERR, "Failed to flush _xos");
+            Syslog(LOG_ERR, "Failed to flush encrypted stream");
           }
         }
         else {
-          Syslog(LOG_ERR, "Failed to write msg to _xos");
+          Syslog(LOG_ERR, "Failed to write msg to encrypted stream");
         }
       }
       return rc;
@@ -129,12 +143,15 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    bool Client::ReceiveFrom(std::string & msg)
+    bool Client::Receive(std::string & msg)
     {
       bool  rc = false;
       if (_xis) {
         if (IO::Read(*_xis, msg)) {
           rc = true;
+        }
+        else {
+          Syslog(LOG_ERR, "Failed to read msg from encrypted stream");
         }
       }
       return rc;
@@ -143,15 +160,38 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    bool Client::ReceiveFrom(StreamReadable & msg)
+    bool Client::Receive(StreamReadable & msg)
     {
       bool  rc = false;
       if (_xis) {
         if (msg.Read(*_xis)) {
           rc = true;
         }
+        else {
+          Syslog(LOG_ERR, "Failed to read msg from encrypted stream");
+        }
       }
       return rc;
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    void Client::Disconnect()
+    {
+      if (_xis) {
+        _xis = nullptr;
+      }
+      if (_xos) {
+        _xos = nullptr;
+      }
+      if (_ios.socket().is_open()) {
+        _ios.close();
+        Syslog(LOG_INFO, "Disconnected client %s:%hu",
+               _endPoint.address().to_string().c_str(),
+               _endPoint.port());
+      }
+      return;
     }
 
     //------------------------------------------------------------------------
@@ -167,6 +207,12 @@ namespace Dwm {
           _sharedKey = myKeys.ServerSharedKey(clientPubKey);
           rc = true;
         }
+        else {
+          Syslog(LOG_ERR, "Failed to read public key from client");
+        }
+      }
+      else {
+        Syslog(LOG_ERR, "Failed to send publc key to client");
       }
       return rc;
     }
@@ -181,15 +227,14 @@ namespace Dwm {
     {
       bool  rc = false;
       if (keyStash.Get(myKeys)) {
-        if (SendTo(myKeys.Id())) {
-          string  clientId;
-          if (ReceiveFrom(clientId)) {
-            clientPubKey = knownKeys.Find(clientId);
+        if (Send(myKeys.Id())) {
+          if (Receive(_id)) {
+            clientPubKey = knownKeys.Find(_id);
             if (! clientPubKey.empty()) {
               rc = true;
             }
             else {
-              Syslog(LOG_ERR, "client %s not known", clientId.c_str());
+              Syslog(LOG_ERR, "client %s not known", _id.c_str());
             }
           }
           else {
@@ -212,17 +257,17 @@ namespace Dwm {
       bool  rc = false;
       //  Send challenge to client
       Challenge  clientChallenge(true);
-      if (SendTo(clientChallenge)) {
+      if (Send(clientChallenge)) {
         //  Receive challenge from client
         Challenge  myChallenge;
-        if (ReceiveFrom(myChallenge)) {
+        if (Receive(myChallenge)) {
           //  Send my response
           ChallengeResponse  myResponse;
           if (myResponse.Create(mySecretKey, myChallenge)) {
-            if (SendTo(myResponse)) {
+            if (Send(myResponse)) {
               // Receive response from client
               ChallengeResponse  clientResponse;
-              if (ReceiveFrom(clientResponse)) {
+              if (Receive(clientResponse)) {
                 if (clientResponse.Verify(clientPubKey, clientChallenge)) {
                   rc = true;
                 }
@@ -232,16 +277,19 @@ namespace Dwm {
               }
             }
             else {
-              Syslog(LOG_INFO, "Failed to send challenge response to client");
+              Syslog(LOG_ERR, "Failed to send challenge response to client");
             }
+          }
+          else {
+            Syslog(LOG_ERR, "Failed to create challenge response");
           }
         }
         else {
-          Syslog(LOG_INFO, "Failed to read challenge from client");
+          Syslog(LOG_ERR, "Failed to read challenge from client");
         }
       }
       else {
-        Syslog(LOG_INFO, "Failed to send challenge to client");
+        Syslog(LOG_ERR, "Failed to send challenge to client");
       }
       return rc;
     }

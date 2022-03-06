@@ -82,18 +82,22 @@ void ServerThread(const std::string & plaintext)
   }
   if (! ec) {
     socket.native_non_blocking(false, ec);
+#if 0
     boost::asio::ip::tcp::no_delay  noDelayOption(true);
     socket.set_option(noDelayOption, ec);
+#endif
     Credence::Client  client(std::move(socket));
     Credence::KeyStash  keyStash("./inputs");
     Credence::KnownKeys  knownKeys("./inputs");
     if (UnitAssert(client.Authenticate(keyStash, knownKeys))) {
+      UnitAssert(client.Id() == "test@mcplex.net");
       string  receivedtext;
-      if (UnitAssert(client.ReceiveFrom(receivedtext))) {
+      if (UnitAssert(client.Receive(receivedtext))) {
         UnitAssert(plaintext == receivedtext);
       }
-      UnitAssert(client.SendTo(plaintext));
+      UnitAssert(client.Send(receivedtext));
     }
+    client.Disconnect();
   }
   
   return;
@@ -128,13 +132,15 @@ int main(int argc, char *argv[])
     Credence::KeyStash   keyStash("./inputs");
     Credence::KnownKeys  knownKeys("./inputs");
     if (UnitAssert(server.Authenticate(keyStash, knownKeys))) {
-      if (UnitAssert(server.SendTo(fileContents))) {
+      UnitAssert(server.Id() == "test@mcplex.net");
+      if (UnitAssert(server.Send(fileContents))) {
         string  recoveredContents;
-        if (UnitAssert(server.ReceiveFrom(recoveredContents))) {
+        if (UnitAssert(server.Receive(recoveredContents))) {
           UnitAssert(recoveredContents == fileContents);
         }
       }
     }
+    server.Disconnect();
   }
   g_serverShouldRun = false;
   serverThread.join();

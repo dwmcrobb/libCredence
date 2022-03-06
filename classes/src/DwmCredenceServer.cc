@@ -70,14 +70,11 @@ namespace Dwm {
       if (_ios.socket().is_open()) {
         boost::system::error_code  ec;
         _ios.socket().native_non_blocking(false, ec);
-#if 0
-        boost::asio::ip::tcp::no_delay  noDelayOption(true);
-        _ios.socket().set_option(noDelayOption, ec);
-#endif
+        _endPoint = _ios.socket().remote_endpoint();
       }
       return (bool)_ios;
     }
-    
+
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
@@ -104,11 +101,19 @@ namespace Dwm {
       }
       return rc;
     }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    const string & Server::Id() const
+    {
+      return _id;
+    }
     
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    bool Server::SendTo(const std::string & msg)
+    bool Server::Send(const std::string & msg)
     {
       bool  rc = false;
       if (_xos) {
@@ -130,7 +135,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    bool Server::SendTo(const StreamWritable & msg)
+    bool Server::Send(const StreamWritable & msg)
     {
       bool  rc = false;
       if (_xos) {
@@ -139,6 +144,9 @@ namespace Dwm {
             rc = true;
           }
         }
+        else {
+          Syslog(LOG_ERR, "Failed to write msg to _xos");
+        }
       }
       return rc;
     }
@@ -146,7 +154,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    bool Server::ReceiveFrom(std::string & msg)
+    bool Server::Receive(std::string & msg)
     {
       bool  rc = false;
       if (_xis) {
@@ -160,18 +168,36 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    bool Server::ReceiveFrom(StreamReadable & msg)
+    bool Server::Receive(StreamReadable & msg)
     {
       bool  rc = false;
       if (_xis) {
         if (msg.Read(*_xis)) {
-          // if (IO::Read(*_xis, msg)) {
           rc = true;
         }
       }
       return rc;
     }
 
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    void Server::Disconnect()
+    {
+      if (_xis) {
+        _xis = nullptr;
+      }
+      if (_xos) {
+        _xos = nullptr;
+      }
+      if (_ios.socket().is_open()) {
+        _ios.close();
+        Syslog(LOG_INFO, "Disconnected server %s:%hu",
+               _endPoint.address().to_string().c_str(),
+               _endPoint.port());
+      }
+    }
+    
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
@@ -206,13 +232,12 @@ namespace Dwm {
     {
       bool  rc = false;
       if (keyStash.Get(myKeys)) {
-        if (SendTo(myKeys.Id())) {
-          string  serverId;
-          if (ReceiveFrom(serverId)) {
-            serverPubKey = knownKeys.Find(serverId);
+        if (Send(myKeys.Id())) {
+          if (Receive(_id)) {
+            serverPubKey = knownKeys.Find(_id);
             rc = (! serverPubKey.empty());
             if (! rc) {
-              Syslog(LOG_ERR, "Unknown ID %s", serverId.c_str());
+              Syslog(LOG_ERR, "Unknown ID %s", _id.c_str());
             }
           }
           else {
@@ -235,17 +260,17 @@ namespace Dwm {
       bool  rc = false;
       //  Send challenge to server
       Challenge  serverChallenge(true);
-      if (SendTo(serverChallenge)) {
+      if (Send(serverChallenge)) {
         //  Receive challenge from server
         Challenge  myChallenge;
-        if (ReceiveFrom(myChallenge)) {
+        if (Receive(myChallenge)) {
           //  Send my response
           ChallengeResponse  myResponse;
           if (myResponse.Create(mySecretKey, myChallenge)) {
-            if (SendTo(myResponse)) {
+            if (Send(myResponse)) {
               // Receive response from server
               ChallengeResponse  serverResponse;
-              if (ReceiveFrom(serverResponse)) {
+              if (Receive(serverResponse)) {
                 if (serverResponse.Verify(serverPubKey, serverChallenge)) {
                   rc = true;
                 }
