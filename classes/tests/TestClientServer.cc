@@ -82,20 +82,19 @@ void ServerThread(const std::string & plaintext)
   }
   if (! ec) {
     socket.native_non_blocking(false, ec);
-#if 0
-    boost::asio::ip::tcp::no_delay  noDelayOption(true);
-    socket.set_option(noDelayOption, ec);
-#endif
     Credence::Client  client(std::move(socket));
-    Credence::KeyStash  keyStash("./inputs");
-    Credence::KnownKeys  knownKeys("./inputs");
-    if (UnitAssert(client.Authenticate(keyStash, knownKeys))) {
-      UnitAssert(client.Id() == "test@mcplex.net");
-      string  receivedtext;
-      if (UnitAssert(client.Receive(receivedtext))) {
-        UnitAssert(plaintext == receivedtext);
+    if (UnitAssert(client.ExchangeKeys())) {
+      Credence::KeyStash  keyStash("./inputs");
+      Credence::KnownKeys  knownKeys("./inputs");
+      
+      if (UnitAssert(client.Authenticate(keyStash, knownKeys))) {
+        UnitAssert(client.Id() == "test@mcplex.net");
+        string  receivedtext;
+        if (UnitAssert(client.Receive(receivedtext))) {
+          UnitAssert(plaintext == receivedtext);
+        }
+        UnitAssert(client.Send(receivedtext));
       }
-      UnitAssert(client.Send(receivedtext));
     }
     client.Disconnect();
   }
@@ -127,8 +126,8 @@ int main(int argc, char *argv[])
   std::thread  serverThread(ServerThread, fileContents);
   while (! g_serverStarted) { }
 
-  Credence::Server  server("127.0.0.1", 7789);
-  if (UnitAssert(server.Connect())) {
+  Credence::Server  server;
+  if (UnitAssert(server.Connect("127.0.0.1", 7789))) {
     Credence::KeyStash   keyStash("./inputs");
     Credence::KnownKeys  knownKeys("./inputs");
     if (UnitAssert(server.Authenticate(keyStash, knownKeys))) {
