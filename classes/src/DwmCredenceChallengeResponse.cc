@@ -36,7 +36,7 @@
 //---------------------------------------------------------------------------
 //!  \file DwmCredenceChallengeResponse.cc
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief Dwm::Credence::ChallengeResponse class implementation
 //---------------------------------------------------------------------------
 
 #include "DwmIO.hh"
