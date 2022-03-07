@@ -57,20 +57,40 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    Server::Server(const std::string & host, uint16_t port)
-        : _host(host), _port(port), _ios(), _sharedKey()
+    Server::Server()
+        : _endPoint(), _id(), _ios(), _sharedKey(), _xos(nullptr),
+          _xis(nullptr)
     {}
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    Server::~Server()
+    {
+      Disconnect();
+    }
     
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    bool Server::Connect()
+    bool Server::Connect(const string & host, uint16_t port)
     {
-      _ios.connect(_host, std::to_string(_port));
+      _ios.connect(host, std::to_string(port));
       if (_ios.socket().is_open()) {
         boost::system::error_code  ec;
         _ios.socket().native_non_blocking(false, ec);
-        _endPoint = _ios.socket().remote_endpoint();
+        if (ExchangeKeys()) {
+          _endPoint = _ios.socket().remote_endpoint();
+          _xis = make_unique<XChaCha20Poly1305::Istream>(_ios, _sharedKey);
+          _xos = make_unique<XChaCha20Poly1305::Ostream>(_ios, _sharedKey);
+        }
+        else {
+          Syslog(LOG_ERR, "Key exchange failed");
+          Disconnect();
+        }
+      }
+      else {
+        Syslog(LOG_ERR, "Failed to connect to %s:%hu", host.c_str(), port);
       }
       return (bool)_ios;
     }
@@ -82,22 +102,18 @@ namespace Dwm {
                               const KnownKeys & knownKeys)
     {
       bool  rc = false;
-      if (ExchangeKeys()) {
-        _xis = std::make_unique<XChaCha20Poly1305::Istream>(_ios, _sharedKey);
-        _xos = std::make_unique<XChaCha20Poly1305::Ostream>(_ios, _sharedKey);
-        Ed25519KeyPair  myKeys;
-        string          serverPubKey;
-        if (ExchangeIds(keyStash, knownKeys, myKeys, serverPubKey)) {
-          if (ExchangeChallenges(myKeys.SecretKey(), serverPubKey)) {
-            rc = true;
-          }
-          else {
-            Syslog(LOG_ERR, "Challenge failed");
-          }
+      Ed25519KeyPair  myKeys;
+      string          serverPubKey;
+      if (ExchangeIds(keyStash, knownKeys, myKeys, serverPubKey)) {
+        if (ExchangeChallenges(myKeys.SecretKey(), serverPubKey)) {
+          rc = true;
         }
         else {
-          Syslog(LOG_ERR, "ID exchange failed");
+          Syslog(LOG_ERR, "Challenge failed");
         }
+      }
+      else {
+        Syslog(LOG_ERR, "ID exchange failed");
       }
       return rc;
     }
@@ -184,18 +200,15 @@ namespace Dwm {
     //------------------------------------------------------------------------
     void Server::Disconnect()
     {
-      if (_xis) {
-        _xis = nullptr;
-      }
-      if (_xos) {
-        _xos = nullptr;
-      }
+      if (_xis) {  _xis = nullptr;  }
+      if (_xos) {  _xos = nullptr;  }
       if (_ios.socket().is_open()) {
         _ios.close();
         Syslog(LOG_INFO, "Disconnected server %s:%hu",
                _endPoint.address().to_string().c_str(),
                _endPoint.port());
       }
+      _sharedKey.clear();
     }
     
     //------------------------------------------------------------------------
