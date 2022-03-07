@@ -58,6 +58,8 @@ namespace Dwm {
     {
     public:
       Challenge(bool init = false);
+      Challenge(const Challenge &) = default;
+      Challenge & operator = (const Challenge &) = default;
       operator const std::string & () const;
       std::istream & Read(std::istream & is) override;
       std::ostream & Write(std::ostream & os) const override;
