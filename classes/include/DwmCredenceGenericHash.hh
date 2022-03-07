@@ -36,7 +36,7 @@
 //---------------------------------------------------------------------------
 //!  \file DwmCredenceGenericHash.hh
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief Dwm::Credence::GenericHash class template
 //---------------------------------------------------------------------------
 
 #ifndef _DWMCREDENCEGENERICHASH_HH_
