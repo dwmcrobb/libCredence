@@ -36,7 +36,7 @@
 //---------------------------------------------------------------------------
 //!  \file DwmCredenceChallengeResponse.hh
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief Dwm::Credence::ChallengeResponse class declaration
 //---------------------------------------------------------------------------
 
 #ifndef _DWMCREDENCECHALLENGERESPONSE_HH_
