@@ -56,24 +56,75 @@ namespace Dwm {
 
     //------------------------------------------------------------------------
     //!  Encapsulates a server from the perspective of a client.
+    //!  Uses XChacha20Poly1305 for authenticated encryption (AE).
     //------------------------------------------------------------------------
     class Server
     {
     public:
-      Server(const std::string & host, uint16_t port);
-      bool Connect();
+      //----------------------------------------------------------------------
+      //!  Default constructor
+      //----------------------------------------------------------------------
+      Server();
+
+      //----------------------------------------------------------------------
+      //!  Destructor
+      //----------------------------------------------------------------------
+      ~Server();
+      
+      //----------------------------------------------------------------------
+      //!  Connects to the given @c host at @c port, exchanges randomly
+      //!  generated public keys and creates a shared encryption key.
+      //!  Returns true on success, false on failure.
+      //----------------------------------------------------------------------
+      bool Connect(const std::string & host, uint16_t port);
+
+      //----------------------------------------------------------------------
+      //!  Authenticates the server and provides authentication to the
+      //!  server.  Returns true on success, false on failure.  If used,
+      //!  this should be called immediately after Connect() succeeds.
+      //!  The KeyStash is used to authenticate ourselves to the server,
+      //!  and the KnownKeys is used to authenticate the server to us.
+      //----------------------------------------------------------------------
       bool Authenticate(const KeyStash & keyStash,
                         const KnownKeys & knownKeys);
+      
+      //----------------------------------------------------------------------
+      //!  Returns the ID of the server.  The ID is used to find a public key
+      //!  in the KnownKeys in Authenticate().  It is only valid if
+      //!  authentication was successful.
+      //----------------------------------------------------------------------
       const std::string & Id() const;
+      
+      //----------------------------------------------------------------------
+      //!  Send the given @c msg to the server.  Returns true on success,
+      //!  false on failure.
+      //----------------------------------------------------------------------
       bool Send(const std::string & msg);
+      
+      //----------------------------------------------------------------------
+      //!  Send the given @c msg to the server.  Returns true on success,
+      //!  false on failure.
+      //----------------------------------------------------------------------
       bool Send(const StreamWritable & msg);
+      
+      //----------------------------------------------------------------------
+      //!  Receives @c msg from the server.  Returns true on success,
+      //!  false on failure.
+      //----------------------------------------------------------------------
       bool Receive(std::string & msg);
+      
+      //----------------------------------------------------------------------
+      //!  Receives @c msg from the server.  Returns true on success,
+      //!  false on failure.
+      //----------------------------------------------------------------------
       bool Receive(StreamReadable & msg);
+      
+      //----------------------------------------------------------------------
+      //!  Disconnects from the server.
+      //----------------------------------------------------------------------
       void Disconnect();
       
     private:
-      std::string                                  _host;
-      uint16_t                                     _port;
       boost::asio::ip::tcp::endpoint               _endPoint;
       std::string                                  _id;
       boost::asio::ip::tcp::iostream               _ios;
