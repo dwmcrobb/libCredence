@@ -206,6 +206,16 @@ namespace Dwm {
       }
       return rc;
     }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    std::string
+    Utils::EndPointString(const boost::asio::ip::tcp::endpoint & endPoint)
+    {
+      return (endPoint.address().to_string() + ':'
+              + std::to_string(endPoint.port()));
+    }
     
   }  // namespace Credence
 

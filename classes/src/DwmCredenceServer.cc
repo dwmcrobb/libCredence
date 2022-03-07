@@ -204,9 +204,8 @@ namespace Dwm {
       if (_xos) {  _xos = nullptr;  }
       if (_ios.socket().is_open()) {
         _ios.close();
-        Syslog(LOG_INFO, "Disconnected server %s:%hu",
-               _endPoint.address().to_string().c_str(),
-               _endPoint.port());
+        Syslog(LOG_INFO, "Disconnected server %s",
+               Utils::EndPointString(_endPoint).c_str());
       }
       _sharedKey.clear();
     }
@@ -286,23 +285,44 @@ namespace Dwm {
               if (Receive(serverResponse)) {
                 if (serverResponse.Verify(serverPubKey, serverChallenge)) {
                   rc = true;
+                  Syslog(LOG_INFO, "Authenticated server %s at %s:%hu",
+                         _id.c_str(), _endPoint.address().to_string().c_str(),
+                         _endPoint.port());
+                }
+                else {
+                  Syslog(LOG_INFO, "Failed to authenticate server %s at"
+                         " %s:%hu",
+                         _id.c_str(), _endPoint.address().to_string().c_str(),
+                         _endPoint.port());
                 }
               }
               else {
-                Syslog(LOG_ERR, "Failed to read server challenge response");
+                Syslog(LOG_ERR, "Failed to read server challenge response"
+                       " from server %s at %s:%hu",
+                       _id.c_str(), _endPoint.address().to_string().c_str(),
+                       _endPoint.port());
               }
             }
             else {
-              Syslog(LOG_ERR, "Failed to send challenge response");
+              Syslog(LOG_ERR, "Failed to send challenge response to server"
+                     " %s at %s:%hu",
+                     _id.c_str(), _endPoint.address().to_string().c_str(),
+                     _endPoint.port());
             }
           }
         }
         else {
-          Syslog(LOG_ERR, "Failed to read challenge from server");
+          Syslog(LOG_ERR, "Failed to read challenge from server %s at"
+                 " %s:%hu",
+                 _id.c_str(), _endPoint.address().to_string().c_str(),
+                 _endPoint.port());
         }
       }
       else {
-        Syslog(LOG_ERR, "Failed to send challenge to server");
+        Syslog(LOG_ERR, "Failed to send challenge to server %s at"
+               " %s:%hu",
+               _id.c_str(), _endPoint.address().to_string().c_str(),
+                 _endPoint.port());
       }
       return rc;
     }

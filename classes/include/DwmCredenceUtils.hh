@@ -49,6 +49,7 @@ extern "C" {
 #include <array>
 #include <cstdint>
 #include <string>
+#include <boost/asio.hpp>
 
 namespace Dwm {
 
@@ -61,13 +62,20 @@ namespace Dwm {
     {
     public:
       static std::string Bin2Base64(const std::string & s);
+
       static std::string Base642Bin(const std::string & s);
+
       static std::string UserHomeDirectory();
+
       static std::string UserName();
+
       static std::string HostName();
+
       static bool ScalarMult(const std::string & sk, const std::string & pk,
                              std::string & q);
-      
+
+      static std::string
+      EndPointString(const boost::asio::ip::tcp::endpoint & endPoint);
     };
     
   }  // namespace Credence

@@ -266,26 +266,47 @@ namespace Dwm {
               if (Receive(clientResponse)) {
                 if (clientResponse.Verify(clientPubKey, clientChallenge)) {
                   rc = true;
+                  Syslog(LOG_INFO, "Authenticated client %s at %s:%hu",
+                         _id.c_str(), _endPoint.address().to_string().c_str(),
+                         _endPoint.port());
+                }
+                else {
+                  Syslog(LOG_ERR, "Failed to authenticate client %s at %s:%hu",
+                         _id.c_str(), _endPoint.address().to_string().c_str(),
+                         _endPoint.port());
                 }
               }
               else {
-                Syslog(LOG_ERR, "Failed to read client challenge response");
+                Syslog(LOG_ERR, "Failed to read client challenge response"
+                       " from %s at %s:%hu",
+                       _id.c_str(), _endPoint.address().to_string().c_str(),
+                       _endPoint.port());
               }
             }
             else {
-              Syslog(LOG_ERR, "Failed to send challenge response to client");
+              Syslog(LOG_ERR, "Failed to send challenge response to client"
+                     " %s at %s:%hu",
+                     _id.c_str(), _endPoint.address().to_string().c_str(),
+                     _endPoint.port());
             }
           }
           else {
-            Syslog(LOG_ERR, "Failed to create challenge response");
+            Syslog(LOG_ERR, "Failed to create challenge response for client"
+                   " %s at %s:%hu",
+                   _id.c_str(), _endPoint.address().to_string().c_str(),
+                   _endPoint.port());
           }
         }
         else {
-          Syslog(LOG_ERR, "Failed to read challenge from client");
+          Syslog(LOG_ERR, "Failed to read challenge from client %s at %s:%hu",
+                 _id.c_str(), _endPoint.address().to_string().c_str(),
+                 _endPoint.port());
         }
       }
       else {
-        Syslog(LOG_ERR, "Failed to send challenge to client");
+        Syslog(LOG_ERR, "Failed to send challenge to client %s at %s:%hu",
+               _id.c_str(), _endPoint.address().to_string().c_str(),
+               _endPoint.port());
       }
       return rc;
     }

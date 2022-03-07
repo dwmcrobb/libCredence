@@ -5,8 +5,6 @@ OBJFILES = TestChallenge.o \
            TestKeyStash.o \
            TestKnownKeys.o \
            TestKXKeyPair.o \
-           TestSessionClientKeyPair.o \
-           TestSessionServerKeyPair.o \
            TestSigner.o \
            TestX25519KeyPair.o \
            TestXChaCha20Poly1305.o \
