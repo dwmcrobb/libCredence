@@ -1,0 +1,28 @@
+msc {
+    hscale = "1.25";
+    client,server;
+    client => client [label="create KXKeypair"];
+    server => server [label="create KXKeyPair"];
+    client -> server [label="KXKeyPair public key"];
+    server -> client [label="KXKeyPair public key"];
+    client => client [label="compute shared key"];
+    server => server [label="compute shared key"];
+    client note server [label="session now encrypted with shared key",
+                        textbgcolor="#f5deb3"];
+
+    client -> server [label="client_id and server_challenge"];
+    server -> client [label="server_id and client_challenge"];
+
+    server => server [label="Find client_id in authorized keys"];
+    server => server [label="create server_challenge_response\nfrom server_challenge"];
+    server -> client [label="server_challenge_response"];
+    
+    client => client [label="Find server_id in authorized keys"];
+    client => client [label="create client_challenge_response\nfrom client_challenge"];
+    client -> server [label="client_challenge_response"];
+
+    client => client [label="verify server_challenge_response"];
+    client -> server [label="challenge_response_ack"];
+    server => server [label="verify client_challenge_response"];
+    server -> client [label="challenge_response_ack"];
+}

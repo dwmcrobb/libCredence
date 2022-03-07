@@ -1,9 +1,11 @@
-AuthSequence.pdf: AuthSequence.eps
+all:: AuthSequence.pdf AuthSequence.eps AuthSequence2.pdf AuthSequence2.eps
+      
+%.pdf: %.eps
 	epspdf $<
 
-AuthSequence.eps: AuthSequence.msc
+%.eps: %.msc
 	mscgen -Teps -o $@ $<
 
 clean::
-	rm -f AuthSequence.eps AuthSequence.pdf
+	rm -f *.eps *.pdf
 
