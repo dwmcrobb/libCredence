@@ -74,15 +74,11 @@ namespace Dwm {
                               const KnownKeys & knownKeys)
     {
       bool  rc = false;
-      if (ExchangeKeys()) {
-        _xis = std::make_unique<XChaCha20Poly1305::Istream>(_ios, _sharedKey);
-        _xos = std::make_unique<XChaCha20Poly1305::Ostream>(_ios, _sharedKey);
-        Ed25519KeyPair  myKeys;
-        string          clientPubKey;
-        if (ExchangeIds(keyStash, knownKeys, myKeys, clientPubKey)) {
-          if (ExchangeChallenges(myKeys.SecretKey(), clientPubKey)) {
-            rc = true;
-          }
+      Ed25519KeyPair  myKeys;
+      string          clientPubKey;
+      if (ExchangeIds(keyStash, knownKeys, myKeys, clientPubKey)) {
+        if (ExchangeChallenges(myKeys.SecretKey(), clientPubKey)) {
+          rc = true;
         }
       }
       return rc;
@@ -179,18 +175,16 @@ namespace Dwm {
     //------------------------------------------------------------------------
     void Client::Disconnect()
     {
-      if (_xis) {
-        _xis = nullptr;
-      }
-      if (_xos) {
-        _xos = nullptr;
-      }
+      if (_xis) {  _xis = nullptr;  }
+      if (_xos) {  _xos = nullptr;  }
       if (_ios.socket().is_open()) {
         _ios.close();
         Syslog(LOG_INFO, "Disconnected client %s:%hu",
                _endPoint.address().to_string().c_str(),
                _endPoint.port());
       }
+      _sharedKey.clear();
+      _id.clear();
       return;
     }
 
@@ -205,6 +199,8 @@ namespace Dwm {
         string  clientPubKey;
         if (IO::Read(_ios, clientPubKey)) {
           _sharedKey = myKeys.ServerSharedKey(clientPubKey);
+          _xis = make_unique<XChaCha20Poly1305::Istream>(_ios, _sharedKey);
+          _xos = make_unique<XChaCha20Poly1305::Ostream>(_ios, _sharedKey);
           rc = true;
         }
         else {
