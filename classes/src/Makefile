@@ -9,7 +9,6 @@ OBJFILESNP   = DwmCredenceChallenge.o \
                DwmCredenceKnownKeys.o \
                DwmCredenceKXKeyPair.o \
                DwmCredenceServer.o \
-               DwmCredenceSessionClientKeyPair.o \
                DwmCredenceSessionServerKeyPair.o \
                DwmCredenceSigner.o \
                DwmCredenceUtils.o \
