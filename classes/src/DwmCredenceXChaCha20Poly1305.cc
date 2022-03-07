@@ -36,7 +36,7 @@
 //---------------------------------------------------------------------------
 //!  \file DwmCredenceXChaCha20Poly1305.cc
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief Dwm::Credence::XChaCha20Poly1305 function implementations
 //---------------------------------------------------------------------------
 
 extern "C" {
