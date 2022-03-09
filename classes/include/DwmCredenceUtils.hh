@@ -46,7 +46,7 @@ extern "C" {
   #include <sodium.h>
 }
 
-#include <array>
+#include <chrono>
 #include <cstdint>
 #include <string>
 #include <boost/asio.hpp>
@@ -61,6 +61,33 @@ namespace Dwm {
     class Utils
     {
     public:
+      using Clock = std::chrono::system_clock;
+      using TimePoint = std::chrono::time_point<Clock>;
+      using BoostTcpSocket =
+        boost::asio::basic_socket<boost::asio::ip::tcp, boost::asio::executor>;
+      
+      static std::size_t BytesReady(BoostTcpSocket & sck);
+
+      static bool WaitUntilBytesReady(BoostTcpSocket & sck,
+                                      uint32_t numBytes, TimePoint endTime);
+
+      static bool WaitForBytesReady(BoostTcpSocket & sck,
+                                    uint32_t numBytes,
+                                    std::chrono::milliseconds timeout);
+
+      static ssize_t
+      ReadLengthRestrictedString(boost::asio::ip::tcp::socket & sck,
+                                 std::string & s, uint64_t maxLen);
+      
+      static std::istream & ReadLengthRestrictedString(std::istream & is,
+                                                       std::string & s,
+                                                       uint64_t maxLen);
+
+      static ssize_t
+      ReadLengthRestrictedString(boost::asio::ip::tcp::socket & sck,
+                                 std::string & s, uint64_t maxLen,
+                                 TimePoint endTime);
+
       static std::string Bin2Base64(const std::string & s);
 
       static std::string Base642Bin(const std::string & s);

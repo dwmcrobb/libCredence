@@ -45,6 +45,7 @@
 #include "DwmCredenceChallenge.hh"
 #include "DwmCredenceChallengeResponse.hh"
 #include "DwmCredenceServer.hh"
+#include "DwmCredenceShortString.hh"
 #include "DwmCredenceSigner.hh"
 #include "DwmCredenceUtils.hh"
 
@@ -204,8 +205,8 @@ namespace Dwm {
       if (_xos) {  _xos = nullptr;  }
       if (_ios.socket().is_open()) {
         _ios.close();
-        Syslog(LOG_INFO, "Disconnected server %s",
-               Utils::EndPointString(_endPoint).c_str());
+        Syslog(LOG_INFO, "Disconnected server %s at %s",
+               _id.c_str(), EndPointString().c_str());
       }
       _sharedKey.clear();
     }
@@ -225,11 +226,13 @@ namespace Dwm {
           rc = true;
         }
         else {
-          Syslog(LOG_ERR, "Failed to read public key from server");
+          Syslog(LOG_ERR, "Failed to read public key from server at %s",
+                 EndPointString().c_str());
         }
       }
       else {
-        Syslog(LOG_ERR, "Failed to send public key to server");
+        Syslog(LOG_ERR, "Failed to send public key to server at %s",
+               EndPointString().c_str());
       }
       return rc;
     }
@@ -244,20 +247,24 @@ namespace Dwm {
     {
       bool  rc = false;
       if (keyStash.Get(myKeys)) {
-        if (Send(myKeys.Id())) {
+        ShortString  idShort(myKeys.Id());
+        if (Send(idShort)) {
           if (Receive(_id)) {
             serverPubKey = knownKeys.Find(_id);
             rc = (! serverPubKey.empty());
             if (! rc) {
-              Syslog(LOG_ERR, "Unknown ID %s", _id.c_str());
+              Syslog(LOG_ERR, "Unknown ID %s from server at %s",
+                     _id.c_str(), EndPointString().c_str());
             }
           }
           else {
-            Syslog(LOG_ERR, "Failed to read ID from server");
+            Syslog(LOG_ERR, "Failed to read ID from server at %s",
+                   EndPointString().c_str());
           }
         }
         else {
-          Syslog(LOG_ERR, "Failed to send ID to server");
+          Syslog(LOG_ERR, "Failed to send ID to server at %s",
+                 EndPointString().c_str());
         }
       }
       return rc;
@@ -285,48 +292,46 @@ namespace Dwm {
               if (Receive(serverResponse)) {
                 if (serverResponse.Verify(serverPubKey, serverChallenge)) {
                   rc = true;
-                  Syslog(LOG_INFO, "Authenticated server %s at %s:%hu",
-                         _id.c_str(), _endPoint.address().to_string().c_str(),
-                         _endPoint.port());
+                  Syslog(LOG_INFO, "Authenticated server %s at %s",
+                         _id.c_str(), EndPointString().c_str());
                 }
                 else {
-                  Syslog(LOG_INFO, "Failed to authenticate server %s at"
-                         " %s:%hu",
-                         _id.c_str(), _endPoint.address().to_string().c_str(),
-                         _endPoint.port());
+                  Syslog(LOG_INFO, "Failed to authenticate server %s at %s",
+                         _id.c_str(), EndPointString().c_str());
                 }
               }
               else {
                 Syslog(LOG_ERR, "Failed to read server challenge response"
-                       " from server %s at %s:%hu",
-                       _id.c_str(), _endPoint.address().to_string().c_str(),
-                       _endPoint.port());
+                       " from server %s at %s",
+                       _id.c_str(), EndPointString().c_str());
               }
             }
             else {
               Syslog(LOG_ERR, "Failed to send challenge response to server"
-                     " %s at %s:%hu",
-                     _id.c_str(), _endPoint.address().to_string().c_str(),
-                     _endPoint.port());
+                     " %s at %s",
+                     _id.c_str(), EndPointString().c_str());
             }
           }
         }
         else {
-          Syslog(LOG_ERR, "Failed to read challenge from server %s at"
-                 " %s:%hu",
-                 _id.c_str(), _endPoint.address().to_string().c_str(),
-                 _endPoint.port());
+          Syslog(LOG_ERR, "Failed to read challenge from server %s at %s",
+                 _id.c_str(), EndPointString().c_str());
         }
       }
       else {
-        Syslog(LOG_ERR, "Failed to send challenge to server %s at"
-               " %s:%hu",
-               _id.c_str(), _endPoint.address().to_string().c_str(),
-                 _endPoint.port());
+        Syslog(LOG_ERR, "Failed to send challenge to server %s at %s",
+               _id.c_str(), EndPointString().c_str());
       }
       return rc;
     }
-    
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    std::string Server::EndPointString() const
+    {
+      return Utils::EndPointString(_endPoint);
+    }
 
   }  // namespace Credence
 

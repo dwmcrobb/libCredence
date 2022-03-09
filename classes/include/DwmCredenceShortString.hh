@@ -34,16 +34,17 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceChallenge.hh
+//!  \file DwmCredenceShortString.hh
 //!  \author Daniel W. McRobb
-//!  \brief Dwm::Credence::Challenge class declaration
+//!  \brief Dwm::Credence::ShortString class declaration
 //---------------------------------------------------------------------------
 
-#ifndef _DWMCREDENCECHALLENGE_HH_
-#define _DWMCREDENCECHALLENGE_HH_
+#ifndef _DWMCREDENCESHORTSTRING_HH_
+#define _DWMCREDENCESHORTSTRING_HH_
+
+#include <string>
 
 #include "DwmStreamIOCapable.hh"
-#include "DwmCredenceShortString.hh"
 
 namespace Dwm {
 
@@ -52,23 +53,31 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    class Challenge
+    class ShortString
       : public StreamIOCapable
     {
     public:
-      Challenge(bool init = false);
-      Challenge(const Challenge &) = default;
-      Challenge & operator = (const Challenge &) = default;
-      operator const std::string & () const;
-      std::istream & Read(std::istream & is) override;
-      std::ostream & Write(std::ostream & os) const override;
+      ShortString() = default;
+      ShortString(const ShortString &) = default;
+      ShortString & operator = (const ShortString &) = default;
+      ShortString(const std::string & s);
+      ShortString & operator = (const std::string & s);
+      const std::string & Value() const;
+      
+      std::istream & Read(std::istream & is);
+      std::ostream & Write(std::ostream & os) const;
+
+      friend std::ostream & operator << (std::ostream & os,
+                                         const ShortString & shortString);
+      friend std::istream & operator >> (std::istream & is,
+                                         ShortString & shortString);
       
     private:
-      ShortString  _challenge;
+      std::string  _s;
     };
     
   }  // namespace Credence
 
 }  // namespace Dwm
 
-#endif  // _DWMCREDENCECHALLENGE_HH_
+#endif  // _DWMCREDENCESHORTSTRING_HH_

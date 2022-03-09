@@ -34,53 +34,68 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceChallenge.cc
+//!  \file DwmCredenceShortString.cc
 //!  \author Daniel W. McRobb
-//!  \brief Dwm::Credence::Challenge class implementation
+//!  \brief NOT YET DOCUMENTED
 //---------------------------------------------------------------------------
 
-extern "C" {
-  #include <sodium.h>
-}
-
-#include "DwmIO.hh"
-#include "DwmCredenceSigner.hh"
-#include "DwmCredenceChallenge.hh"
+#include "DwmCredenceShortString.hh"
 
 namespace Dwm {
 
   namespace Credence {
-
-    using namespace std;
     
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    Challenge::Challenge(bool init)
-        : _challenge()
+    ShortString::ShortString(const std::string & s)
     {
-      if (init) {
-        uint8_t  buf[32];
-        randombytes_buf((void *)buf, 32);
-        _challenge = string((const char *)buf, 32);
+      if (s.size() <= 255) {
+        _s = s;
+      }
+      else {
+        throw std::logic_error("Initializing string too long");
       }
     }
-
+    
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    Challenge::operator const string & () const
+    ShortString & ShortString::operator = (const std::string & s)
     {
-      return _challenge.Value();
+      if (s.size() <= 255) {
+        _s = s;
+      }
+      else {
+        throw std::logic_error("Initializing string too long");
+      }
+      return *this;
     }
     
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    std::istream & Challenge::Read(std::istream & is)
+    const std::string & ShortString::Value() const
     {
+      return _s;
+    }
+    
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    std::istream & ShortString::Read(std::istream & is)
+    {
+      _s.clear();
       if (is) {
-        IO::Read(is, _challenge);
+        uint8_t  len;
+        if (is.read((char *)&len, sizeof(len))) {
+          if (len) {
+            char  buf[len];
+            if (is.read(buf, len)) {
+              _s.assign(buf, len);
+            }
+          }
+        }
       }
       return is;
     }
@@ -88,12 +103,45 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    std::ostream & Challenge::Write(std::ostream & os) const
+    std::ostream & ShortString::Write(std::ostream & os) const
     {
       if (os) {
-        IO::Write(os, _challenge);
+        uint8_t  len = _s.size();
+        if (os.write((char *)&len, sizeof(len))) {
+          if (len) {
+            os.write(_s.data(), _s.size());
+          }
+        }
       }
       return os;
+    }
+    
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    std::ostream & operator << (std::ostream & os,
+                                const ShortString & shortString)
+    {
+      return (os << shortString._s);
+    }
+    
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    std::istream & operator >> (std::istream & is,
+                                ShortString & shortString)
+    {
+      shortString._s.clear();
+      std::string  s;
+      if (is >> s) {
+        if (s.size() <= 255) {
+          shortString._s = s;
+        }
+        else {
+          throw std::logic_error("String too long");
+        }
+      }
+      return is;
     }
     
 

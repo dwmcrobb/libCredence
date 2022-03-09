@@ -45,6 +45,7 @@
 #include "DwmCredenceChallenge.hh"
 #include "DwmCredenceChallengeResponse.hh"
 #include "DwmCredenceClient.hh"
+#include "DwmCredenceShortString.hh"
 #include "DwmCredenceSigner.hh"
 #include "DwmCredenceUtils.hh"
 
@@ -179,9 +180,8 @@ namespace Dwm {
       if (_xos) {  _xos = nullptr;  }
       if (_ios.socket().is_open()) {
         _ios.close();
-        Syslog(LOG_INFO, "Disconnected client %s:%hu",
-               _endPoint.address().to_string().c_str(),
-               _endPoint.port());
+        Syslog(LOG_INFO, "Disconnected client %s at %s",
+               _id.c_str(), EndPointString().c_str());
       }
       _sharedKey.clear();
       _id.clear();
@@ -191,24 +191,62 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
+    bool Client::ReceivePublicKey(std::string & publicKey)
+    {
+      publicKey.clear();
+      if (Utils::WaitForBytesReady(_ios.socket(),
+                                   crypto_box_PUBLICKEYBYTES
+                                   + sizeof(uint64_t),
+                                   chrono::milliseconds(1000))) {
+        if (! Utils::ReadLengthRestrictedString(_ios, publicKey,
+                                                crypto_box_PUBLICKEYBYTES)) {
+          publicKey.clear();
+        }
+      }
+      return (! publicKey.empty());
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool Client::ReceiveId(std::string & id)
+    {
+      id.clear();
+      if (Utils::WaitForBytesReady(_ios.socket(),
+                                   crypto_secretbox_NONCEBYTES
+                                   + crypto_aead_xchacha20poly1305_ietf_ABYTES,
+                                   chrono::milliseconds(1000))) {
+        ShortString  shortId;
+        if (Receive(shortId)) {
+          id = shortId.Value();
+        }
+      }
+      return (! id.empty());
+    }
+    
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
     bool Client::ExchangeKeys()
     {
       bool  rc = false;
       KXKeyPair  myKeys;
       if (IO::Write(_ios, myKeys.PublicKey())) {
         string  clientPubKey;
-        if (IO::Read(_ios, clientPubKey)) {
+        if (ReceivePublicKey(clientPubKey)) {
           _sharedKey = myKeys.ServerSharedKey(clientPubKey);
           _xis = make_unique<XChaCha20Poly1305::Istream>(_ios, _sharedKey);
           _xos = make_unique<XChaCha20Poly1305::Ostream>(_ios, _sharedKey);
           rc = true;
         }
         else {
-          Syslog(LOG_ERR, "Failed to read public key from client");
+          Syslog(LOG_ERR, "Failed to read public key from client at %s",
+                 EndPointString().c_str());
         }
       }
       else {
-        Syslog(LOG_ERR, "Failed to send publc key to client");
+        Syslog(LOG_ERR, "Failed to send public key to client at %s",
+               EndPointString().c_str());
       }
       return rc;
     }
@@ -224,21 +262,24 @@ namespace Dwm {
       bool  rc = false;
       if (keyStash.Get(myKeys)) {
         if (Send(myKeys.Id())) {
-          if (Receive(_id)) {
+          if (ReceiveId(_id)) {
             clientPubKey = knownKeys.Find(_id);
             if (! clientPubKey.empty()) {
               rc = true;
             }
             else {
-              Syslog(LOG_ERR, "client %s not known", _id.c_str());
+              Syslog(LOG_ERR, "client %s at %s not known",
+                     _id.c_str(), EndPointString().c_str());
             }
           }
           else {
-            Syslog(LOG_ERR, "Failed to read ID from client");
+            Syslog(LOG_ERR, "Failed to read ID from client at %s",
+                   EndPointString().c_str());
           }
         }
         else {
-          Syslog(LOG_ERR, "Failed to send ID to client");
+          Syslog(LOG_ERR, "Failed to send ID to client at %s",
+                 EndPointString().c_str());
         }
       }
       return rc;
@@ -266,51 +307,53 @@ namespace Dwm {
               if (Receive(clientResponse)) {
                 if (clientResponse.Verify(clientPubKey, clientChallenge)) {
                   rc = true;
-                  Syslog(LOG_INFO, "Authenticated client %s at %s:%hu",
-                         _id.c_str(), _endPoint.address().to_string().c_str(),
-                         _endPoint.port());
+                  Syslog(LOG_INFO, "Authenticated client %s at %s",
+                         _id.c_str(), EndPointString().c_str());
                 }
                 else {
-                  Syslog(LOG_ERR, "Failed to authenticate client %s at %s:%hu",
-                         _id.c_str(), _endPoint.address().to_string().c_str(),
-                         _endPoint.port());
+                  Syslog(LOG_ERR, "Failed to authenticate client %s at %s",
+                         _id.c_str(), EndPointString().c_str());
                 }
               }
               else {
                 Syslog(LOG_ERR, "Failed to read client challenge response"
-                       " from %s at %s:%hu",
-                       _id.c_str(), _endPoint.address().to_string().c_str(),
-                       _endPoint.port());
+                       " from %s at %s",
+                       _id.c_str(), EndPointString().c_str());
               }
             }
             else {
               Syslog(LOG_ERR, "Failed to send challenge response to client"
-                     " %s at %s:%hu",
-                     _id.c_str(), _endPoint.address().to_string().c_str(),
-                     _endPoint.port());
+                     " %s at %s",
+                     _id.c_str(), EndPointString().c_str());
             }
           }
           else {
             Syslog(LOG_ERR, "Failed to create challenge response for client"
-                   " %s at %s:%hu",
-                   _id.c_str(), _endPoint.address().to_string().c_str(),
-                   _endPoint.port());
+                   " %s at %s",
+                   _id.c_str(), EndPointString().c_str());
           }
         }
         else {
-          Syslog(LOG_ERR, "Failed to read challenge from client %s at %s:%hu",
-                 _id.c_str(), _endPoint.address().to_string().c_str(),
-                 _endPoint.port());
+          Syslog(LOG_ERR, "Failed to read challenge from client %s at %s",
+                 _id.c_str(), EndPointString().c_str());
         }
       }
       else {
-        Syslog(LOG_ERR, "Failed to send challenge to client %s at %s:%hu",
-               _id.c_str(), _endPoint.address().to_string().c_str(),
-               _endPoint.port());
+        Syslog(LOG_ERR, "Failed to send challenge to client %s at %s",
+               _id.c_str(), EndPointString().c_str());
       }
       return rc;
     }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    std::string Client::EndPointString() const
+    {
+      return Utils::EndPointString(_endPoint);
+    }
     
+
 
   }  // namespace Credence
 

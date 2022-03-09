@@ -54,6 +54,9 @@ extern "C" {
 }
 
 #include <cstdlib>
+
+#include "DwmStreamIO.hh"
+#include "DwmSysLogger.hh"
 #include "DwmCredenceUtils.hh"
 
 namespace Dwm {
@@ -61,6 +64,48 @@ namespace Dwm {
   namespace Credence {
 
     using namespace std;
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    std::size_t Utils::BytesReady(BoostTcpSocket & sck)
+    {
+      boost::asio::socket_base::bytes_readable  cmd(true);
+      sck.io_control(cmd);
+      return cmd.get();
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool Utils::WaitUntilBytesReady(BoostTcpSocket & sck,
+                                    uint32_t numBytes, TimePoint endTime)
+    {
+      bool  rc = false;
+      if (sck.is_open()) {
+        std::size_t  bytesReady = 0;
+        while ((bytesReady = BytesReady(sck)) < numBytes) {
+          if (Clock::now() > endTime) {
+            break;
+          }
+          else {
+            std::this_thread::sleep_for(std::chrono::milliseconds(130));
+          }
+        }
+        rc = (bytesReady >= numBytes);
+      }
+      return rc;
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool Utils::WaitForBytesReady(BoostTcpSocket & sck,
+                                  uint32_t numBytes,
+                                  std::chrono::milliseconds timeout)
+    {
+      return WaitUntilBytesReady(sck, numBytes, Clock::now() + timeout);
+    }
     
     //------------------------------------------------------------------------
     //!  
@@ -215,6 +260,46 @@ namespace Dwm {
     {
       return (endPoint.address().to_string() + ':'
               + std::to_string(endPoint.port()));
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    std::istream & Utils::ReadLengthRestrictedString(std::istream & is,
+                                                     std::string & s,
+                                                     uint64_t maxLen) 
+    {
+      s.clear();
+      if (is) {
+        uint64_t  len;
+        if (StreamIO::Read(is, len)) {
+          if (len > 0) {
+            if (len <= maxLen) {
+              try {
+                s.resize(len);
+                if (! is.read(s.data(), len)) {
+                  Syslog(LOG_ERR, "Failed to read string data");
+                  s.clear();
+                }
+              }
+              catch (...) {
+                Syslog(LOG_ERR, "Exception reading string data");
+              }
+            }
+            else {
+              Syslog(LOG_ERR, "String length %llu exceeds max of %llu",
+                     len, maxLen);
+            }
+          }
+        }
+        else {
+          Syslog(LOG_ERR, "Failed to read string length");
+        }
+      }
+      else {
+        Syslog(LOG_ERR, "Invalid istream");
+      }
+      return is;
     }
     
   }  // namespace Credence

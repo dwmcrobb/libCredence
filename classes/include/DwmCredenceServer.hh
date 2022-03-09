@@ -137,7 +137,7 @@ namespace Dwm {
                        Ed25519KeyPair & myKeys, std::string & serverPubKey);
       bool ExchangeChallenges(const std::string & mySecretKey,
                               const std::string & serverPubKey);
-      
+      std::string EndPointString() const;
     };
     
   }  // namespace Credence
