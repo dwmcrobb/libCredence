@@ -63,14 +63,17 @@ namespace Dwm {
       ShortString(const std::string & s);
       ShortString & operator = (const std::string & s);
       const std::string & Value() const;
+      operator std::string () const
+      { return _s; }
       
-      std::istream & Read(std::istream & is);
-      std::ostream & Write(std::ostream & os) const;
+      std::istream & Read(std::istream & is) override;
+      std::ostream & Write(std::ostream & os) const override;
 
       friend std::ostream & operator << (std::ostream & os,
                                          const ShortString & shortString);
       friend std::istream & operator >> (std::istream & is,
                                          ShortString & shortString);
+      bool operator == (const ShortString & s) const;
       
     private:
       std::string  _s;

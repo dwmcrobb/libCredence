@@ -58,7 +58,7 @@ namespace Dwm {
     Ed25519KeyPair::Ed25519KeyPair(const string & id)
         : _id(id)
     {
-      if (_id.empty()) {
+      if (_id.Value().empty()) {
         _id = Utils::UserName() + '@' + Utils::HostName();
       }
       
@@ -83,7 +83,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    const string & Ed25519KeyPair::Id() const
+    const ShortString & Ed25519KeyPair::Id() const
     {
       return _id;
     }
@@ -91,7 +91,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    const string & Ed25519KeyPair::Id(const string & id)
+    const ShortString & Ed25519KeyPair::Id(const ShortString & id)
     {
       _id = id;
       return _id;
@@ -136,8 +136,8 @@ namespace Dwm {
     //------------------------------------------------------------------------
     void Ed25519KeyPair::Clear()
     {
-      _id.assign(_id.size(), '\0');
-      _id.clear();
+      // _id.assign(_id.size(), '\0');
+      // _id.clear();
       _publicKey.assign(_publicKey.size(), '\0');
       _publicKey.clear();
       _secretKey.assign(_secretKey.size(), '\0');
@@ -150,7 +150,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     bool Ed25519KeyPair::operator == (const Ed25519KeyPair & keyPair) const
     {
-      return ((_id == keyPair._id)
+      return ((_id.Value() == keyPair._id.Value())
               && (_publicKey == keyPair._publicKey)
               && (_secretKey == keyPair._secretKey));
     }

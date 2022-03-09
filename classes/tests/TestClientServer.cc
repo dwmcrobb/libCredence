@@ -108,7 +108,7 @@ void ServerThread(const std::string & plaintext)
 //----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-  // Dwm::SysLogger::Open("TestClientServer", LOG_PID|LOG_PERROR, LOG_USER);
+  Dwm::SysLogger::Open("TestClientServer", LOG_PID|LOG_PERROR, LOG_USER);
 
   std::string    fileContents;
   std::ifstream  is("TestClientServer.cc", std::ios::in | std::ios::binary);
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
     Credence::KeyStash   keyStash("./inputs");
     Credence::KnownKeys  knownKeys("./inputs");
     if (UnitAssert(server.Authenticate(keyStash, knownKeys))) {
-      UnitAssert(server.Id() == "test@mcplex.net");
+      UnitAssert(server.Id().Value() == "test@mcplex.net");
       if (UnitAssert(server.Send(fileContents))) {
         string  recoveredContents;
         if (UnitAssert(server.Receive(recoveredContents))) {

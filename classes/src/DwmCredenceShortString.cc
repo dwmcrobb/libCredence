@@ -144,7 +144,14 @@ namespace Dwm {
       return is;
     }
     
-
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool ShortString::operator == (const ShortString & s) const
+    {
+      return (s._s == _s);
+    }
+    
   }  // namespace Credence
 
 }  // namespace Dwm

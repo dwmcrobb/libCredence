@@ -122,7 +122,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    const string & Server::Id() const
+    const ShortString & Server::Id() const
     {
       return _id;
     }
@@ -206,7 +206,7 @@ namespace Dwm {
       if (_ios.socket().is_open()) {
         _ios.close();
         Syslog(LOG_INFO, "Disconnected server %s at %s",
-               _id.c_str(), EndPointString().c_str());
+               _id.Value().c_str(), EndPointString().c_str());
       }
       _sharedKey.clear();
     }
@@ -247,14 +247,13 @@ namespace Dwm {
     {
       bool  rc = false;
       if (keyStash.Get(myKeys)) {
-        ShortString  idShort(myKeys.Id());
-        if (Send(idShort)) {
+        if (Send(myKeys.Id())) {
           if (Receive(_id)) {
-            serverPubKey = knownKeys.Find(_id);
+            serverPubKey = knownKeys.Find(_id.Value());
             rc = (! serverPubKey.empty());
             if (! rc) {
               Syslog(LOG_ERR, "Unknown ID %s from server at %s",
-                     _id.c_str(), EndPointString().c_str());
+                     _id.Value().c_str(), EndPointString().c_str());
             }
           }
           else {
@@ -293,34 +292,34 @@ namespace Dwm {
                 if (serverResponse.Verify(serverPubKey, serverChallenge)) {
                   rc = true;
                   Syslog(LOG_INFO, "Authenticated server %s at %s",
-                         _id.c_str(), EndPointString().c_str());
+                         _id.Value().c_str(), EndPointString().c_str());
                 }
                 else {
                   Syslog(LOG_INFO, "Failed to authenticate server %s at %s",
-                         _id.c_str(), EndPointString().c_str());
+                         _id.Value().c_str(), EndPointString().c_str());
                 }
               }
               else {
                 Syslog(LOG_ERR, "Failed to read server challenge response"
                        " from server %s at %s",
-                       _id.c_str(), EndPointString().c_str());
+                       _id.Value().c_str(), EndPointString().c_str());
               }
             }
             else {
               Syslog(LOG_ERR, "Failed to send challenge response to server"
                      " %s at %s",
-                     _id.c_str(), EndPointString().c_str());
+                     _id.Value().c_str(), EndPointString().c_str());
             }
           }
         }
         else {
           Syslog(LOG_ERR, "Failed to read challenge from server %s at %s",
-                 _id.c_str(), EndPointString().c_str());
+                 _id.Value().c_str(), EndPointString().c_str());
         }
       }
       else {
         Syslog(LOG_ERR, "Failed to send challenge to server %s at %s",
-               _id.c_str(), EndPointString().c_str());
+               _id.Value().c_str(), EndPointString().c_str());
       }
       return rc;
     }

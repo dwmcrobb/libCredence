@@ -44,6 +44,8 @@
 
 #include <string>
 
+#include "DwmCredenceShortString.hh"
+
 namespace Dwm {
 
   namespace Credence {
@@ -57,8 +59,8 @@ namespace Dwm {
       Ed25519KeyPair(const std::string & id = "");
       Ed25519KeyPair(const Ed25519KeyPair &) = default;
       ~Ed25519KeyPair();
-      const std::string & Id() const;
-      const std::string & Id(const std::string & id);
+      const ShortString & Id() const;
+      const ShortString & Id(const ShortString & id);
       const std::string & PublicKey() const;
       const std::string & PublicKey(const std::string & publicKey);
       const std::string & SecretKey() const;
@@ -67,7 +69,7 @@ namespace Dwm {
       bool operator == (const Ed25519KeyPair & keyPair) const;
       
     private:
-      std::string  _id;
+      ShortString  _id;
       std::string  _publicKey;
       std::string  _secretKey;
     };

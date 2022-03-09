@@ -47,6 +47,7 @@
 #include "DwmStreamIOCapable.hh"
 #include "DwmCredenceKeyStash.hh"
 #include "DwmCredenceKnownKeys.hh"
+#include "DwmCredenceShortString.hh"
 #include "DwmCredenceXChaCha20Poly1305Istream.hh"
 #include "DwmCredenceXChaCha20Poly1305Ostream.hh"
 
@@ -93,7 +94,7 @@ namespace Dwm {
       //!  in the KnownKeys in Authenticate().  It is only valid if
       //!  authentication was successful.
       //----------------------------------------------------------------------
-      const std::string & Id() const;
+      const ShortString & Id() const;
       
       //----------------------------------------------------------------------
       //!  Send the given @c msg to the server.  Returns true on success,
@@ -126,7 +127,7 @@ namespace Dwm {
       
     private:
       boost::asio::ip::tcp::endpoint               _endPoint;
-      std::string                                  _id;
+      ShortString                                  _id;
       boost::asio::ip::tcp::iostream               _ios;
       std::string                                  _sharedKey;
       std::unique_ptr<XChaCha20Poly1305::Ostream>  _xos;
