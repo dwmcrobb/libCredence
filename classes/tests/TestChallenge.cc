@@ -41,6 +41,7 @@
 
 #include <sstream>
 
+#include "DwmSysLogger.hh"
 #include "DwmUnitAssert.hh"
 #include "DwmCredenceChallengeResponse.hh"
 #include "DwmCredenceEd25519KeyPair.hh"
@@ -74,6 +75,8 @@ static void TestIO()
 //----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
+  Dwm::SysLogger::Open("TestChallenge", LOG_PID|LOG_PERROR, LOG_USER);
+  
   Credence::Ed25519KeyPair  keyPair("dwm");
   Credence::Challenge       challenge(true);
   string                    signedMessage;
