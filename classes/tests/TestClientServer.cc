@@ -98,18 +98,19 @@ void ServerThread(const std::string & plaintext)
     }
     client.Disconnect();
   }
+  g_serverStarted = false;
   
   return;
 }
 
-      
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
   Dwm::SysLogger::Open("TestClientServer", LOG_PID|LOG_PERROR, LOG_USER);
-
+  Dwm::SysLogger::MinimumPriority(LOG_WARNING);
+  
   std::string    fileContents;
   std::ifstream  is("TestClientServer.cc", std::ios::in | std::ios::binary);
   if (UnitAssert(is)) {
