@@ -56,20 +56,14 @@ namespace Dwm {
     //!  
     //------------------------------------------------------------------------
     Ed25519KeyPair::Ed25519KeyPair(const string & id)
-        : _id(id)
+        : _id(id), _publicKey(crypto_sign_ed25519_PUBLICKEYBYTES, '\0'),
+          _secretKey(crypto_sign_ed25519_SECRETKEYBYTES, '\0')
     {
       if (_id.Value().empty()) {
         _id = Utils::UserName() + '@' + Utils::HostName();
       }
-      
-      unsigned char ed25519_pk[crypto_sign_ed25519_PUBLICKEYBYTES];
-      unsigned char ed25519_skpk[crypto_sign_ed25519_SECRETKEYBYTES];
-      
-      crypto_sign_ed25519_keypair(ed25519_pk, ed25519_skpk);
-      _publicKey.assign((const char *)ed25519_pk,
-                        crypto_sign_ed25519_PUBLICKEYBYTES);
-      _secretKey.assign((const char *)ed25519_skpk,
-                        crypto_sign_ed25519_SECRETKEYBYTES);
+      crypto_sign_ed25519_keypair((uint8_t *)_publicKey.data(),
+                                  (uint8_t *)_secretKey.data());
     }
 
     //------------------------------------------------------------------------
