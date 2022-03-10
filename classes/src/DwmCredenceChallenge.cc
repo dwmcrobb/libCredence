@@ -60,9 +60,9 @@ namespace Dwm {
         : _challenge()
     {
       if (init) {
-        uint8_t  buf[32];
-        randombytes_buf((void *)buf, 32);
-        _challenge = string((const char *)buf, 32);
+        string  buf(32, '\0');
+        randombytes_buf((void *)buf.data(), 32);
+        _challenge = buf;
       }
     }
 
