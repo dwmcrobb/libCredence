@@ -101,26 +101,26 @@ namespace Dwm {
         if (LoadNonceAndCipherText(nonce, cipherText)) {
           size_t  bufLen =
             cipherText.size() - crypto_aead_xchacha20poly1305_ietf_ABYTES;
+          //  NOTE: make_unique will throw an exception on failure, which
+          //  will normally be caught by the istream and used to set badbit
+          //  on the istream.
           _buffer = std::make_unique<char_type[]>(bufLen);
-          if (_buffer != nullptr) {
-            string  msg;
-            if (Decrypt(msg, cipherText, nonce, _key)) {
-              rc = bufLen;
-              memcpy(_buffer.get(), msg.data(), bufLen);
-              setg(_buffer.get(), _buffer.get(),
-                   _buffer.get() + bufLen);
-            }
-            else {
-              Syslog(LOG_ERR, "Decrypt() of %zu bytes failed!",
-                     cipherText.size());
-            }
+          string  msg;
+          if (Decrypt(msg, cipherText, nonce, _key)) {
+            rc = bufLen;
+            memcpy(_buffer.get(), msg.data(), bufLen);
+            setg(_buffer.get(), _buffer.get(),
+                 _buffer.get() + bufLen);
           }
           else {
-            Syslog(LOG_ERR, "Failed to allocate _buffer");
+            Syslog(LOG_ERR, "Decrypt() of %zu bytes failed!",
+                   cipherText.size());
+            throw std::ios_base::failure("Decryption failed");
           }
         }
         else {
           Syslog(LOG_ERR, "Failed to read message");
+          throw std::ios_base::failure("Failed to read message");
         }
         if (rc < 0) {
           setg(0, 0, 0);
