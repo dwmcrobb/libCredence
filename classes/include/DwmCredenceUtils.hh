@@ -66,40 +66,85 @@ namespace Dwm {
       using BoostTcpSocket =
         boost::asio::basic_socket<boost::asio::ip::tcp, boost::asio::executor>;
       
+      //----------------------------------------------------------------------
+      //!  Returns the number of bytes ready to read (without blocking) from
+      //!  the given socket @c sck.
+      //----------------------------------------------------------------------
       static std::size_t BytesReady(BoostTcpSocket & sck);
 
+      //----------------------------------------------------------------------
+      //!  Waits for at least @c numBytes to be ready to read (without
+      //!  blocking) from the given socket @c sck.  If @c endTime arrives
+      //!  before @c numBytes are ready to be read, returns false.  Else
+      //!  returns true.
+      //----------------------------------------------------------------------
       static bool WaitUntilBytesReady(BoostTcpSocket & sck,
                                       uint32_t numBytes, TimePoint endTime);
 
+      //----------------------------------------------------------------------
+      //!  Waits for at least @c numBytes to be ready to read (without
+      //!  blocking) from the given socket @c sck.  If @c timeout milliseconds
+      //!  transpire before @c numBytes are ready to be read, returns false.
+      //!  Else returns true.
+      //----------------------------------------------------------------------
       static bool WaitForBytesReady(BoostTcpSocket & sck, uint32_t numBytes,
                                     std::chrono::milliseconds timeout);
 
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
       static ssize_t
       ReadLengthRestrictedString(boost::asio::ip::tcp::socket & sck,
                                  std::string & s, uint64_t maxLen);
       
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
       static std::istream & ReadLengthRestrictedString(std::istream & is,
                                                        std::string & s,
                                                        uint64_t maxLen);
 
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
       static ssize_t
       ReadLengthRestrictedString(boost::asio::ip::tcp::socket & sck,
                                  std::string & s, uint64_t maxLen,
                                  TimePoint endTime);
 
+      //----------------------------------------------------------------------
+      //!  Returns the base64 representation of the given binary string @c s.
+      //----------------------------------------------------------------------
       static std::string Bin2Base64(const std::string & s);
 
+      //----------------------------------------------------------------------
+      //!  Returns the binary representation of the given base64-encoded
+      //!  string @c s.
+      //----------------------------------------------------------------------
       static std::string Base642Bin(const std::string & s);
 
+      //----------------------------------------------------------------------
+      //!  Returns the current user's home directory.
+      //----------------------------------------------------------------------
       static std::string UserHomeDirectory();
 
+      //----------------------------------------------------------------------
+      //!  Returns the current user's login name.
+      //----------------------------------------------------------------------
       static std::string UserName();
 
+      //----------------------------------------------------------------------
+      //!  Returns the host's hostname.
+      //----------------------------------------------------------------------
       static std::string HostName();
 
       static bool ScalarMult(const std::string & sk, const std::string & pk,
                              std::string & q);
 
+      //----------------------------------------------------------------------
+      //!  Returns a string representation of the given @c endPoint, in the
+      //!  form address:port.
+      //----------------------------------------------------------------------
       static std::string
       EndPointString(const boost::asio::ip::tcp::endpoint & endPoint);
     };
