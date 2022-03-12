@@ -52,18 +52,50 @@ namespace Dwm {
   namespace Credence {
 
     //------------------------------------------------------------------------
-    //!  
+    //!  Encapsulates a challenge response.  This is used when responding
+    //!  to a Challenge during authentication to a client or server.
     //------------------------------------------------------------------------
     class ChallengeResponse
       : public StreamIOCapable
     {
     public:
+      //----------------------------------------------------------------------
+      //!  Default constructor.
+      //----------------------------------------------------------------------
       ChallengeResponse() = default;
+      
+      //----------------------------------------------------------------------
+      //!  Default copy constructor.
+      //----------------------------------------------------------------------
       ChallengeResponse(const ChallengeResponse &) = default;
+      
+      //----------------------------------------------------------------------
+      //!  Given a @c challenge, creates the response using the given
+      //!  @c signingKey.  Returns true on success, false on failure.
+      //----------------------------------------------------------------------
       bool Create(const std::string & signingKey,
                   const Challenge & challenge);
+      
+      //----------------------------------------------------------------------
+      //!  Reads the challenge response from the given istream @c is.
+      //!  Returns @c is.  @c is is normally a reference to an
+      //!  XChaCha20Poly1305::Istream (an encrypted stream).
+      //----------------------------------------------------------------------
       std::istream & Read(std::istream & is) override;
+      
+      //----------------------------------------------------------------------
+      //!  Writes the challenge response to the given ostream @c os.
+      //!  Returns @c os.  @c os is normally a reference to an
+      //!  XChaCha20Poly1305::Ostream (an encrypted stream).
+      //----------------------------------------------------------------------
       std::ostream & Write(std::ostream & os) const override;
+      
+      //----------------------------------------------------------------------
+      //!  Using the given @c publicKey of the source of the response,
+      //!  verifies that the response was signed by the source and that the
+      //!  response contents matches the given @c challengeString.  Returns
+      //!  true if the response is correct, else returns false.
+      //----------------------------------------------------------------------
       bool Verify(const std::string & publicKey,
                   const std::string & challengeString) const;
       
