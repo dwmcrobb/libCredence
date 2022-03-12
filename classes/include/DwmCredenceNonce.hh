@@ -63,7 +63,8 @@ namespace Dwm {
     {
     public:
       //----------------------------------------------------------------------
-      //!  
+      //!  Default constructor.  Initializes the nonce with random data
+      //!  if @c init is true.
       //----------------------------------------------------------------------
       Nonce(bool init = true)
       {
@@ -73,7 +74,7 @@ namespace Dwm {
       }
 
       //----------------------------------------------------------------------
-      //!  
+      //!  Reads the nonce from the given istream @c is.  Returns @c is.
       //----------------------------------------------------------------------
       std::istream & Read(std::istream & is)
       {
@@ -84,7 +85,7 @@ namespace Dwm {
       }
 
       //----------------------------------------------------------------------
-      //!  
+      //!  Writes the nonce to the given ostream @c os.  Returns @c os.
       //----------------------------------------------------------------------
       std::ostream & Write(std::ostream & os) const
       {
@@ -95,12 +96,12 @@ namespace Dwm {
       }
       
       //----------------------------------------------------------------------
-      //!  
+      //!  Copy constructor.
       //----------------------------------------------------------------------
       Nonce(const Nonce &) = default;
       
       //----------------------------------------------------------------------
-      //!  
+      //!  Returns a pointer to const of the encapsulated nonce data.
       //----------------------------------------------------------------------
       operator const uint8_t * () const   { return _nonce; }
 
