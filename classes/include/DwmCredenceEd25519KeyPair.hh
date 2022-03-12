@@ -51,21 +51,77 @@ namespace Dwm {
   namespace Credence {
 
     //------------------------------------------------------------------------
-    //!  Encapsulates an Ed25519 key pair.
+    //!  Encapsulates an Ed25519 key pair.  The contained secret key is used
+    //!  to sign challenge responses during authentication.  The contained
+    //!  public key is used to validate signatures in challenge responses
+    //!  during authentication.
+    //!
+    //!  A ShortString is used to hold the ID of the owner of the keypair.
+    //!  This is to help avoid memory resource DoS attacks on a server,
+    //!  where a length-encoded version of the ID will be received from a
+    //!  client during authentication.  The keys themselves are never
+    //!  transmitted.
     //------------------------------------------------------------------------
     class Ed25519KeyPair
     {
     public:
+      //----------------------------------------------------------------------
+      //!  Default constructor.  Creates the contained public and secret keys
+      //!  using random data.  If @c id is empty, an ID consisting of the
+      //!  local user name and hostname will be used (e.g. 'dwm@host.org').
+      //----------------------------------------------------------------------
       Ed25519KeyPair(const std::string & id = "");
+      
+      //----------------------------------------------------------------------
+      //!  Copy constructor.
+      //----------------------------------------------------------------------
       Ed25519KeyPair(const Ed25519KeyPair &) = default;
+
+      //----------------------------------------------------------------------
+      //!  Destructor.  Clears the contents of the keys before deallocation.
+      //----------------------------------------------------------------------
       ~Ed25519KeyPair();
+      
+      //----------------------------------------------------------------------
+      //!  Returns the owner of the keypair.
+      //----------------------------------------------------------------------
       const ShortString & Id() const;
+      
+      //----------------------------------------------------------------------
+      //!  Sets and returns the owner of the keypair.
+      //----------------------------------------------------------------------
       const ShortString & Id(const ShortString & id);
+      
+      //----------------------------------------------------------------------
+      //!  Returns the public key.  This is used to verify signatures in
+      //!  challenge responses during authentication.
+      //----------------------------------------------------------------------
       const std::string & PublicKey() const;
+      
+      //----------------------------------------------------------------------
+      //!  Sets and returns the public key.
+      //----------------------------------------------------------------------
       const std::string & PublicKey(const std::string & publicKey);
+      
+      //----------------------------------------------------------------------
+      //!  Returns the secret key.  This is used to sign challenge responses
+      //!  during authentication.
+      //----------------------------------------------------------------------
       const std::string & SecretKey() const;
+      
+      //----------------------------------------------------------------------
+      //!  Sets and returns the secret key.
+      //----------------------------------------------------------------------
       const std::string & SecretKey(const std::string & secretKey);
+      
+      //----------------------------------------------------------------------
+      //!  Clears the contents of the key pair.
+      //----------------------------------------------------------------------
       void Clear();
+      
+      //----------------------------------------------------------------------
+      //!  operator ==
+      //----------------------------------------------------------------------
       bool operator == (const Ed25519KeyPair & keyPair) const;
       
     private:
