@@ -51,28 +51,82 @@ namespace Dwm {
   namespace Credence {
 
     //------------------------------------------------------------------------
-    //!  
+    //!  Encapsulates a string that is restricted to 255 bytes or less.
+    //!  We use this to prevent a couple of memory resource DoS attacks on
+    //!  a server during session initialization.
     //------------------------------------------------------------------------
     class ShortString
       : public StreamIOCapable
     {
     public:
+      //----------------------------------------------------------------------
+      //!  Default constructor.
+      //----------------------------------------------------------------------
       ShortString() = default;
+      
+      //----------------------------------------------------------------------
+      //!  Copy constructor.
+      //----------------------------------------------------------------------
       ShortString(const ShortString &) = default;
+      
+      //----------------------------------------------------------------------
+      //!  Assignment operator.
+      //----------------------------------------------------------------------
       ShortString & operator = (const ShortString &) = default;
+      
+      //----------------------------------------------------------------------
+      //!  Construct from the given string @c s.  Throws an exception if
+      //!  s.size() is greater than 255.
+      //----------------------------------------------------------------------
       ShortString(const std::string & s);
+      
+      //----------------------------------------------------------------------
+      //!  Assign from the given string @c s.  Throws an exception if
+      //!  s.size() is greater than 255 bytes.
+      //----------------------------------------------------------------------
       ShortString & operator = (const std::string & s);
+      
+      //----------------------------------------------------------------------
+      //!  Returns the contained string value.
+      //----------------------------------------------------------------------
       const std::string & Value() const;
+      
+      //----------------------------------------------------------------------
+      //!  Returns a copy of the contained string value.
+      //----------------------------------------------------------------------
       operator std::string () const
       { return _s; }
       
+      //----------------------------------------------------------------------
+      //!  Reads the short string from the given istream @c is.  Returns
+      //!  @c is.
+      //----------------------------------------------------------------------
       std::istream & Read(std::istream & is) override;
+
+      //----------------------------------------------------------------------
+      //!  Writes the shirt string to the given ostream @c os.  Returns
+      //!  @c os.
+      //----------------------------------------------------------------------
       std::ostream & Write(std::ostream & os) const override;
 
+      //----------------------------------------------------------------------
+      //!  ostream operator <<
+      //----------------------------------------------------------------------
       friend std::ostream & operator << (std::ostream & os,
                                          const ShortString & shortString);
+
+      //----------------------------------------------------------------------
+      //!  istream operator >>
+      //!
+      //!  Throws an exception if the string is longer than 255 characters.
+      //!  Note that the string can not include whitespace.
+      //----------------------------------------------------------------------
       friend std::istream & operator >> (std::istream & is,
                                          ShortString & shortString);
+
+      //----------------------------------------------------------------------
+      //!  operator ==
+      //----------------------------------------------------------------------
       bool operator == (const ShortString & s) const;
       
     private:
