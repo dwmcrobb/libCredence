@@ -49,14 +49,26 @@ namespace Dwm {
   namespace Credence {
 
     //------------------------------------------------------------------------
-    //!  
+    //!  Encapsulates message signing and opening of signed messages.
     //------------------------------------------------------------------------
     class Signer
     {
     public:
+      //----------------------------------------------------------------------
+      //!  Signs the given @c message with the given @c signingKey, storing
+      //!  the signed message in @c signedMessage.  Returns true on success,
+      //!  false on failure.
+      //----------------------------------------------------------------------
       static bool Sign(const std::string & message,
                        const std::string & signingKey,
                        std::string & signedMessage);
+      
+      //----------------------------------------------------------------------
+      //!  Opens the given @c signedMessage that must have been signed by
+      //!  the owner of the given @c publicKey, storing the contents of the
+      //!  signed message in @c message.  Returns true on success, false on
+      //!  failure.
+      //----------------------------------------------------------------------
       static bool Open(const std::string & signedMessage,
                        const std::string & publicKey,
                        std::string & message);
