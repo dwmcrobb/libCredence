@@ -50,17 +50,49 @@ namespace Dwm {
   namespace Credence {
 
     //------------------------------------------------------------------------
-    //!  
+    //!  Encapsulate a challenge sent to a client or server to verify their
+    //!  idendity during authentication.  The challenge consists of 32 bytes
+    //!  of random data.
     //------------------------------------------------------------------------
     class Challenge
       : public StreamIOCapable
     {
     public:
+      //----------------------------------------------------------------------
+      //!  Default constructor.  If @c init is @c true, the content of the
+      //!  challenge will be initialized with random data.  This is used
+      //!  when the challenge will be transmitted.  If @c init is @c false,
+      //!  the content of the challenge will not be initialized.  This is
+      //!  used when we are intending to receive a challenge via the
+      //!  Read() member.
+      //----------------------------------------------------------------------
       Challenge(bool init = false);
+      
+      //----------------------------------------------------------------------
+      //!  Copy constructor.
+      //----------------------------------------------------------------------
       Challenge(const Challenge &) = default;
+      
+      //----------------------------------------------------------------------
+      //!  Assignment operator.
+      //----------------------------------------------------------------------
       Challenge & operator = (const Challenge &) = default;
+      
+      //----------------------------------------------------------------------
+      //!  Returns a reference to the encapsulate challenge data.
+      //----------------------------------------------------------------------
       operator const std::string & () const;
+      
+      //----------------------------------------------------------------------
+      //!  Reads the challenge from the given istream @c is.  Returns @c is.
+      //!  @c is normally a reference to an XChaChaPoly1305::Istream.
+      //----------------------------------------------------------------------
       std::istream & Read(std::istream & is) override;
+      
+      //----------------------------------------------------------------------
+      //!  Writes the challenge to the given ostream @c os.  Returns @c os.
+      //!  @c os is normally a reference to an XChaChapoly1305::Ostream.
+      //----------------------------------------------------------------------
       std::ostream & Write(std::ostream & os) const override;
       
     private:
