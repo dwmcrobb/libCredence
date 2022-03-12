@@ -71,8 +71,7 @@ namespace Dwm {
       static bool WaitUntilBytesReady(BoostTcpSocket & sck,
                                       uint32_t numBytes, TimePoint endTime);
 
-      static bool WaitForBytesReady(BoostTcpSocket & sck,
-                                    uint32_t numBytes,
+      static bool WaitForBytesReady(BoostTcpSocket & sck, uint32_t numBytes,
                                     std::chrono::milliseconds timeout);
 
       static ssize_t

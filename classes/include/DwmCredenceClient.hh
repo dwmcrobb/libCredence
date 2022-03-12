@@ -45,6 +45,7 @@
 #include <boost/asio.hpp>
 
 #include "DwmStreamIOCapable.hh"
+#include "DwmCredenceChallengeResponse.hh"
 #include "DwmCredenceKeyStash.hh"
 #include "DwmCredenceKnownKeys.hh"
 #include "DwmCredenceXChaCha20Poly1305Istream.hh"
@@ -132,6 +133,8 @@ namespace Dwm {
       std::string EndPointString() const;
       bool ReceivePublicKey(std::string & publicKey);
       bool ReceiveId(std::string & id);
+      bool ReceiveChallenge(Challenge & challenge);
+      bool ReceiveChallengeResponse(ChallengeResponse & challenge);
     };
     
   }  // namespace Credence

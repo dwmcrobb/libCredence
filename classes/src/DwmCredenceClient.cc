@@ -223,6 +223,37 @@ namespace Dwm {
       }
       return (! id.empty());
     }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool Client::ReceiveChallenge(Challenge & challenge)
+    {
+      bool  rc = false;
+      if (Utils::WaitForBytesReady(_ios.socket(),
+                                   crypto_secretbox_NONCEBYTES
+                                   + crypto_aead_xchacha20poly1305_ietf_ABYTES,
+                                   chrono::milliseconds(1000))) {
+        rc = Receive(challenge);
+      }
+      return rc;
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool Client::ReceiveChallengeResponse(ChallengeResponse & cr)
+    {
+      bool  rc = false;
+      if (Utils::WaitForBytesReady(_ios.socket(),
+                                   crypto_sign_BYTES
+                                   + crypto_secretbox_NONCEBYTES
+                                   + 32,
+                                   chrono::milliseconds(1000))) {
+        rc = Receive(cr);
+      }
+      return rc;
+    }
     
     //------------------------------------------------------------------------
     //!  
@@ -297,14 +328,14 @@ namespace Dwm {
       if (Send(clientChallenge)) {
         //  Receive challenge from client
         Challenge  myChallenge;
-        if (Receive(myChallenge)) {
+        if (ReceiveChallenge(myChallenge)) {
           //  Send my response
           ChallengeResponse  myResponse;
           if (myResponse.Create(mySecretKey, myChallenge)) {
             if (Send(myResponse)) {
               // Receive response from client
               ChallengeResponse  clientResponse;
-              if (Receive(clientResponse)) {
+              if (ReceiveChallengeResponse(clientResponse)) {
                 if (clientResponse.Verify(clientPubKey, clientChallenge)) {
                   rc = true;
                   Syslog(LOG_INFO, "Authenticated client %s at %s",

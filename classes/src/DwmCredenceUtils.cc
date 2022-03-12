@@ -89,7 +89,7 @@ namespace Dwm {
             break;
           }
           else {
-            std::this_thread::sleep_for(std::chrono::milliseconds(130));
+            std::this_thread::sleep_for(std::chrono::milliseconds(30));
           }
         }
         rc = (bytesReady >= numBytes);
@@ -106,7 +106,7 @@ namespace Dwm {
     {
       return WaitUntilBytesReady(sck, numBytes, Clock::now() + timeout);
     }
-    
+
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
