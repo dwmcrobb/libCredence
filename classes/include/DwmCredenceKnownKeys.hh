@@ -51,13 +51,29 @@ namespace Dwm {
   namespace Credence {
 
     //------------------------------------------------------------------------
-    //!  
+    //!  Encapsulates the storage of a set of known public keys.  These
+    //!  keys are stored in a 'known_keys' file in a directory given as an
+    //!  argument to the constructor.  By default, this directory is
+    //!  .credence in the user's home directory.
     //------------------------------------------------------------------------
     class KnownKeys
     {
     public:
+      //----------------------------------------------------------------------
+      //!  Construct with the given storage directory @c dirName.  This is
+      //!  the directory where the 'known_keys' file will be stored.
+      //----------------------------------------------------------------------
       KnownKeys(const std::string & dirName = "~/.credence");
+      
+      //----------------------------------------------------------------------
+      //!  Returns the public key for the given key owner @c id on success.
+      //!  Returns an empty string if no key is found for @c id.
+      //----------------------------------------------------------------------
       std::string Find(const std::string & id) const;
+      
+      //----------------------------------------------------------------------
+      //!  Returns a const reference to the encapsulated keys.
+      //----------------------------------------------------------------------
       const std::map<std::string,std::string> & Keys() const;
       
     private:
