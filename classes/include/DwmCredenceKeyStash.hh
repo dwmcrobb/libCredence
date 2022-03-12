@@ -49,14 +49,33 @@ namespace Dwm {
   namespace Credence {
 
     //------------------------------------------------------------------------
-    //!  
+    //!  Encapsulates storage of an Ed25519KeyPair in a filesystem.  This is
+    //!  used to hold a single keypair for a user.
     //------------------------------------------------------------------------
     class KeyStash
     {
     public:
+      //----------------------------------------------------------------------
+      //!  Construct from the given @c dirName, which is the directory where
+      //!  the keys will be stored.
+      //----------------------------------------------------------------------
       KeyStash(const std::string & dirName = "~/.credence");
+      
+      //----------------------------------------------------------------------
+      //!  Returns the directory where the keys are stored.
+      //----------------------------------------------------------------------
       const std::string & DirName() const;
+      
+      //----------------------------------------------------------------------
+      //!  Saves the given keypair.  Returns true on success, false on
+      //!  failure.
+      //----------------------------------------------------------------------
       bool Save(const Ed25519KeyPair & edkp) const;
+      
+      //----------------------------------------------------------------------
+      //!  Fetches the keypair from the key stash and stores it in @c edkp.
+      //!  Returns true on success, false on failure.
+      //----------------------------------------------------------------------
       bool Get(Ed25519KeyPair & edkp) const;
       
     private:
