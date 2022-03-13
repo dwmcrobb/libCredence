@@ -54,8 +54,6 @@ using namespace Dwm;
 
 static std::atomic<bool>  g_serverStarted = false;
 static std::atomic<bool>  g_serverShouldRun = true;
-static std::atomic<bool>  g_fuzzServerStarted = false;
-static std::atomic<bool>  g_fuzzServerShouldRun = true;
 
 //----------------------------------------------------------------------------
 //!  
@@ -108,7 +106,8 @@ void ServerThread(const std::string & plaintext)
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
-void FuzzServerThread()
+void FuzzServerThread(const std::atomic<bool> & shouldRun,
+                      std::atomic<bool> & running)
 {
   using namespace  boost::asio;
     io_context  ioContext;
@@ -120,8 +119,8 @@ void FuzzServerThread()
   acc.non_blocking(true, ec);
 
   ip::tcp::endpoint  client;
-  g_fuzzServerStarted = true;
-  while (g_fuzzServerShouldRun) {
+  running = true;
+  while (shouldRun) {
     ip::tcp::socket    socket(ioContext);
     acc.accept(socket, client, ec);
     if (ec == boost::asio::error::would_block) {
@@ -138,7 +137,7 @@ void FuzzServerThread()
       }
     }
   }
-  g_fuzzServerStarted = false;
+  running = false;
   return;
 }
 
@@ -147,9 +146,11 @@ void FuzzServerThread()
 //----------------------------------------------------------------------------
 static void FuzzTest1()
 {
-  g_fuzzServerShouldRun = true;
-  std::thread  serverThread(FuzzServerThread);
-  while (! g_fuzzServerStarted) { }
+  
+  atomic<bool>  serverShouldRun = true, serverIsRunning = false;
+  std::thread  serverThread(FuzzServerThread, std::ref(serverShouldRun),
+                            std::ref(serverIsRunning));
+  while (! serverIsRunning) { }
   Credence::Server  server;
   if (UnitAssert(server.Connect("127.0.0.1", 7789))) {
     string  randomString(32, '\0');
@@ -165,7 +166,7 @@ static void FuzzTest1()
     server.Disconnect();
   }
   
-  g_fuzzServerShouldRun = false;
+  serverShouldRun = false;
   serverThread.join();
   
   return;
