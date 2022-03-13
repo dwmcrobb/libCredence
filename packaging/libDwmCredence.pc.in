@@ -6,6 +6,6 @@ includedir=${prefix}/include/libDwmCredence
 Name: libDwmCredence
 Description: C++ classes for encryption and authentication
 Version: @TAGVERSION@
-Requires: libDwm
+Requires: libDwm, libsodium
 Libs: @PTHREADLDFLAGS@ -L${libdir} -lDwmCredence -lDwm @BZ2LIB@ @BOOSTLIBS@ @ZLIB@ @KVMLIB@ @TERMCAPLIB@ @OSLIBS@
 Cflags: @PTHREADCXXFLAGS@ -I${includedir} @BOOSTINC@
