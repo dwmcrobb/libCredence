@@ -1,0 +1,11 @@
+prefix=@prefix@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include/libDwmCredence
+
+Name: libDwmCredence
+Description: C++ classes for encryption and authentication
+Version: @TAGVERSION@
+Requires: libDwm
+Libs: @PTHREADLDFLAGS@ -L${libdir} -lDwmCredence -lDwm @BZ2LIB@ @BOOSTLIBS@ @ZLIB@ @KVMLIB@ @TERMCAPLIB@ @OSLIBS@
+Cflags: @PTHREADCXXFLAGS@ -I${includedir} @BOOSTINC@

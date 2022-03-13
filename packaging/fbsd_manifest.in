@@ -1,0 +1,14 @@
+name: "libDwmCredence"
+version: "@TAGVERSION@"
+origin: "devel/libDwmCredence"
+prefix: "@prefix@"
+www: "http://www.rfdm.com"
+maintainer: "dwmcrobb@me.com"
+comment: "C++ classes for encryption and authentication"
+desc: "C++ classes for encryption and authentication.  Uses libsodium under the hood."
+licenselogic: "single"
+licenses: ["BSD"]
+categories: ["devel"]
+scripts: {
+  post-install: "#!/bin/sh\nldconfig @prefix@/lib\n"
+}

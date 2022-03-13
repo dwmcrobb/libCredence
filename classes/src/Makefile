@@ -43,8 +43,17 @@ endif
 ../obj/%.o: %.cc deps/%_deps
 	${CXX} ${CXXFLAGS} ${PTHREADCXXFLAGS} ${ALLINC} -c $< -o $@
 
-clean::
+tarprep: ${TARDIR}/lib/libDwmCredence.a
+
+${TARDIR}/lib/libDwmCredence.a: ../lib/libDwmCredence.a
+	${LIBTOOL} --mode=install ../../install-sh -s -c $< ${TARDIR}/lib/libDwmCredence.a
+
+clean:: clean-tarprep
 	rm -f ../lib/libDwmCredence.a ${OBJFILES}
 
 distclean:: clean
 	rm -f deps/*_deps
+
+clean-tarprep::
+	${LIBTOOL} --mode=clean rm -f ${TARDIR}/lib/libDwmCredence.a
+

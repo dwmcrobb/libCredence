@@ -168,7 +168,7 @@ static void FuzzTest1()
   
   serverShouldRun = false;
   serverThread.join();
-  
+
   return;
 }
 

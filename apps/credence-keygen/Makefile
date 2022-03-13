@@ -5,6 +5,7 @@ OBJDEPS	 = $(OBJFILES:%.o=deps/%_deps)
 ALLINC   = ${DWMINCS}
 ALLINC   += -I../../classes/include -I.
 ALLLIBS  = -L../../classes/lib -lDwmCredence ${DWMLIBS} ${SODIUMLIB}
+TARTARGETS  = ${TARDIR}/bin/credence-keygen
 
 all: credence-keygen
 
@@ -30,5 +31,13 @@ endif
 ../../classes/lib/libDwmCredence.a::
 	${MAKE} -C ../../classes/src
 
-clean:
+tarprep: ${TARTARGETS}
+
+${TARDIR}/bin/credence-keygen: credence-keygen
+	../../install-sh -s -c -m 555 $< $@
+
+clean: clean-tarprep
 	rm -f credence-keygen ${OBJFILES}
+
+clean-tarprep::
+	rm -f ${TARDIR}/bin/credence-keygen

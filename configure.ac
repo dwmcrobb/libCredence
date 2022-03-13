@@ -65,6 +65,12 @@ AC_SUBST(DWMDIR)
 AC_SUBST(DWMINCS)
 AC_SUBST(DWMLIBS)
 
+dnl  Look for libtermcap
+AC_LANG_PUSH(C++)
+AC_CHECK_LIB(termcap, tgetent, [TERMCAPLIB=-ltermcap], [exit 1])
+AC_LANG_POP()
+AC_SUBST(TERMCAPLIB)
+
 dnl  Look for libz
 AC_LANG_PUSH(C++)
 AC_CHECK_LIB(z, gzwrite, [ZLIB=-lz], [exit 1])
@@ -173,5 +179,6 @@ AC_ARG_ENABLE([docs],[AS_HELP_STRING([--enable-docs],[build documentation])],
 	      [BUILD_DOCS="yes"], [])
 AC_SUBST(BUILD_DOCS)
 
-AC_CONFIG_FILES([Makefile.vars])
+AC_CONFIG_FILES([Makefile.vars packaging/debcontrol
+                 packaging/fbsd_manifest packaging/libDwmCredence.pc])
 AC_OUTPUT
