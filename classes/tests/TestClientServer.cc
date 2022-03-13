@@ -48,6 +48,7 @@
 #include "DwmCredenceKXKeyPair.hh"
 #include "DwmCredenceServer.hh"
 #include "DwmCredenceClient.hh"
+#include "DwmCredenceUtils.hh"
 
 using namespace std;
 using namespace Dwm;
@@ -142,7 +143,7 @@ void FuzzServerThread(const std::atomic<bool> & shouldRun,
 }
 
 //----------------------------------------------------------------------------
-//!  
+//!  If we send garbage at the server, we expect it to fail authentication.
 //----------------------------------------------------------------------------
 static void FuzzTest1()
 {
@@ -156,13 +157,12 @@ static void FuzzTest1()
     string  randomString(32, '\0');
     randombytes_buf((void *)randomString.data(), 32);
     randomString[0] = 0x1F;
-    uint64_t  sendCount = 0;
+    Credence::Utils::TimePoint  expectedFailTime =
+      Credence::Utils::Clock::now() + chrono::milliseconds(1000);
     while (server.Send(randomString)) {
       randombytes_buf((void *)randomString.data(), 32);
-      std::this_thread::sleep_for(std::chrono::milliseconds(1));
-      ++sendCount;
     }
-    UnitAssert(1 == sendCount);
+    UnitAssert(expectedFailTime > Credence::Utils::Clock::now());
     server.Disconnect();
   }
   
