@@ -158,7 +158,6 @@ static void FuzzTest1()
     uint64_t  sendCount = 0;
     while (server.Send(randomString)) {
       randombytes_buf((void *)randomString.data(), 32);
-      randomString[0] = 0x1F;
       std::this_thread::sleep_for(std::chrono::milliseconds(1));
       ++sendCount;
     }
