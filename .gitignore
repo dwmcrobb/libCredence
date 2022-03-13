@@ -3,5 +3,6 @@ autom4te.cache/**
 config.log
 config.status
 libDwmCredence_*.deb
+libDwmCredence-*.pkg
 Makefile.vars
 staging/**
