@@ -54,6 +54,8 @@ using namespace Dwm;
 
 static std::atomic<bool>  g_serverStarted = false;
 static std::atomic<bool>  g_serverShouldRun = true;
+static std::atomic<bool>  g_fuzzServerStarted = false;
+static std::atomic<bool>  g_fuzzServerShouldRun = true;
 
 //----------------------------------------------------------------------------
 //!  
@@ -106,10 +108,90 @@ void ServerThread(const std::string & plaintext)
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
+void FuzzServerThread()
+{
+  using namespace  boost::asio;
+    io_context  ioContext;
+  boost::system::error_code  ec;
+  ip::tcp::endpoint  endPoint(ip::address::from_string("127.0.0.1"), 7789);
+  ip::tcp::acceptor  acc(ioContext, endPoint);
+  boost::asio::ip::tcp::acceptor::reuse_address option(true);
+  acc.set_option(option, ec);
+  acc.non_blocking(true, ec);
+
+  ip::tcp::endpoint  client;
+  g_fuzzServerStarted = true;
+  while (g_fuzzServerShouldRun) {
+    ip::tcp::socket    socket(ioContext);
+    acc.accept(socket, client, ec);
+    if (ec == boost::asio::error::would_block) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    }
+    else {
+      socket.native_non_blocking(false, ec);
+      Credence::Client  client(std::move(socket));
+      if (UnitAssert(client.ExchangeKeys())) {
+        Credence::KeyStash   keyStash("./inputs");
+        Credence::KnownKeys  knownKeys("./inputs");
+        UnitAssert(! client.Authenticate(keyStash, knownKeys));
+        client.Disconnect();
+      }
+    }
+  }
+  g_fuzzServerStarted = false;
+  return;
+}
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+static void FuzzTest1()
+{
+  g_fuzzServerShouldRun = true;
+  std::thread  serverThread(FuzzServerThread);
+  while (! g_fuzzServerStarted) { }
+  Credence::Server  server;
+  if (UnitAssert(server.Connect("127.0.0.1", 7789))) {
+    string  randomString(32, '\0');
+    randombytes_buf((void *)randomString.data(), 32);
+    randomString[0] = 0x1F;
+    uint64_t  sendCount = 0;
+    while (server.Send(randomString)) {
+      randombytes_buf((void *)randomString.data(), 32);
+      randomString[0] = 0x1F;
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+      ++sendCount;
+    }
+    UnitAssert(1 == sendCount);
+    server.Disconnect();
+  }
+  
+  g_fuzzServerShouldRun = false;
+  serverThread.join();
+  
+  return;
+}
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-  Dwm::SysLogger::Open("TestClientServer", LOG_PID|LOG_PERROR, LOG_USER);
-  Dwm::SysLogger::MinimumPriority(LOG_WARNING);
+  int  optChar;
+  while ((optChar = getopt(argc, argv, "d")) != -1) {
+    switch (optChar) {
+      case 'd':
+        Dwm::SysLogger::Open("TestClientServer", LOG_PID|LOG_PERROR, LOG_USER);
+        Dwm::SysLogger::MinimumPriority(LOG_WARNING);
+        break;
+      default:
+        break;
+    }
+  }
+  
+  for (int i = 0; i < 5; ++i) {
+    FuzzTest1();
+  }
   
   std::string    fileContents;
   std::ifstream  is("TestClientServer.cc", std::ios::in | std::ios::binary);
