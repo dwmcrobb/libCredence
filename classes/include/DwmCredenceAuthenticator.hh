@@ -34,70 +34,62 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceKXKeyPair.hh
+//!  \file DwmCredenceAuthenticator.hh
 //!  \author Daniel W. McRobb
-//!  \brief Dwm::Credence::KXKeyPair class declaration
+//!  \brief NOT YET DOCUMENTED
 //---------------------------------------------------------------------------
 
-#ifndef _DWMCREDENCEKXKEYPAIR_HH_
-#define _DWMCREDENCEKXKEYPAIR_HH_
+#ifndef _DWMCREDENCEAUTHENTICATOR_HH_
+#define _DWMCREDENCEAUTHENTICATOR_HH_
 
-#include <string>
+#include <boost/asio.hpp>
+
+#include "DwmStreamIOCapable.hh"
+#include "DwmCredenceKeyStash.hh"
+#include "DwmCredenceKnownKeys.hh"
+#include "DwmCredenceXChaCha20Poly1305Istream.hh"
+#include "DwmCredenceXChaCha20Poly1305Ostream.hh"
 
 namespace Dwm {
 
   namespace Credence {
 
     //------------------------------------------------------------------------
-    //!  Encapsulates a key exchange key pair.
+    //!  
     //------------------------------------------------------------------------
-    class KXKeyPair
+    class Authenticator
     {
     public:
-      //----------------------------------------------------------------------
-      //!  Creates a key exchange key pair with random content.
-      //----------------------------------------------------------------------
-      KXKeyPair();
+      Authenticator(const KeyStash & keyStash, const KnownKeys & knownKeys);
       
-      //----------------------------------------------------------------------
-      //!  Clears the keys before destroying them.
-      //----------------------------------------------------------------------
-      ~KXKeyPair();
-      
-      //----------------------------------------------------------------------
-      //!  Returns a const reference to the public key.
-      //----------------------------------------------------------------------
-      const std::string & PublicKey() const;
-      
-      //----------------------------------------------------------------------
-      //!  Returns a const reference to the secret key.
-      //----------------------------------------------------------------------
-      const std::string & SecretKey() const;
-      
-      //----------------------------------------------------------------------
-      //!  Given a client's public key, returns a shared key that will
-      //!  match the shared key created on the client side with
-      //!  ClientSharedKey().
-      //----------------------------------------------------------------------
-      std::string ServerSharedKey(const std::string & clientPublicKey) const;
-      
-      //----------------------------------------------------------------------
-      //!  Given a server's public key, returns a shared key that will
-      //!  match the shared key created on the server side with
-      //!  ServerSharedKey().
-      //----------------------------------------------------------------------
-      std::string ClientSharedKey(const std::string & serverPublicKey) const;
-
-      std::string SharedKey(const std::string & theirPublicKey) const;
+      bool Authenticate(boost::asio::ip::tcp::iostream & s,
+                        std::string & theirId,
+                        std::string & agreedKey);
 
     private:
-      std::string  _publicKey;
-      std::string  _secretKey;
+      KeyStash                                     _keyStash;
+      KnownKeys                                    _knownKeys;
+      boost::asio::ip::tcp::endpoint               _endPoint;
+      std::unique_ptr<XChaCha20Poly1305::Ostream>  _xos;
+      std::unique_ptr<XChaCha20Poly1305::Istream>  _xis;
 
+      bool ExchangeKeys(boost::asio::ip::tcp::iostream & s,
+                        std::string & agreedKey);
+      bool ExchangeIds(Ed25519KeyPair & myKeys,
+                       ShortString & theirId,
+                       std::string & theirPubKey);
+      bool ExchangeChallenges(const std::string & ourSecretKey,
+                              const std::string & theirId,
+                              const std::string & theirPubKey);
+      bool Send(const std::string & msg);
+      bool Send(const StreamWritable & msg);
+      bool Receive(std::string & msg);
+      bool Receive(StreamReadable & msg);
+      std::string EndPointString() const;
     };
     
   }  // namespace Credence
 
 }  // namespace Dwm
 
-#endif  // _DWMCREDENCEKXKEYPAIR_HH_
+#endif  // _DWMCREDENCEAUTHENTICATOR_HH_

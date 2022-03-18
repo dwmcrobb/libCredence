@@ -1,13 +1,15 @@
 include ../../Makefile.vars
 
 ALLINC       = -I../include ${DWMINCS}
-OBJFILESNP   = DwmCredenceChallenge.o \
+OBJFILESNP   = DwmCredenceAuthenticator.o \
+               DwmCredenceChallenge.o \
                DwmCredenceChallengeResponse.o \
                DwmCredenceClient.o \
                DwmCredenceEd25519KeyPair.o \
                DwmCredenceKeyStash.o \
                DwmCredenceKnownKeys.o \
                DwmCredenceKXKeyPair.o \
+               DwmCredencePeer.o \
                DwmCredenceServer.o \
                DwmCredenceShortString.o \
                DwmCredenceSigner.o \
@@ -46,7 +48,7 @@ endif
 tarprep: ${TARDIR}/lib/libDwmCredence.a
 
 ${TARDIR}/lib/libDwmCredence.a: ../lib/libDwmCredence.a
-	${LIBTOOL} --mode=install ../../install-sh -s -c $< ${TARDIR}/lib/libDwmCredence.a
+	${LIBTOOL} --mode=install ../../install-sh -c $< ${TARDIR}/lib/libDwmCredence.a
 
 clean:: clean-tarprep
 	rm -f ../lib/libDwmCredence.a ${OBJFILES}

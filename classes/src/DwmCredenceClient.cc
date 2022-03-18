@@ -265,7 +265,7 @@ namespace Dwm {
       if (IO::Write(_ios, myKeys.PublicKey())) {
         string  clientPubKey;
         if (ReceivePublicKey(clientPubKey)) {
-          _sharedKey = myKeys.ServerSharedKey(clientPubKey);
+          _sharedKey = myKeys.SharedKey(clientPubKey);
           _xis = make_unique<XChaCha20Poly1305::Istream>(_ios, _sharedKey);
           _xos = make_unique<XChaCha20Poly1305::Ostream>(_ios, _sharedKey);
           rc = true;

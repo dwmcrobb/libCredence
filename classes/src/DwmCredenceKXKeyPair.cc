@@ -96,7 +96,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     string KXKeyPair::ServerSharedKey(const string & clientPublicKey) const
     {
-      return SharedKey(clientPublicKey, false);
+      return SharedKey(clientPublicKey);
     }
     
     //------------------------------------------------------------------------
@@ -104,21 +104,20 @@ namespace Dwm {
     //------------------------------------------------------------------------
     string KXKeyPair::ClientSharedKey(const string & serverPublicKey) const
     {
-      return SharedKey(serverPublicKey, true);
+      return SharedKey(serverPublicKey);
     }
 
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-      string KXKeyPair::SharedKey(const string & theirPublicKey,
-                                  bool isClient) const
+    string KXKeyPair::SharedKey(const string & theirPublicKey) const
     {
       string   rc;
       string   scalarmult_q;
       if (Utils::ScalarMult(_secretKey, theirPublicKey, scalarmult_q)) {
         GenericHash<crypto_generichash_BYTES>  h;
         h.Update(scalarmult_q);
-        if (isClient) {
+        if (_publicKey < theirPublicKey) {
           h.Update(_publicKey);
           h.Update(theirPublicKey);
         }

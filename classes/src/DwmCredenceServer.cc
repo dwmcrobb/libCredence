@@ -222,7 +222,7 @@ namespace Dwm {
         _ios.flush();
         string  serverPubKey;
         if (IO::Read(_ios, serverPubKey)) {
-          _sharedKey = myKeys.ClientSharedKey(serverPubKey);
+          _sharedKey = myKeys.SharedKey(serverPubKey);
           rc = true;
         }
         else {

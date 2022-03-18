@@ -34,60 +34,46 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file TestKXKeyPair.cc
+//!  \file DwmCredencePeer.cc
 //!  \author Daniel W. McRobb
-//!  \brief Dwm::Credence::KXKeyPair unit tests
+//!  \brief Dwm::Credence::Peer class implementation
 //---------------------------------------------------------------------------
 
-extern "C" {
-  #include <sodium.h>
-}
+#include "DwmCredenceAuthenticator.hh"
+#include "DwmCredencePeer.hh"
 
-#include <iostream>
+namespace Dwm {
 
-#include "DwmUnitAssert.hh"
-#include "DwmCredenceKXKeyPair.hh"
+  namespace Credence {
 
-using namespace std;
-using namespace Dwm;
+    using namespace std;
+    
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    Peer::Peer(boost::asio::ip::tcp::socket && s)
+        : _ios(std::move(s)), _theirId(), _xis(nullptr), _xos(nullptr)
+    {}
+    
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool Peer::Authenticate(const KeyStash & keyStash,
+                            const KnownKeys & knownKeys)
+    {
+      bool  rc = false;
+      _theirId.clear();
+      Authenticator  authenticator(keyStash, knownKeys);
+      string  agreedKey;
+      if (authenticator.Authenticate(_ios, _theirId, agreedKey)) {
+        _xis = make_unique<XChaCha20Poly1305::Istream>(_ios, agreedKey);
+        _xos = make_unique<XChaCha20Poly1305::Ostream>(_ios, agreedKey);
+        rc = true;
+      }
+      return rc;
+    }
+    
+    
+  }  // namespace Credence
 
-//----------------------------------------------------------------------------
-//!  
-//----------------------------------------------------------------------------
-int main(int argc, char *argv[])
-{
-  Credence::KXKeyPair  clientKeys, serverKeys;
-  UnitAssert(clientKeys.PublicKey().size() == crypto_box_PUBLICKEYBYTES);
-  UnitAssert(clientKeys.SecretKey().size() == crypto_box_SECRETKEYBYTES);
-  UnitAssert(serverKeys.PublicKey().size() == crypto_box_PUBLICKEYBYTES);
-  UnitAssert(serverKeys.SecretKey().size() == crypto_box_SECRETKEYBYTES);
-
-  string clientSharedKey = clientKeys.ClientSharedKey(serverKeys.PublicKey());
-  string serverSharedKey = serverKeys.ServerSharedKey(clientKeys.PublicKey());
-  if (UnitAssert((! clientSharedKey.empty())
-                 && (! serverSharedKey.empty()))) {
-    UnitAssert(clientSharedKey == serverSharedKey);
-  }
-
-  string  prevSharedKey;
-  for (int i = 0; i < 20; ++i) {
-    Credence::KXKeyPair  myKeys, theirKeys;
-    string  mySharedKey = myKeys.SharedKey(theirKeys.PublicKey());
-    string  theirSharedKey = theirKeys.SharedKey(myKeys.PublicKey());
-    UnitAssert(! mySharedKey.empty());
-    UnitAssert(! theirSharedKey.empty());
-    UnitAssert(mySharedKey == theirSharedKey);
-    UnitAssert(prevSharedKey != mySharedKey);
-    prevSharedKey = mySharedKey;
-  }
-  
-  if (Assertions::Total().Failed()) {
-    Assertions::Print(cerr, true);
-    return 1;
-  }
-  else {
-    cout << Assertions::Total() << " passed" << endl;
-  }
-  return 0;
-}
-
+}  // namespace Dwm

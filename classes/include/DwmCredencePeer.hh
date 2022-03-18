@@ -34,70 +34,94 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceKXKeyPair.hh
+//!  \file DwmCredencePeer.hh
 //!  \author Daniel W. McRobb
-//!  \brief Dwm::Credence::KXKeyPair class declaration
+//!  \brief Dwm::Credence::Peer class declaration
 //---------------------------------------------------------------------------
 
-#ifndef _DWMCREDENCEKXKEYPAIR_HH_
-#define _DWMCREDENCEKXKEYPAIR_HH_
+#ifndef _DWMCREDENCEPEER_HH_
+#define _DWMCREDENCEPEER_HH_
 
-#include <string>
+#include <boost/asio.hpp>
+
+#include "DwmStreamIO.hh"
+#include "DwmSysLogger.hh"
+#include "DwmCredenceKeyStash.hh"
+#include "DwmCredenceKnownKeys.hh"
+#include "DwmCredenceXChaCha20Poly1305Istream.hh"
+#include "DwmCredenceXChaCha20Poly1305Ostream.hh"
 
 namespace Dwm {
 
   namespace Credence {
 
     //------------------------------------------------------------------------
-    //!  Encapsulates a key exchange key pair.
+    //!  
     //------------------------------------------------------------------------
-    class KXKeyPair
+    class Peer
     {
     public:
       //----------------------------------------------------------------------
-      //!  Creates a key exchange key pair with random content.
+      //!  
       //----------------------------------------------------------------------
-      KXKeyPair();
-      
-      //----------------------------------------------------------------------
-      //!  Clears the keys before destroying them.
-      //----------------------------------------------------------------------
-      ~KXKeyPair();
-      
-      //----------------------------------------------------------------------
-      //!  Returns a const reference to the public key.
-      //----------------------------------------------------------------------
-      const std::string & PublicKey() const;
-      
-      //----------------------------------------------------------------------
-      //!  Returns a const reference to the secret key.
-      //----------------------------------------------------------------------
-      const std::string & SecretKey() const;
-      
-      //----------------------------------------------------------------------
-      //!  Given a client's public key, returns a shared key that will
-      //!  match the shared key created on the client side with
-      //!  ClientSharedKey().
-      //----------------------------------------------------------------------
-      std::string ServerSharedKey(const std::string & clientPublicKey) const;
-      
-      //----------------------------------------------------------------------
-      //!  Given a server's public key, returns a shared key that will
-      //!  match the shared key created on the server side with
-      //!  ServerSharedKey().
-      //----------------------------------------------------------------------
-      std::string ClientSharedKey(const std::string & serverPublicKey) const;
+      Peer(boost::asio::ip::tcp::socket && s);
 
-      std::string SharedKey(const std::string & theirPublicKey) const;
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
+      bool Authenticate(const KeyStash & keyStash,
+                        const KnownKeys & knownKeys);
+
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
+      template <typename T>
+      bool Send(const T & msg)
+      {
+        bool  rc = false;
+        if (_xos) {
+          if (StreamIO::Write(*_xos, msg)) {
+            if (_xos->flush()) {
+              rc = true;
+            }
+            else {
+              Syslog(LOG_ERR, "Failed to flush encrypted stream");
+            }
+          }
+          else {
+            Syslog(LOG_ERR, "Failed to send message");
+          }
+        }
+        return rc;
+      }
+      
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
+      template <typename T>
+      bool Receive(T & msg)
+      {
+        bool  rc = false;
+        if (_xos) {
+          if (StreamIO::Read(*_xis, msg)) {
+            rc = true;
+          }
+          else {
+            Syslog(LOG_ERR, "Failed to receive message");
+          }
+        }
+        return rc;
+      }
 
     private:
-      std::string  _publicKey;
-      std::string  _secretKey;
-
+      boost::asio::ip::tcp::iostream               _ios;
+      std::string                                  _theirId;
+      std::unique_ptr<XChaCha20Poly1305::Istream>  _xis;
+      std::unique_ptr<XChaCha20Poly1305::Ostream>  _xos;
     };
     
   }  // namespace Credence
 
 }  // namespace Dwm
 
-#endif  // _DWMCREDENCEKXKEYPAIR_HH_
+#endif  // _DWMCREDENCEPEER_HH_

@@ -1,0 +1,294 @@
+//===========================================================================
+// @(#) $DwmPath$
+//===========================================================================
+//  Copyright (c) Daniel W. McRobb 2022
+//  All rights reserved.
+//
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions
+//  are met:
+//
+//  1. Redistributions of source code must retain the above copyright
+//     notice, this list of conditions and the following disclaimer.
+//  2. Redistributions in binary form must reproduce the above copyright
+//     notice, this list of conditions and the following disclaimer in the
+//     documentation and/or other materials provided with the distribution.
+//  3. The names of the authors and copyright holders may not be used to
+//     endorse or promote products derived from this software without
+//     specific prior written permission.
+//
+//  IN NO EVENT SHALL DANIEL W. MCROBB BE LIABLE TO ANY PARTY FOR
+//  DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES,
+//  INCLUDING LOST PROFITS, ARISING OUT OF THE USE OF THIS SOFTWARE,
+//  EVEN IF DANIEL W. MCROBB HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+//  DAMAGE.
+//
+//  THE SOFTWARE PROVIDED HEREIN IS ON AN "AS IS" BASIS, AND
+//  DANIEL W. MCROBB HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT,
+//  UPDATES, ENHANCEMENTS, OR MODIFICATIONS. DANIEL W. MCROBB MAKES NO
+//  REPRESENTATIONS AND EXTENDS NO WARRANTIES OF ANY KIND, EITHER
+//  IMPLIED OR EXPRESS, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+//  WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE,
+//  OR THAT THE USE OF THIS SOFTWARE WILL NOT INFRINGE ANY PATENT,
+//  TRADEMARK OR OTHER RIGHTS.
+//===========================================================================
+
+//---------------------------------------------------------------------------
+//!  \file DwmCredenceAuthenticator.cc
+//!  \author Daniel W. McRobb
+//!  \brief Dwm::Credence::Authenticator class implementation
+//---------------------------------------------------------------------------
+
+#include "DwmIO.hh"
+#include "DwmSysLogger.hh"
+#include "DwmCredenceAuthenticator.hh"
+#include "DwmCredenceChallengeResponse.hh"
+#include "DwmCredenceKXKeyPair.hh"
+#include "DwmCredenceUtils.hh"
+
+namespace Dwm {
+
+  namespace Credence {
+
+    using namespace std;
+    
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    Authenticator::Authenticator(const KeyStash & keyStash,
+                                 const KnownKeys & knownKeys)
+        : _keyStash(keyStash), _knownKeys(knownKeys)
+    {}
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool Authenticator::Authenticate(boost::asio::ip::tcp::iostream & s,
+                                     string & theirId,
+                                     string & agreedKey)
+    {
+      bool  rc = false;
+      theirId.clear();
+      _endPoint = s.socket().remote_endpoint();
+      if (ExchangeKeys(s, agreedKey)) {
+        Ed25519KeyPair  myKeys;
+        ShortString     theirIdShort;
+        string          theirPubKey;
+        if (ExchangeIds(myKeys, theirIdShort, theirPubKey)) {
+          if (ExchangeChallenges(myKeys.SecretKey(), theirIdShort.Value(),
+                                 theirPubKey)) {
+            theirId = theirIdShort.Value();
+          }
+        }
+      }
+      return rc;
+    }
+    
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool Authenticator::ExchangeKeys(boost::asio::ip::tcp::iostream & s,
+                                     string & agreedKey)
+    {
+      bool  rc = false;
+      agreedKey.clear();
+      KXKeyPair  kxKeys;
+      if (IO::Write(s, kxKeys.PublicKey())) {
+        s.flush();
+        string  serverPubKey;
+        if (IO::Read(s, serverPubKey)) {
+          agreedKey = kxKeys.SharedKey(serverPubKey);
+          _xis = make_unique<XChaCha20Poly1305::Istream>(s, agreedKey);
+          _xos = make_unique<XChaCha20Poly1305::Ostream>(s, agreedKey);
+          rc = true;
+        }
+        else {
+          Syslog(LOG_ERR, "Failed to read public key from server at %s",
+                 EndPointString().c_str());
+        }
+      }
+      else {
+        Syslog(LOG_ERR, "Failed to send public key to server at %s",
+               EndPointString().c_str());
+      }
+      return rc;
+    }
+    
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool Authenticator::ExchangeIds(Ed25519KeyPair & myKeys,
+                                    ShortString & theirId,
+                                    string & theirPubKey)
+    {
+      bool  rc = false;
+      if (_keyStash.Get(myKeys)) {
+        if (Send(myKeys.Id())) {
+          if (Receive(theirId)) {
+            theirPubKey = _knownKeys.Find(theirId.Value());
+            rc = (! theirPubKey.empty());
+            if (! rc) {
+              Syslog(LOG_ERR, "Unknown ID %s from server at %s",
+                     theirId.Value().c_str(), EndPointString().c_str());
+            }
+          }
+          else {
+            Syslog(LOG_ERR, "Failed to read ID from server at %s",
+                   EndPointString().c_str());
+          }
+        }
+        else {
+          Syslog(LOG_ERR, "Failed to send ID to server at %s",
+                 EndPointString().c_str());
+        }
+      }
+      return rc;
+    }
+    
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool Authenticator::ExchangeChallenges(const string & ourSecretKey,
+                                           const string & theirId,
+                                           const string & theirPubKey)
+    {
+      bool  rc = false;
+      //  Send our challenge
+      Challenge  ourChallenge(true);
+      if (Send(ourChallenge)) {
+        //  Receive their challenge
+        Challenge  theirChallenge;
+        if (Receive(theirChallenge)) {
+          //  Send our response
+          ChallengeResponse  ourResponse;
+          if (ourResponse.Create(ourSecretKey, ourChallenge)) {
+            if (Send(ourResponse)) {
+              //  Receive their response
+              ChallengeResponse  theirResponse;
+              if (Receive(theirResponse)) {
+                if (theirResponse.Verify(theirPubKey, ourChallenge)) {
+                  rc = true;
+                  Syslog(LOG_INFO, "Authenticated peer at %s",
+                         EndPointString().c_str());
+                }
+                else {
+                  Syslog(LOG_INFO, "Failed to authenticate peer %s at %s",
+                         theirId.c_str(), EndPointString().c_str());
+                }
+              }
+              else {
+                Syslog(LOG_ERR, "Failed to read challenge response from"
+                       " peer %s at %s",
+                       theirId.c_str(), EndPointString().c_str());
+              }
+            }
+            else {
+              Syslog(LOG_ERR, "Failed to send challenge response to peer"
+                     " %s at %s",
+                     theirId.c_str(), EndPointString().c_str());
+            }
+          }
+        }
+        else {
+          Syslog(LOG_ERR, "Failed to read challenge from peer %s at %s",
+                 theirId.c_str(), EndPointString().c_str());
+        }
+      }
+      else {
+        Syslog(LOG_ERR, "Failed to send challenge to peer %s at %s",
+               theirId.c_str(), EndPointString().c_str());
+      }
+
+      return rc;
+    }
+    
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool Authenticator::Send(const string & msg)
+    {
+      bool  rc = false;
+      if (_xos) {
+        if (IO::Write(*_xos, msg)) {
+          if (_xos->flush()) {
+            rc = true;
+          }
+          else {
+            Syslog(LOG_ERR, "Failed to flush _xos");
+          }
+        }
+        else {
+          Syslog(LOG_ERR, "Failed to write msg to _xos");
+        }
+      }
+      return rc;
+    }
+    
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool Authenticator::Send(const StreamWritable & msg)
+    {
+      bool  rc = false;
+      if (_xos) {
+        if (msg.Write(*_xos)) {
+          if (_xos->flush()) {
+            rc = true;
+          }
+          else {
+            Syslog(LOG_ERR, "Failed to flush _xos");
+          }
+        }
+        else {
+          Syslog(LOG_ERR, "Failed to write msg to _xos");
+        }
+      }
+      return rc;
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool Authenticator::Receive(string & msg)
+    {
+      bool  rc = false;
+      if (_xis) {
+        if (IO::Read(*_xis, msg)) {
+          rc = true;
+        }
+        else {
+          Syslog(LOG_ERR, "Failed to read msg from _xis");
+        }
+      }
+      return rc;
+    }
+    
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool Authenticator::Receive(StreamReadable & msg)
+    {
+      bool  rc = false;
+      if (_xis) {
+        if (msg.Read(*_xis)) {
+          rc = true;
+        }
+        else {
+          Syslog(LOG_ERR, "Failed to read msg from _xis");
+        }
+      }
+      return rc;
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    std::string Authenticator::EndPointString() const
+    {
+      return Utils::EndPointString(_endPoint);
+    }
+
+    
+  }  // namespace Credence
+
+}  // namespace Dwm
