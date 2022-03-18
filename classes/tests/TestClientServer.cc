@@ -53,13 +53,12 @@
 using namespace std;
 using namespace Dwm;
 
-static std::atomic<bool>  g_serverStarted = false;
-static std::atomic<bool>  g_serverShouldRun = true;
-
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
-void ServerThread(const std::string & plaintext)
+void ServerThread(const std::string & plaintext,
+                  const std::atomic<bool> & shouldRun,
+                  std::atomic<bool> & running)
 {
   using namespace  boost::asio;
     io_context  ioContext;
@@ -73,8 +72,8 @@ void ServerThread(const std::string & plaintext)
   ip::tcp::socket    socket(ioContext);
   ip::tcp::endpoint  client;
   ip::tcp::iostream  stream;
-  g_serverStarted = true;
-  while (g_serverShouldRun) {
+  running = true;
+  while (shouldRun) {
     acc.accept(socket, client, ec);
     if (ec != boost::asio::error::would_block) {
       break;
@@ -99,7 +98,7 @@ void ServerThread(const std::string & plaintext)
     }
     client.Disconnect();
   }
-  g_serverStarted = false;
+  running = false;
   
   return;
 }
@@ -202,12 +201,13 @@ int main(int argc, char *argv[])
     is.read(&fileContents[0], fileContents.size());
     is.close();
   }
-
-  g_serverStarted = false;
-  g_serverShouldRun = true;
+  std::atomic<bool>  serverShouldRun = true;
+  std::atomic<bool>  serverIsRunning = false;
   
-  std::thread  serverThread(ServerThread, fileContents);
-  while (! g_serverStarted) { }
+  std::thread  serverThread(ServerThread, fileContents,
+                            std::ref(serverShouldRun),
+                            std::ref(serverIsRunning));
+  while (! serverIsRunning) { }
 
   Credence::Server  server;
   if (UnitAssert(server.Connect("127.0.0.1", 7789))) {
@@ -224,7 +224,7 @@ int main(int argc, char *argv[])
     }
     server.Disconnect();
   }
-  g_serverShouldRun = false;
+  serverShouldRun = false;
   serverThread.join();
   
   if (Assertions::Total().Failed()) {
