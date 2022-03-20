@@ -82,7 +82,7 @@ namespace Dwm {
       //!  Used by a server to accept a new connection.  Returns true on
       //!  success, false on failure.  Note that @c s is expected to be
       //!  a socket that was already accepted
-      //!  (via Boost::asio::ip::tcp::acceptor::accpet()).
+      //!  (via Boost::asio::ip::tcp::acceptor::accept()).
       //----------------------------------------------------------------------
       bool Accept(boost::asio::ip::tcp::socket && s);
       
