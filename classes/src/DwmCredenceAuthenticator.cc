@@ -76,7 +76,7 @@ namespace Dwm {
         Ed25519KeyPair  myKeys;
         ShortString     theirIdShort;
         string          theirPubKey;
-        if (ExchangeIds(myKeys, theirIdShort, theirPubKey)) {
+        if (ExchangeIds(s, myKeys, theirIdShort, theirPubKey)) {
           if (ExchangeChallenges(myKeys.SecretKey(), theirIdShort.Value(),
                                  theirPubKey)) {
             theirId = theirIdShort.Value();
@@ -88,63 +88,49 @@ namespace Dwm {
       return rc;
     }
 
-#if 0
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    bool Authenticator::ExchangeKeys(boost::asio::ip::tcp::iostream & s,
-                                     string & agreedKey)
+    void Authenticator::SetIdExchangeTimeout(std::chrono::milliseconds ms)
     {
-      bool  rc = false;
-      agreedKey.clear();
-      KXKeyPair  kxKeys;
-      if (IO::Write(s, kxKeys.PublicKey())) {
-        s.flush();
-        string  serverPubKey;
-        if (IO::Read(s, serverPubKey)) {
-          agreedKey = kxKeys.SharedKey(serverPubKey);
-          _xis = make_unique<XChaCha20Poly1305::Istream>(s, agreedKey);
-          _xos = make_unique<XChaCha20Poly1305::Ostream>(s, agreedKey);
-          rc = true;
-        }
-        else {
-          Syslog(LOG_ERR, "Failed to read public key from server at %s",
-                 EndPointString().c_str());
-        }
-      }
-      else {
-        Syslog(LOG_ERR, "Failed to send public key to server at %s",
-               EndPointString().c_str());
-      }
-      return rc;
+      _timeout = ms;
+      return;
     }
-#endif
-    
+
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    bool Authenticator::ExchangeIds(Ed25519KeyPair & myKeys,
+    bool Authenticator::ExchangeIds(boost::asio::ip::tcp::iostream & s,
+                                    Ed25519KeyPair & myKeys,
                                     ShortString & theirId,
                                     string & theirPubKey)
     {
       bool  rc = false;
       if (_keyStash.Get(myKeys)) {
         if (Send(myKeys.Id())) {
-          if (Receive(theirId)) {
-            theirPubKey = _knownKeys.Find(theirId.Value());
-            rc = (! theirPubKey.empty());
-            if (! rc) {
-              Syslog(LOG_ERR, "Unknown ID %s from server at %s",
-                     theirId.Value().c_str(), EndPointString().c_str());
+          uint32_t  minBytes = crypto_secretbox_NONCEBYTES
+            + crypto_aead_xchacha20poly1305_ietf_ABYTES + 1;
+          if (Utils::WaitForBytesReady(s.socket(), minBytes, _timeout)) {
+            if (Receive(theirId)) {
+              theirPubKey = _knownKeys.Find(theirId.Value());
+              rc = (! theirPubKey.empty());
+              if (! rc) {
+                Syslog(LOG_ERR, "Unknown ID %s from peer at %s",
+                       theirId.Value().c_str(), EndPointString().c_str());
+              }
+            }
+            else {
+              Syslog(LOG_ERR, "Failed to read ID from peer at %s",
+                     EndPointString().c_str());
             }
           }
           else {
-            Syslog(LOG_ERR, "Failed to read ID from server at %s",
-                   EndPointString().c_str());
+            Syslog(LOG_ERR, "Peer at %s failed to send ID within %lld"
+                   " milliseconds", _timeout.count());
           }
         }
         else {
-          Syslog(LOG_ERR, "Failed to send ID to server at %s",
+          Syslog(LOG_ERR, "Failed to send ID to peer at %s",
                  EndPointString().c_str());
         }
       }

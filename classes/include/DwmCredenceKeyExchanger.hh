@@ -42,6 +42,7 @@
 #ifndef _DWMCREDENCEKEYEXCHANGER_HH_
 #define _DWMCREDENCEKEYEXCHANGER_HH_
 
+#include <chrono>
 #include <string>
 #include <boost/asio.hpp>
 
@@ -56,7 +57,9 @@ namespace Dwm {
     {
     public:
       static bool ExchangeKeys(boost::asio::ip::tcp::iostream & s,
-                               std::string & agreedKey);
+                               std::string & agreedKey,
+                               std::chrono::milliseconds timeout =
+                               std::chrono::milliseconds(1000));
     };
     
   }  // namespace Credence

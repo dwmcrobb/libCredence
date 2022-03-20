@@ -49,12 +49,32 @@ namespace Dwm {
   namespace Credence {
 
     using namespace std;
-    
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    Peer::Peer()
+        : _keyExchangeTimeout(1000), _idExchangeTimeout(1000), _endPoint(),
+          _theirId(), _agreedKey(), _ios(nullptr), _xis(nullptr),
+          _xos(nullptr)
+    { }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    void Peer::SetKeyExchangeTimeout(std::chrono::milliseconds ms)
+    {
+      _keyExchangeTimeout = ms;
+      return;
+    }
+
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
     bool Peer::Accept(boost::asio::ip::tcp::socket && s)
     {
+      using XChaCha20Poly1305::Istream, XChaCha20Poly1305::Ostream;
+      
       bool  rc = false;
       _agreedKey.clear();
       _ios = make_unique<boost::asio::ip::tcp::iostream>(std::move(s));
@@ -62,9 +82,10 @@ namespace Dwm {
         boost::system::error_code  ec;
         _endPoint = _ios->socket().remote_endpoint(ec);
         if (! ec) {
-          if (KeyExchanger::ExchangeKeys(*_ios, _agreedKey)) {
-            _xis = make_unique<XChaCha20Poly1305::Istream>(*_ios, _agreedKey);
-            _xos = make_unique<XChaCha20Poly1305::Ostream>(*_ios, _agreedKey);
+          if (KeyExchanger::ExchangeKeys(*_ios, _agreedKey,
+                                         _keyExchangeTimeout)) {
+            _xis = make_unique<Istream>(*_ios, _agreedKey);
+            _xos = make_unique<Ostream>(*_ios, _agreedKey);
             rc = ((nullptr != _xis) && (nullptr != _xos));
           }
         }
@@ -87,7 +108,8 @@ namespace Dwm {
           boost::system::error_code  ec;
           _endPoint = _ios->socket().remote_endpoint(ec);
           if (! ec) {
-            if (KeyExchanger::ExchangeKeys(*_ios, _agreedKey)) {
+            if (KeyExchanger::ExchangeKeys(*_ios, _agreedKey,
+                                           _keyExchangeTimeout)) {
               _xis = make_unique<XChaCha20Poly1305::Istream>(*_ios, _agreedKey);
               _xos = make_unique<XChaCha20Poly1305::Ostream>(*_ios, _agreedKey);
               rc = ((nullptr != _xis) && (nullptr != _xos));
@@ -109,6 +131,15 @@ namespace Dwm {
       _agreedKey.clear();
       return;
     }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    void Peer::SetIdExchangeTimeout(std::chrono::milliseconds ms)
+    {
+      _idExchangeTimeout = ms;
+      return;
+    }
     
     //------------------------------------------------------------------------
     //!  
@@ -119,6 +150,7 @@ namespace Dwm {
       bool  rc = false;
       _theirId.clear();
       Authenticator  authenticator(keyStash, knownKeys);
+      authenticator.SetIdExchangeTimeout(_idExchangeTimeout);
       if (authenticator.Authenticate(*_ios, _agreedKey, _theirId)) {
         rc = true;
       }

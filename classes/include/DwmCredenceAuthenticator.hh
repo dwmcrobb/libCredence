@@ -42,6 +42,7 @@
 #ifndef _DWMCREDENCEAUTHENTICATOR_HH_
 #define _DWMCREDENCEAUTHENTICATOR_HH_
 
+#include <chrono>
 #include <boost/asio.hpp>
 
 #include "DwmStreamIOCapable.hh"
@@ -61,6 +62,8 @@ namespace Dwm {
     {
     public:
       Authenticator(const KeyStash & keyStash, const KnownKeys & knownKeys);
+
+      void SetIdExchangeTimeout(std::chrono::milliseconds ms);
       
       bool Authenticate(boost::asio::ip::tcp::iostream & s,
                         const std::string & agreedKey,
@@ -69,15 +72,13 @@ namespace Dwm {
     private:
       KeyStash                                     _keyStash;
       KnownKeys                                    _knownKeys;
+      std::chrono::milliseconds                    _timeout;
       boost::asio::ip::tcp::endpoint               _endPoint;
       std::unique_ptr<XChaCha20Poly1305::Ostream>  _xos;
       std::unique_ptr<XChaCha20Poly1305::Istream>  _xis;
 
-#if 0
-      bool ExchangeKeys(boost::asio::ip::tcp::iostream & s,
-                        std::string & agreedKey);
-#endif
-      bool ExchangeIds(Ed25519KeyPair & myKeys,
+      bool ExchangeIds(boost::asio::ip::tcp::iostream & s,
+                       Ed25519KeyPair & myKeys,
                        ShortString & theirId,
                        std::string & theirPubKey);
       bool ExchangeChallenges(const std::string & ourSecretKey,

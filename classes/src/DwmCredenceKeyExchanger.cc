@@ -54,7 +54,8 @@ namespace Dwm {
     //!  
     //------------------------------------------------------------------------
     bool KeyExchanger::ExchangeKeys(boost::asio::ip::tcp::iostream & s,
-                                    std::string & agreedKey)
+                                    std::string & agreedKey,
+                                    std::chrono::milliseconds timeout)
     {
       bool  rc = false;
       agreedKey.clear();
@@ -66,14 +67,24 @@ namespace Dwm {
           KXKeyPair  kxKeys;
           if (StreamIO::Write(s, kxKeys.PublicKey())) {
             s.flush();
-            ShortString  theirPubKey;
-            if (StreamIO::Read(s, theirPubKey)) {
-              agreedKey = kxKeys.SharedKey(theirPubKey.Value());
-              rc = true;
+            if (Utils::WaitForBytesReady(s.socket(),
+                                         kxKeys.PublicKeyMinimumStreamedLength(),
+                                         timeout)) {
+              ShortString  theirPubKey;
+              if (StreamIO::Read(s, theirPubKey)) {
+                agreedKey = kxKeys.SharedKey(theirPubKey.Value());
+                rc = true;
+              }
+              else {
+                Syslog(LOG_ERR, "Failed to read public key from %s",
+                       Utils::EndPointString(endPoint).c_str());
+              }
             }
             else {
-              Syslog(LOG_ERR, "Failed to read public key from %s",
-                     Utils::EndPointString(endPoint).c_str());
+              Syslog(LOG_ERR, "Peer at %s failed to send public key within"
+                     " %lld milliseconds",
+                     Utils::EndPointString(endPoint).c_str(),
+                     timeout.count());
             }
           }
           else {

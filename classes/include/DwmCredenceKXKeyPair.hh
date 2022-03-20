@@ -73,6 +73,12 @@ namespace Dwm {
       //!  Returns a const reference to the secret key.
       //----------------------------------------------------------------------
       const ShortString & SecretKey() const;
+
+      //----------------------------------------------------------------------
+      //!  Returns the minimum number of bytes to represent the public key
+      //!  'on the wire'; the key itself and its length.
+      //----------------------------------------------------------------------
+      size_t PublicKeyMinimumStreamedLength() const;
       
       //----------------------------------------------------------------------
       //!  Given the public key of a peer, returns a shared secret key that

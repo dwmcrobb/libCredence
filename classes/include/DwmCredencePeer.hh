@@ -42,6 +42,7 @@
 #ifndef _DWMCREDENCEPEER_HH_
 #define _DWMCREDENCEPEER_HH_
 
+#include <chrono>
 #include <boost/asio.hpp>
 
 #include "DwmStreamIO.hh"
@@ -68,7 +69,14 @@ namespace Dwm {
       //----------------------------------------------------------------------
       //!  Default constructor.
       //----------------------------------------------------------------------
-      Peer() = default;
+      Peer();
+
+      //----------------------------------------------------------------------
+      //!  Sets the time we'll wait for the peer to send its public key.
+      //!  If not set, a default of 1000 milliseconds (1 second) will be
+      //!  used.
+      //----------------------------------------------------------------------
+      void SetKeyExchangeTimeout(std::chrono::milliseconds ms);
       
       //----------------------------------------------------------------------
       //!  Used by a server to accept a new connection.  Returns true on
@@ -83,6 +91,13 @@ namespace Dwm {
       //!  Returns true on success, false on failure.
       //----------------------------------------------------------------------
       bool Connect(const std::string & host, uint16_t port);
+
+      //----------------------------------------------------------------------
+      //!  Sets the time we'll wait for the peer to send its ID during
+      //!  authentication.  If not set, a default of 1000 milliseconds
+      //!  (1 second) will be used.
+      //----------------------------------------------------------------------
+      void SetIdExchangeTimeout(std::chrono::milliseconds ms);
 
       //----------------------------------------------------------------------
       //!  Using the given @c keyStash and @c knownKeys, authenticate our
@@ -159,6 +174,8 @@ namespace Dwm {
       void Disconnect();
       
     private:
+      std::chrono::milliseconds                        _keyExchangeTimeout;
+      std::chrono::milliseconds                        _idExchangeTimeout;
       boost::asio::ip::tcp::endpoint                   _endPoint;
       std::string                                      _theirId;
       std::string                                      _agreedKey;
