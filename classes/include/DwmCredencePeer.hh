@@ -56,24 +56,54 @@ namespace Dwm {
   namespace Credence {
 
     //------------------------------------------------------------------------
-    //!  
+    //!  Encapsulate a network peer.
+    //!  Note that once a connection is set up with Accept() or Connect(),
+    //!  all traffic will be encrypted with XChacha20Poly1305.
+    //!  Identity authentication is optional but highly recommended, as I
+    //!  don't have any production code that doesn't use it.
     //------------------------------------------------------------------------
     class Peer
     {
     public:
       //----------------------------------------------------------------------
-      //!  
+      //!  Default constructor.
       //----------------------------------------------------------------------
-      Peer(boost::asio::ip::tcp::socket && s);
+      Peer() = default;
+      
+      //----------------------------------------------------------------------
+      //!  Used by a server to accept a new connection.  Returns true on
+      //!  success, false on failure.  Note that @c s is expected to be
+      //!  a socket that was already accepted
+      //!  (via Boost::asio::ip::tcp::acceptor::accpet()).
+      //----------------------------------------------------------------------
+      bool Accept(boost::asio::ip::tcp::socket && s);
+      
+      //----------------------------------------------------------------------
+      //!  Used by a client to connect to @c host at the given @c port.
+      //!  Returns true on success, false on failure.
+      //----------------------------------------------------------------------
+      bool Connect(const std::string & host, uint16_t port);
 
       //----------------------------------------------------------------------
-      //!  
+      //!  Using the given @c keyStash and @c knownKeys, authenticate our
+      //!  identity to the peer and verify the peer's identity.  This is
+      //!  done using randomly generated challenges which must be signed
+      //!  with an Ed25519 key.  Since this should be called immediately
+      //!  after Accept() or Connect(), the entire transaction is encrypted
+      //!  with XChaCha20Poly1305.
+      //!  Returns true on success, false on failure.
       //----------------------------------------------------------------------
       bool Authenticate(const KeyStash & keyStash,
                         const KnownKeys & knownKeys);
 
       //----------------------------------------------------------------------
-      //!  
+      //!  If Authenticate() was used, returns the peer's identifier.
+      //----------------------------------------------------------------------
+      const std::string & Id() const   { return _theirId; }
+      
+      //----------------------------------------------------------------------
+      //!  Sends the given @c msg to the peer.  Returns true on success,
+      //!  false on failure.
       //----------------------------------------------------------------------
       template <typename T>
       bool Send(const T & msg)
@@ -85,39 +115,58 @@ namespace Dwm {
               rc = true;
             }
             else {
-              Syslog(LOG_ERR, "Failed to flush encrypted stream");
+              Syslog(LOG_ERR, "Failed to flush encrypted stream to %s",
+                     EndPointString().c_str());
             }
           }
           else {
-            Syslog(LOG_ERR, "Failed to send message");
+            Syslog(LOG_ERR, "Failed to send message to %s",
+                   EndPointString().c_str());
           }
+        }
+        else {
+          Syslog(LOG_ERR, "Invalid encrypted output stream");
         }
         return rc;
       }
       
       //----------------------------------------------------------------------
-      //!  
+      //!  Receives the given @c msg from the peer.  Returns true on success,
+      //!  false on failure.
       //----------------------------------------------------------------------
       template <typename T>
       bool Receive(T & msg)
       {
         bool  rc = false;
-        if (_xos) {
+        if (_xis) {
           if (StreamIO::Read(*_xis, msg)) {
             rc = true;
           }
           else {
-            Syslog(LOG_ERR, "Failed to receive message");
+            Syslog(LOG_ERR, "Failed to receive message from %s",
+                   EndPointString().c_str());
           }
+        }
+        else {
+          Syslog(LOG_ERR, "Invalid encrypted input stream");
         }
         return rc;
       }
 
+      //----------------------------------------------------------------------
+      //!  Disconnects the peer.
+      //----------------------------------------------------------------------
+      void Disconnect();
+      
     private:
-      boost::asio::ip::tcp::iostream               _ios;
-      std::string                                  _theirId;
-      std::unique_ptr<XChaCha20Poly1305::Istream>  _xis;
-      std::unique_ptr<XChaCha20Poly1305::Ostream>  _xos;
+      boost::asio::ip::tcp::endpoint                   _endPoint;
+      std::string                                      _theirId;
+      std::string                                      _agreedKey;
+      std::unique_ptr<boost::asio::ip::tcp::iostream>  _ios;
+      std::unique_ptr<XChaCha20Poly1305::Istream>      _xis;
+      std::unique_ptr<XChaCha20Poly1305::Ostream>      _xos;
+
+      std::string EndPointString() const;
     };
     
   }  // namespace Credence

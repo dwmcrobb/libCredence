@@ -64,13 +64,15 @@ namespace Dwm {
     //!  
     //------------------------------------------------------------------------
     bool Authenticator::Authenticate(boost::asio::ip::tcp::iostream & s,
-                                     string & theirId,
-                                     string & agreedKey)
+                                     const std::string & agreedKey,
+                                     string & theirId)
     {
       bool  rc = false;
       theirId.clear();
       _endPoint = s.socket().remote_endpoint();
-      if (ExchangeKeys(s, agreedKey)) {
+      _xis = make_unique<XChaCha20Poly1305::Istream>(s, agreedKey);
+      _xos = make_unique<XChaCha20Poly1305::Ostream>(s, agreedKey);
+      if ((nullptr != _xis) && (nullptr != _xos)) {
         Ed25519KeyPair  myKeys;
         ShortString     theirIdShort;
         string          theirPubKey;
@@ -78,12 +80,15 @@ namespace Dwm {
           if (ExchangeChallenges(myKeys.SecretKey(), theirIdShort.Value(),
                                  theirPubKey)) {
             theirId = theirIdShort.Value();
+            rc = true;
           }
         }
       }
+      
       return rc;
     }
-    
+
+#if 0
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
@@ -113,6 +118,7 @@ namespace Dwm {
       }
       return rc;
     }
+#endif
     
     //------------------------------------------------------------------------
     //!  
@@ -161,15 +167,15 @@ namespace Dwm {
         if (Receive(theirChallenge)) {
           //  Send our response
           ChallengeResponse  ourResponse;
-          if (ourResponse.Create(ourSecretKey, ourChallenge)) {
+          if (ourResponse.Create(ourSecretKey, theirChallenge)) {
             if (Send(ourResponse)) {
               //  Receive their response
               ChallengeResponse  theirResponse;
               if (Receive(theirResponse)) {
                 if (theirResponse.Verify(theirPubKey, ourChallenge)) {
                   rc = true;
-                  Syslog(LOG_INFO, "Authenticated peer at %s",
-                         EndPointString().c_str());
+                  Syslog(LOG_INFO, "Authenticated peer %s at %s",
+                         theirId.c_str(), EndPointString().c_str());
                 }
                 else {
                   Syslog(LOG_INFO, "Failed to authenticate peer %s at %s",

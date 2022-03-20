@@ -34,21 +34,17 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceAuthenticator.hh
+//!  \file DwmCredenceKeyExchanger.cc
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief Dwm::Credence::KeyExchanger class implementation
 //---------------------------------------------------------------------------
 
-#ifndef _DWMCREDENCEAUTHENTICATOR_HH_
-#define _DWMCREDENCEAUTHENTICATOR_HH_
-
-#include <boost/asio.hpp>
-
-#include "DwmStreamIOCapable.hh"
-#include "DwmCredenceKeyStash.hh"
-#include "DwmCredenceKnownKeys.hh"
-#include "DwmCredenceXChaCha20Poly1305Istream.hh"
-#include "DwmCredenceXChaCha20Poly1305Ostream.hh"
+#include "DwmStreamIO.hh"
+#include "DwmSysLogger.hh"
+#include "DwmCredenceKXKeyPair.hh"
+#include "DwmCredenceKeyExchanger.hh"
+#include "DwmCredenceShortString.hh"
+#include "DwmCredenceUtils.hh"
 
 namespace Dwm {
 
@@ -57,41 +53,46 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    class Authenticator
+    bool KeyExchanger::ExchangeKeys(boost::asio::ip::tcp::iostream & s,
+                                    std::string & agreedKey)
     {
-    public:
-      Authenticator(const KeyStash & keyStash, const KnownKeys & knownKeys);
-      
-      bool Authenticate(boost::asio::ip::tcp::iostream & s,
-                        const std::string & agreedKey,
-                        std::string & theirId);
+      bool  rc = false;
+      agreedKey.clear();
+      if (s.socket().is_open()) {
+        boost::system::error_code  ec;
+        boost::asio::ip::tcp::endpoint  endPoint =
+          s.socket().remote_endpoint(ec);
+        if (! ec) {
+          KXKeyPair  kxKeys;
+          if (StreamIO::Write(s, kxKeys.PublicKey())) {
+            s.flush();
+            ShortString  theirPubKey;
+            if (StreamIO::Read(s, theirPubKey)) {
+              agreedKey = kxKeys.SharedKey(theirPubKey.Value());
+              rc = true;
+            }
+            else {
+              Syslog(LOG_ERR, "Failed to read public key from %s",
+                     Utils::EndPointString(endPoint).c_str());
+            }
+          }
+          else {
+            Syslog(LOG_ERR, "Failed to send public key to %s",
+                   Utils::EndPointString(endPoint).c_str());
+          }
+        }
+        else {
+          Syslog(LOG_ERR, "Failed to get endpoint");
+        }
+      }
+      else {
+        Syslog(LOG_ERR, "socket is not open");
+      }
 
-    private:
-      KeyStash                                     _keyStash;
-      KnownKeys                                    _knownKeys;
-      boost::asio::ip::tcp::endpoint               _endPoint;
-      std::unique_ptr<XChaCha20Poly1305::Ostream>  _xos;
-      std::unique_ptr<XChaCha20Poly1305::Istream>  _xis;
-
-#if 0
-      bool ExchangeKeys(boost::asio::ip::tcp::iostream & s,
-                        std::string & agreedKey);
-#endif
-      bool ExchangeIds(Ed25519KeyPair & myKeys,
-                       ShortString & theirId,
-                       std::string & theirPubKey);
-      bool ExchangeChallenges(const std::string & ourSecretKey,
-                              const std::string & theirId,
-                              const std::string & theirPubKey);
-      bool Send(const std::string & msg);
-      bool Send(const StreamWritable & msg);
-      bool Receive(std::string & msg);
-      bool Receive(StreamReadable & msg);
-      std::string EndPointString() const;
-    };
+      return rc;
+    }
+    
     
   }  // namespace Credence
 
 }  // namespace Dwm
-
-#endif  // _DWMCREDENCEAUTHENTICATOR_HH_

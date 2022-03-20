@@ -57,7 +57,7 @@ using namespace Dwm;
 int main(int argc, char *argv[])
 {
   Credence::KXKeyPair  clientKeys, serverKeys;
-  string  sharedKey = clientKeys.ClientSharedKey(serverKeys.PublicKey());
+  string  sharedKey = clientKeys.SharedKey(serverKeys.PublicKey().Value());
 
   string        plainText("An encrypted message to test streams.");
   stringstream  ss;

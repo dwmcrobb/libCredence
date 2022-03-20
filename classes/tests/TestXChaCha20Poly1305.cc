@@ -52,12 +52,16 @@ using namespace Dwm;
 int main(int argc, char *argv[])
 {
   Credence::KXKeyPair  clientKeys, serverKeys;
-  UnitAssert(clientKeys.PublicKey().size() == crypto_box_PUBLICKEYBYTES);
-  UnitAssert(clientKeys.SecretKey().size() == crypto_box_SECRETKEYBYTES);
-  UnitAssert(serverKeys.PublicKey().size() == crypto_box_PUBLICKEYBYTES);
-  UnitAssert(serverKeys.SecretKey().size() == crypto_box_SECRETKEYBYTES);
+  UnitAssert(clientKeys.PublicKey().Value().size()
+             == crypto_box_PUBLICKEYBYTES);
+  UnitAssert(clientKeys.SecretKey().Value().size()
+             == crypto_box_SECRETKEYBYTES);
+  UnitAssert(serverKeys.PublicKey().Value().size()
+             == crypto_box_PUBLICKEYBYTES);
+  UnitAssert(serverKeys.SecretKey().Value().size()
+             == crypto_box_SECRETKEYBYTES);
 
-  string  sharedKey = clientKeys.ClientSharedKey(serverKeys.PublicKey());
+  string  sharedKey = clientKeys.SharedKey(serverKeys.PublicKey().Value());
 
   string  cipherText;
   Credence::Nonce  nonce;

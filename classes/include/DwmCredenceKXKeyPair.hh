@@ -42,7 +42,7 @@
 #ifndef _DWMCREDENCEKXKEYPAIR_HH_
 #define _DWMCREDENCEKXKEYPAIR_HH_
 
-#include <string>
+#include "DwmCredenceShortString.hh"
 
 namespace Dwm {
 
@@ -67,32 +67,22 @@ namespace Dwm {
       //----------------------------------------------------------------------
       //!  Returns a const reference to the public key.
       //----------------------------------------------------------------------
-      const std::string & PublicKey() const;
+      const ShortString & PublicKey() const;
       
       //----------------------------------------------------------------------
       //!  Returns a const reference to the secret key.
       //----------------------------------------------------------------------
-      const std::string & SecretKey() const;
+      const ShortString & SecretKey() const;
       
       //----------------------------------------------------------------------
-      //!  Given a client's public key, returns a shared key that will
-      //!  match the shared key created on the client side with
-      //!  ClientSharedKey().
+      //!  Given the public key of a peer, returns a shared secret key that
+      //!  can be used to encrypt and decrypt data.
       //----------------------------------------------------------------------
-      std::string ServerSharedKey(const std::string & clientPublicKey) const;
-      
-      //----------------------------------------------------------------------
-      //!  Given a server's public key, returns a shared key that will
-      //!  match the shared key created on the server side with
-      //!  ServerSharedKey().
-      //----------------------------------------------------------------------
-      std::string ClientSharedKey(const std::string & serverPublicKey) const;
-
       std::string SharedKey(const std::string & theirPublicKey) const;
 
     private:
-      std::string  _publicKey;
-      std::string  _secretKey;
+      ShortString  _publicKey;
+      ShortString  _secretKey;
 
     };
     

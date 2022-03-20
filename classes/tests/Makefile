@@ -1,10 +1,10 @@
 include ../../Makefile.vars
 
 OBJFILES = TestChallenge.o \
-           TestClientServer.o \
            TestKeyStash.o \
            TestKnownKeys.o \
            TestKXKeyPair.o \
+           TestPeer.o \
            TestSigner.o \
            TestX25519KeyPair.o \
            TestXChaCha20Poly1305.o \

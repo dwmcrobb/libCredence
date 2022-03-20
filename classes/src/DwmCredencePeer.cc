@@ -40,7 +40,9 @@
 //---------------------------------------------------------------------------
 
 #include "DwmCredenceAuthenticator.hh"
+#include "DwmCredenceKeyExchanger.hh"
 #include "DwmCredencePeer.hh"
+#include "DwmCredenceUtils.hh"
 
 namespace Dwm {
 
@@ -51,9 +53,62 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    Peer::Peer(boost::asio::ip::tcp::socket && s)
-        : _ios(std::move(s)), _theirId(), _xis(nullptr), _xos(nullptr)
-    {}
+    bool Peer::Accept(boost::asio::ip::tcp::socket && s)
+    {
+      bool  rc = false;
+      _agreedKey.clear();
+      _ios = make_unique<boost::asio::ip::tcp::iostream>(std::move(s));
+      if (nullptr != _ios) {
+        boost::system::error_code  ec;
+        _endPoint = _ios->socket().remote_endpoint(ec);
+        if (! ec) {
+          if (KeyExchanger::ExchangeKeys(*_ios, _agreedKey)) {
+            _xis = make_unique<XChaCha20Poly1305::Istream>(*_ios, _agreedKey);
+            _xos = make_unique<XChaCha20Poly1305::Ostream>(*_ios, _agreedKey);
+            rc = ((nullptr != _xis) && (nullptr != _xos));
+          }
+        }
+      }
+      return rc;
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool Peer::Connect(const string & host, uint16_t port)
+    {
+      using namespace boost::asio;
+      
+      bool  rc = false;
+      _agreedKey.clear();
+      if (nullptr == _ios) {
+        _ios = make_unique<ip::tcp::iostream>(host, to_string(port));
+        if (nullptr != _ios) {
+          boost::system::error_code  ec;
+          _endPoint = _ios->socket().remote_endpoint(ec);
+          if (! ec) {
+            if (KeyExchanger::ExchangeKeys(*_ios, _agreedKey)) {
+              _xis = make_unique<XChaCha20Poly1305::Istream>(*_ios, _agreedKey);
+              _xos = make_unique<XChaCha20Poly1305::Ostream>(*_ios, _agreedKey);
+              rc = ((nullptr != _xis) && (nullptr != _xos));
+            }
+          }
+        }
+      }
+      return rc;
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    void Peer::Disconnect()
+    {
+      _xos = nullptr;
+      _xis = nullptr;
+      _ios = nullptr;
+      _agreedKey.clear();
+      return;
+    }
     
     //------------------------------------------------------------------------
     //!  
@@ -64,13 +119,18 @@ namespace Dwm {
       bool  rc = false;
       _theirId.clear();
       Authenticator  authenticator(keyStash, knownKeys);
-      string  agreedKey;
-      if (authenticator.Authenticate(_ios, _theirId, agreedKey)) {
-        _xis = make_unique<XChaCha20Poly1305::Istream>(_ios, agreedKey);
-        _xos = make_unique<XChaCha20Poly1305::Ostream>(_ios, agreedKey);
+      if (authenticator.Authenticate(*_ios, _agreedKey, _theirId)) {
         rc = true;
       }
       return rc;
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    std::string Peer::EndPointString() const
+    {
+      return Utils::EndPointString(_endPoint);
     }
     
     

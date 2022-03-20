@@ -1,0 +1,30 @@
+\chapter{Motivation}
+I have many network services that run in my home.  Many of them are
+services I've created myself from scratch in C++.  If a service
+can be secured and strongly authenticated, it should be.  That's the
+case for everything I've authored that runs in my home.  My garage
+door opener (mcpigdo), my firewall software (mcblockd), my network
+and host monitoring software (mcrover), my weather server
+(mcweatherd), my RDAP server (dwmrdapd), etc.
+
+Note that many of these services need to work without any user
+interaction.  Hence I don't need my keys to be protected by passwords,
+and at the moment I don't support password-protected keys in KeyStash.
+
+For years I used Crypto++ for encryption and proof of identity, via my
+own libDwmAuth library.  But a couple of years ago I found some
+problems in Crypto++ that I reported to the maintainers but were never
+fixed.  The issues I reported were memory leaks, and also corruption
+on some platforms (Raspbian).  Despite me explaining what I considered
+obvious (just from code review), the problems were not fixed.
+
+So I've given up on Crypto++.  Not the end of the world, especially
+since what I need is much smaller than what Crypto++ provides.
+I need Ed25519 key support for signatures and XChaCha20Poly1305
+for AEAD encryption (though I'm not supporting the additional data
+at the moment).  libsodium, despite being a C library with some
+awkward overhead when interfacing with C++ strings, easily fits
+the bill.
+
+Basically, I needed to replace libDwmAuth (which used Crypto++) with
+a new library that utilizes libsodium instead.

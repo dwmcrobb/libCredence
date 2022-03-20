@@ -56,24 +56,28 @@ using namespace Dwm;
 //----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-  Credence::KXKeyPair  clientKeys, serverKeys;
-  UnitAssert(clientKeys.PublicKey().size() == crypto_box_PUBLICKEYBYTES);
-  UnitAssert(clientKeys.SecretKey().size() == crypto_box_SECRETKEYBYTES);
-  UnitAssert(serverKeys.PublicKey().size() == crypto_box_PUBLICKEYBYTES);
-  UnitAssert(serverKeys.SecretKey().size() == crypto_box_SECRETKEYBYTES);
+  Credence::KXKeyPair  cKeys, sKeys;
+  UnitAssert(cKeys.PublicKey().Value().size()
+             == crypto_box_PUBLICKEYBYTES);
+  UnitAssert(cKeys.SecretKey().Value().size()
+             == crypto_box_SECRETKEYBYTES);
+  UnitAssert(sKeys.PublicKey().Value().size()
+             == crypto_box_PUBLICKEYBYTES);
+  UnitAssert(sKeys.SecretKey().Value().size()
+             == crypto_box_SECRETKEYBYTES);
 
-  string clientSharedKey = clientKeys.ClientSharedKey(serverKeys.PublicKey());
-  string serverSharedKey = serverKeys.ServerSharedKey(clientKeys.PublicKey());
-  if (UnitAssert((! clientSharedKey.empty())
-                 && (! serverSharedKey.empty()))) {
-    UnitAssert(clientSharedKey == serverSharedKey);
+  string cSharedKey = cKeys.SharedKey(sKeys.PublicKey().Value());
+  string sSharedKey = sKeys.SharedKey(cKeys.PublicKey().Value());
+  if (UnitAssert((! cSharedKey.empty())
+                 && (! sSharedKey.empty()))) {
+    UnitAssert(cSharedKey == sSharedKey);
   }
 
   string  prevSharedKey;
   for (int i = 0; i < 20; ++i) {
     Credence::KXKeyPair  myKeys, theirKeys;
-    string  mySharedKey = myKeys.SharedKey(theirKeys.PublicKey());
-    string  theirSharedKey = theirKeys.SharedKey(myKeys.PublicKey());
+    string  mySharedKey = myKeys.SharedKey(theirKeys.PublicKey().Value());
+    string  theirSharedKey = theirKeys.SharedKey(myKeys.PublicKey().Value());
     UnitAssert(! mySharedKey.empty());
     UnitAssert(! theirSharedKey.empty());
     UnitAssert(mySharedKey == theirSharedKey);

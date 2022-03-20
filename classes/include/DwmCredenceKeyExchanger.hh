@@ -34,21 +34,16 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceAuthenticator.hh
+//!  \file DwmCredenceKeyExchanger.hh
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief Dwm::Credence::KeyExchanger class declaration
 //---------------------------------------------------------------------------
 
-#ifndef _DWMCREDENCEAUTHENTICATOR_HH_
-#define _DWMCREDENCEAUTHENTICATOR_HH_
+#ifndef _DWMCREDENCEKEYEXCHANGER_HH_
+#define _DWMCREDENCEKEYEXCHANGER_HH_
 
+#include <string>
 #include <boost/asio.hpp>
-
-#include "DwmStreamIOCapable.hh"
-#include "DwmCredenceKeyStash.hh"
-#include "DwmCredenceKnownKeys.hh"
-#include "DwmCredenceXChaCha20Poly1305Istream.hh"
-#include "DwmCredenceXChaCha20Poly1305Ostream.hh"
 
 namespace Dwm {
 
@@ -57,41 +52,15 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    class Authenticator
+    class KeyExchanger
     {
     public:
-      Authenticator(const KeyStash & keyStash, const KnownKeys & knownKeys);
-      
-      bool Authenticate(boost::asio::ip::tcp::iostream & s,
-                        const std::string & agreedKey,
-                        std::string & theirId);
-
-    private:
-      KeyStash                                     _keyStash;
-      KnownKeys                                    _knownKeys;
-      boost::asio::ip::tcp::endpoint               _endPoint;
-      std::unique_ptr<XChaCha20Poly1305::Ostream>  _xos;
-      std::unique_ptr<XChaCha20Poly1305::Istream>  _xis;
-
-#if 0
-      bool ExchangeKeys(boost::asio::ip::tcp::iostream & s,
-                        std::string & agreedKey);
-#endif
-      bool ExchangeIds(Ed25519KeyPair & myKeys,
-                       ShortString & theirId,
-                       std::string & theirPubKey);
-      bool ExchangeChallenges(const std::string & ourSecretKey,
-                              const std::string & theirId,
-                              const std::string & theirPubKey);
-      bool Send(const std::string & msg);
-      bool Send(const StreamWritable & msg);
-      bool Receive(std::string & msg);
-      bool Receive(StreamReadable & msg);
-      std::string EndPointString() const;
+      static bool ExchangeKeys(boost::asio::ip::tcp::iostream & s,
+                               std::string & agreedKey);
     };
     
   }  // namespace Credence
 
 }  // namespace Dwm
 
-#endif  // _DWMCREDENCEAUTHENTICATOR_HH_
+#endif  // _DWMCREDENCEKEYEXCHANGER_HH_

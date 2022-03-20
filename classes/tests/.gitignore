@@ -1,8 +1,8 @@
 TestChallenge
-TestClientServer
 TestKeyStash
 TestKnownKeys
 TestKXKeyPair
+TestPeer
 TestSigner
 TestX25519KeyPair
 TestXChaCha20Poly1305

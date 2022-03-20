@@ -4,13 +4,12 @@ ALLINC       = -I../include ${DWMINCS}
 OBJFILESNP   = DwmCredenceAuthenticator.o \
                DwmCredenceChallenge.o \
                DwmCredenceChallengeResponse.o \
-               DwmCredenceClient.o \
                DwmCredenceEd25519KeyPair.o \
+               DwmCredenceKeyExchanger.o \
                DwmCredenceKeyStash.o \
                DwmCredenceKnownKeys.o \
                DwmCredenceKXKeyPair.o \
                DwmCredencePeer.o \
-               DwmCredenceServer.o \
                DwmCredenceShortString.o \
                DwmCredenceSigner.o \
                DwmCredenceUtils.o \
