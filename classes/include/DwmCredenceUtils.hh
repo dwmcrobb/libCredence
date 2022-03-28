@@ -50,6 +50,7 @@ extern "C" {
 #include <cstdint>
 #include <string>
 #include <boost/asio.hpp>
+#include <boost/version.hpp>
 
 namespace Dwm {
 
@@ -63,8 +64,13 @@ namespace Dwm {
     public:
       using Clock = std::chrono::system_clock;
       using TimePoint = std::chrono::time_point<Clock>;
+#if BOOST_VERSION >= 107400
+      using BoostTcpSocket =
+        boost::asio::basic_socket<boost::asio::ip::tcp, boost::asio::any_io_executor>;
+#else
       using BoostTcpSocket =
         boost::asio::basic_socket<boost::asio::ip::tcp, boost::asio::executor>;
+#endif
       
       //----------------------------------------------------------------------
       //!  Returns the number of bytes ready to read (without blocking) from
