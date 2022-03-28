@@ -40,6 +40,7 @@
 //---------------------------------------------------------------------------
 
 #include <fstream>
+#include <regex>
 
 #include "DwmCredenceKnownKeys.hh"
 #include "DwmCredenceUtils.hh"
@@ -56,6 +57,14 @@ namespace Dwm {
     KnownKeys::KnownKeys(const string & dirName)
         : _dirName(dirName)
     {
+      static const regex  rgx("^~\\/.*");
+      if (regex_match(_dirName, rgx)) {
+        string  homeDir = Utils::UserHomeDirectory();
+        if (! homeDir.empty()) {
+          regex  rplrgx("^~");
+          _dirName = regex_replace(_dirName, rplrgx, homeDir);
+        }
+      }
       LoadKeys();
     }
 
