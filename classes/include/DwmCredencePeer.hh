@@ -172,6 +172,12 @@ namespace Dwm {
       //!  Disconnects the peer.
       //----------------------------------------------------------------------
       void Disconnect();
+
+      //----------------------------------------------------------------------
+      //!  Returns a string representation of the peer endpoint, in
+      //!  'addr:port' form.
+      //----------------------------------------------------------------------
+      std::string EndPointString() const;
       
     private:
       std::chrono::milliseconds                        _keyExchangeTimeout;
@@ -183,7 +189,6 @@ namespace Dwm {
       std::unique_ptr<XChaCha20Poly1305::Istream>      _xis;
       std::unique_ptr<XChaCha20Poly1305::Ostream>      _xos;
 
-      std::string EndPointString() const;
     };
     
   }  // namespace Credence

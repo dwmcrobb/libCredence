@@ -126,7 +126,7 @@ namespace Dwm {
           }
           else {
             Syslog(LOG_ERR, "Peer at %s failed to send ID within %lld"
-                   " milliseconds", _timeout.count());
+                   " milliseconds", EndPointString().c_str(), _timeout.count());
           }
         }
         else {
