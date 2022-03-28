@@ -12,7 +12,7 @@ OBJFILES = TestChallenge.o \
 OBJDEPS	 = $(OBJFILES:%.o=deps/%_deps)
 TESTS	 = $(OBJFILES:%.o=%)
 CXXFLAGS += -g
-LDFLAGS  += -g
+LDFLAGS  += -g -Wl,-rpath,${DWMDIR}/lib
 ALLINC   = ${DWMINCS}
 ALLINC   += -I../include -I.
 ALLLIBS  = -L../../classes/lib -lDwmCredence ${DWMLIBS} ${SODIUMLIB}
