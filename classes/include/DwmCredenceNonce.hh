@@ -47,7 +47,6 @@ extern "C" {
 }
 
 #include <cstdint>
-#include <iostream>
 
 #include "DwmStreamIOCapable.hh"
 
