@@ -42,8 +42,6 @@
 #ifndef _DWMCREDENCEED25519KEYPAIR_HH_
 #define _DWMCREDENCEED25519KEYPAIR_HH_
 
-#include <string>
-
 #include "DwmCredenceShortString.hh"
 
 namespace Dwm {
