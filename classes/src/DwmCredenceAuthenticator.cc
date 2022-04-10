@@ -134,6 +134,10 @@ namespace Dwm {
                  EndPointString().c_str());
         }
       }
+      else {
+        Syslog(LOG_ERR, "Failed to get my keys from KeyStash in '%s'",
+               _keyStash.DirName().c_str());
+      }
       return rc;
     }
     
