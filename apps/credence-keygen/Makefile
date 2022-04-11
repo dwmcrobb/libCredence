@@ -1,5 +1,6 @@
 include ../../Makefile.vars
 
+LDFLAGS  = -Wl,-rpath ${DWMDIR}/lib
 OBJFILES = credence-keygen.o
 OBJDEPS	 = $(OBJFILES:%.o=deps/%_deps)
 ALLINC   = ${DWMINCS}
