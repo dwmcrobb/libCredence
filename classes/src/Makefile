@@ -17,6 +17,9 @@ OBJFILESNP   = DwmCredenceAuthenticator.o \
                DwmCredenceXChaCha20Poly1305.o \
                DwmCredenceXChaCha20Poly1305InBuffer.o \
                DwmCredenceXChaCha20Poly1305OutBuffer.o
+ifeq ($(MAKECMDGOALS),tarprep)
+OBJFILESNP   += DwmCredenceVersion.o
+endif
 OBJFILES     = $(OBJFILESNP:%=../obj/%)
 OBJDEPS      = $(OBJFILESNP:%.o=deps/%_deps)
 

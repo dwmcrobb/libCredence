@@ -179,6 +179,7 @@ AC_ARG_ENABLE([docs],[AS_HELP_STRING([--enable-docs],[build documentation])],
 	      [BUILD_DOCS="yes"], [])
 AC_SUBST(BUILD_DOCS)
 
-AC_CONFIG_FILES([Makefile.vars packaging/debcontrol
-                 packaging/fbsd_manifest packaging/libDwmCredence.pc])
+AC_CONFIG_FILES([Makefile.vars classes/include/DwmCredenceVersion.hh
+                 packaging/debcontrol packaging/fbsd_manifest
+		 packaging/libDwmCredence.pc])
 AC_OUTPUT
