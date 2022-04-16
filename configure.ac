@@ -129,37 +129,13 @@ DWM_CHECK_STRTOF()
 
 DWM_PREREQ_PATH(htmlman,share/htmlman,[HTML manpage path])
 
-DWM_SET_PKGVARS(libDwm,[libDwm-0.0.0])
-DWM_GET_TAG([libDwm])
-
-dnl ------------------------------------------------------------------------
-dnl //  Check for CoreFoundation/CFByteOrder.h, an OS X thing.  We need
-dnl //  this so we can define be64toh() and htobe64() to use
-dnl //  CFSwapInt64BigToHost() and CFSwapInt64HostToBig() respectively.
-dnl ------------------------------------------------------------------------
-AC_CHECK_HEADER(CoreFoundation/CFByteOrder.h, [AC_DEFINE(HAVE_CFBYTE_ORDER_H)])
-
-dnl ------------------------------------------------------------------------
-dnl //  Check for byteswap.h, a Linux thing.  We need this so we can define
-dnl //  be64toh() and htobe64() to use bswap_64() on Linux running on 
-dnl //  little-endian hardware.
-dnl ------------------------------------------------------------------------
-AC_CHECK_HEADER(byteswap.h, [AC_DEFINE(HAVE_BYTESWAP_H)])
-AC_CHECK_HEADER(endian.h, [AC_DEFINE(HAVE_ENDIAN_H)])
+DWM_SET_PKGVARS(libDwmCredence,[libDwmCredence-0.0.0])
+DWM_GET_TAG([libDwmCredence])
 
 dnl ------------------------------------------------------------------------
 dnl //  Check for <kvm.h>
 dnl ------------------------------------------------------------------------
 AC_CHECK_HEADER(kvm.h, [AC_DEFINE(HAVE_KVM_H)])
-
-dnl ------------------------------------------------------------------------
-dnl //  Check for <net/pfvar.h> and <net/if_pflog.h>
-dnl ------------------------------------------------------------------------
-AC_CHECK_HEADER(net/pfvar.h, [AC_DEFINE(HAVE_NET_PFVAR_H)], [],
-                [#include <net/if.h>])
-AC_CHECK_HEADER(net/if_pflog.h, [AC_DEFINE(HAVE_NET_IF_PFLOG_H)], [],
-                [#include <net/if.h>
-		 #include <net/pfvar.h>])
 
 AC_CHECK_PROG([MANDOC], [mandoc], [mandoc], [])
 
