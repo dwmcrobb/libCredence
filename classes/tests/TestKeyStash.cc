@@ -49,15 +49,32 @@ using namespace Dwm;
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
+static void TestExistingKeyStash()
+{
+  Credence::KeyStash  keyStash("./inputs");
+  UnitAssert(keyStash.IsValid());
+  return;
+}
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
+  TestExistingKeyStash();
+  
   Credence::Ed25519KeyPair  keyPair;
   Credence::KeyStash        keyStash(".");
 
+  UnitAssert(keyPair.IsValid());
+
   if (UnitAssert(keyStash.Save(keyPair))) {
     Credence::Ed25519KeyPair  keyPair2;
-    if (UnitAssert(keyStash.Get(keyPair2))) {
-      UnitAssert(keyPair2 == keyPair);
+    if (UnitAssert(keyStash.IsValid())) {
+      if (UnitAssert(keyStash.Get(keyPair2))) {
+        UnitAssert(keyPair2.IsValid());
+        UnitAssert(keyPair2 == keyPair);
+      }
     }
     std::remove("./id_ed25519");
     std::remove("./id_ed25519.pub");
