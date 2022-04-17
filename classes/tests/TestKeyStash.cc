@@ -59,9 +59,20 @@ static void TestExistingKeyStash()
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
+static void TestNonexistentKeyStash()
+{
+  Credence::KeyStash  keyStash("./inputs_foo_de_fooe_fom");
+  UnitAssert(! keyStash.IsValid());
+  return;
+}
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
   TestExistingKeyStash();
+  TestNonexistentKeyStash();
   
   Credence::Ed25519KeyPair  keyPair;
   Credence::KeyStash        keyStash(".");
