@@ -111,6 +111,12 @@ namespace Dwm {
       //!  Sets and returns the secret key.
       //----------------------------------------------------------------------
       const std::string & SecretKey(const std::string & secretKey);
+
+      //----------------------------------------------------------------------
+      //!  Returns true if they keypair is valid (i.e. can be used to sign
+      //!  messages).
+      //----------------------------------------------------------------------
+      bool IsValid() const;
       
       //----------------------------------------------------------------------
       //!  Clears the contents of the key pair.

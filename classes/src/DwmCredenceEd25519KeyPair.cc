@@ -44,6 +44,7 @@ extern "C" {
 }
 
 #include "DwmCredenceEd25519KeyPair.hh"
+#include "DwmCredenceSigner.hh"
 #include "DwmCredenceUtils.hh"
 
 namespace Dwm {
@@ -124,7 +125,27 @@ namespace Dwm {
       _secretKey = secretKey;
       return _secretKey;
     }
-    
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool Ed25519KeyPair::IsValid() const
+    {
+      bool  rc = false;
+      if ((! _publicKey.empty()) && (! _secretKey.empty())) {
+        string  origMessage(32, '\0');
+        randombytes_buf((void *)origMessage.data(), 32);
+        string  signedMessage;
+        if (Signer::Sign(origMessage, _secretKey, signedMessage)) {
+          string  openedMessage;
+          if (Signer::Open(signedMessage, _publicKey, openedMessage)) {
+            rc = (openedMessage == origMessage);
+          }
+        }
+      }
+      return rc;
+    }
+      
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
