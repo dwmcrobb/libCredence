@@ -42,6 +42,18 @@
 #ifndef _DWMCREDENCEVERSION_HH_
 #define _DWMCREDENCEVERSION_HH_
 
+#include "DwmGitVersion.hh"
+
 #define DWM_CREDENCE_VERSION "@DWM_VERSION@"
+
+namespace Dwm {
+
+  namespace Credence {
+
+    extern const GitVersion  Version;
+    
+  }  // namespace Credence
+
+}  // namespace Dwm
 
 #endif  // _DWMCREDENCEVERSION_HH_

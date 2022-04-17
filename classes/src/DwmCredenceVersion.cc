@@ -40,14 +40,15 @@
 //---------------------------------------------------------------------------
 
 #include <string>
+#include "DwmGitVersion.hh"
 #include "DwmCredenceVersion.hh"
 
 namespace Dwm {
 
   namespace Credence {
 
-    static const std::string g_version("@(#) libDwmCredence-" DWM_CREDENCE_VERSION);
-
+    const GitVersion  Version("@(#) libDwmCredence-" DWM_CREDENCE_VERSION);
+    
   }  // namespace Credence
 
 }  // namespace Dwm
