@@ -77,6 +77,14 @@ namespace Dwm {
       //!  Returns true on success, false on failure.
       //----------------------------------------------------------------------
       bool Get(Ed25519KeyPair & edkp) const;
+
+      //----------------------------------------------------------------------
+      //!  Returns true if the key stash is valid, i.e. contains a valid
+      //!  keypair.  Note this is just a convenience: it calls
+      //!  Get(Ed25519KeyPair &) and then on successs it calls IsValid() on
+      //!  the retrieved Ed25519KeyPair.
+      //----------------------------------------------------------------------
+      bool IsValid() const;
       
     private:
       std::string  _dirName;
