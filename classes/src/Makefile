@@ -13,6 +13,7 @@ OBJFILESNP   = DwmCredenceAuthenticator.o \
                DwmCredenceShortString.o \
                DwmCredenceSigner.o \
                DwmCredenceUtils.o \
+               DwmCredenceVersion.o \
                DwmCredenceX25519KeyPair.o \
                DwmCredenceXChaCha20Poly1305.o \
                DwmCredenceXChaCha20Poly1305InBuffer.o \
