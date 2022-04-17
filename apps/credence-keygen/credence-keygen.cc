@@ -41,24 +41,42 @@
 
 #include "DwmArguments.hh"
 #include "DwmCredenceKeyStash.hh"
+#include "DwmCredenceVersion.hh"
 
 using namespace std;
 
-typedef   Dwm::Arguments<Dwm::Argument<'i',string>,
-                         Dwm::Argument<'d',string>> MyArgType;
+typedef   Dwm::Arguments<Dwm::Argument<'c',bool,true>,
+                         Dwm::Argument<'i',string>,
+                         Dwm::Argument<'d',string>,
+                         Dwm::Argument<'g',bool,true>,
+                         Dwm::Argument<'v',bool>> MyArgType;
 
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
 static void InitArgs(MyArgType & args)
 {
+  args.SetHelp<'c'>("check key stash validity");
   args.SetValueName<'i'>("identity");
-  args.SetHelp<'i'>("Use the given identity");
+  Dwm::Credence::Ed25519KeyPair  kp;
+  args.SetHelp<'i'>("Use the given identity (defaults to " + kp.Id().Value() + ")");
   args.SetValueName<'d'>("directory");
-  args.SetHelp<'d'>("directory in which to store keys");
+  args.SetHelp<'d'>("directory in which to store keys (defaults to ~/.credence)");
   args.Set<'d'>("~/.credence");
+  args.SetHelp<'g'>("generate key stash");
+  args.SetHelp<'v'>("show version");
+  args.SetConflicts({ {'c','g','v'} });
   
   return;
+}
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+static bool CheckKeyStash(const string & keyDir)
+{
+  Dwm::Credence::KeyStash  keyStash(keyDir);
+  return keyStash.IsValid();
 }
 
 //----------------------------------------------------------------------------
@@ -75,10 +93,33 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  Dwm::Credence::Ed25519KeyPair  keys(args.Get<'i'>());
-  Dwm::Credence::KeyStash        keyStash(args.Get<'d'>());
-  if (keyStash.Save(keys)) {
+  if (args.Get<'v'>()) {
+    cout << Dwm::Credence::Version.Version() << '\n';
     return 0;
   }
+
+  if ((! args.Get<'c'>()) && (! args.Get<'g'>())) {
+    cerr << args.Usage(argv[0],"");
+    return 1;
+  }
+  
+  if (args.Get<'c'>()) {
+    if (CheckKeyStash(args.Get<'d'>())) {
+      cout << "Valid key stash '" << args.Get<'d'>() << "'\n";
+      return 0;
+    }
+    else {
+      cerr << "Invalid key stash '" << args.Get<'d'>() << "'\n";
+      return 1;
+    }
+  }
+  else if (args.Get<'g'>()) {
+    Dwm::Credence::Ed25519KeyPair  keys(args.Get<'i'>());
+    Dwm::Credence::KeyStash        keyStash(args.Get<'d'>());
+    if (keyStash.Save(keys)) {
+      return 0;
+    }
+  }
+  
   return 1;
 }
