@@ -36,7 +36,7 @@
 //---------------------------------------------------------------------------
 //!  \file DwmCredenceAuthenticator.hh
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief Dwm::Credence::Authenticator class declaration
 //---------------------------------------------------------------------------
 
 #ifndef _DWMCREDENCEAUTHENTICATOR_HH_
@@ -56,15 +56,31 @@ namespace Dwm {
   namespace Credence {
 
     //------------------------------------------------------------------------
-    //!  
+    //!  Used by Dwm::Credence::Peer for authentication.
     //------------------------------------------------------------------------
     class Authenticator
     {
     public:
+      //----------------------------------------------------------------------
+      //!  Construct from the given @c keyStash and @c knownKeys.
+      //----------------------------------------------------------------------
       Authenticator(const KeyStash & keyStash, const KnownKeys & knownKeys);
 
+      //----------------------------------------------------------------------
+      //!  Sets the timeout for ID exchange to occur, in milliseconds.
+      //----------------------------------------------------------------------
       void SetIdExchangeTimeout(std::chrono::milliseconds ms);
       
+      //----------------------------------------------------------------------
+      //!  Authenticate the peer connected to @c s using the previously
+      //!  negotiated encryption key @c agreedKey to encrypt and decrypt all
+      //!  communication.  For success, the peer's public key must be in our
+      //!  KnownKeys and the peer must be able to properly sign a random
+      //!  challenge we transmit to them.  In addition, our public key must
+      //!  be in the peer's KnownKeys and we must be able to properly sign a
+      //!  random challenge received from the peer.
+      //!  Returns true on success and sets @c theirId to the ID of the peer.
+      //----------------------------------------------------------------------
       bool Authenticate(boost::asio::ip::tcp::iostream & s,
                         const std::string & agreedKey,
                         std::string & theirId);
