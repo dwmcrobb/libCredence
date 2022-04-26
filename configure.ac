@@ -5,6 +5,8 @@ AC_PROG_CC
 AC_PROG_CXX
 AC_CANONICAL_SYSTEM
 
+LT_INIT([])
+
 dnl  ###  Read some generally useful macros.
 builtin(include, ./dwm.m4)  dnl
 

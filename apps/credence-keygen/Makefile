@@ -1,17 +1,18 @@
 include ../../Makefile.vars
 
 LDFLAGS  = -Wl,-rpath ${DWMDIR}/lib
+LTLINK   = ${LIBTOOL} --tag=CXX --mode=link ${CXX}
 OBJFILES = credence-keygen.o
 OBJDEPS	 = $(OBJFILES:%.o=deps/%_deps)
 ALLINC   = ${DWMINCS}
 ALLINC   += -I../../classes/include -I.
-ALLLIBS  = -L../../classes/lib -lDwmCredence ${DWMLIBS} ${SODIUMLIB}
+ALLLIBS  = ${DWMLIBS} ${SODIUMLIB}
 TARTARGETS  = ${TARDIR}/bin/credence-keygen
 
 all: credence-keygen
 
-credence-keygen: credence-keygen.o ../../classes/lib/libDwmCredence.a
-	${CXX} ${LDFLAGS} -o $@ $< ${ALLLIBS}
+credence-keygen: credence-keygen.o ../../classes/lib/libDwmCredence.la
+	${LTLINK} ${LDFLAGS} -o $@ $^ ${ALLLIBS}
 
 #  dependency rule
 deps/%_deps: %.cc 
@@ -29,7 +30,7 @@ endif
 %.o: %.cc deps/%_deps
 	${CXX} ${CXXFLAGS} ${PTHREADCXXFLAGS} ${ALLINC} -c $<
 
-../../classes/lib/libDwmCredence.a::
+../../classes/lib/libDwmCredence.la::
 	${MAKE} -C ../../classes/src
 
 tarprep: ${TARTARGETS}

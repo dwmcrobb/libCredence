@@ -1,6 +1,11 @@
 include ../../Makefile.vars
 
 ALLINC       = -I../include ${DWMINCS}
+LTCLEAN      = ${LIBTOOL} --mode=clean rm -f
+LTCOMPILE    = ${LIBTOOL} --mode=compile --tag=CXX ${CXX}
+LTINSTALL    = ${LIBTOOL} --mode=install ../../install-sh
+LTLINK       = ${LIBTOOL} --tag=CXX --mode=link ${CXX}
+LTUNINSTALL  = ${LIBTOOL} --mode=uninstall rm -f
 OBJFILESNP   = DwmCredenceAuthenticator.o \
                DwmCredenceChallenge.o \
                DwmCredenceChallengeResponse.o \
@@ -22,13 +27,14 @@ ifeq ($(MAKECMDGOALS),tarprep)
 OBJFILESNP   += DwmCredenceVersion.o
 endif
 OBJFILES     = $(OBJFILESNP:%=../obj/%)
+SHARED_OBJFILES = $(OBJFILES:%.o=%.lo)
 OBJDEPS      = $(OBJFILESNP:%.o=deps/%_deps)
+shlib_version = $(shell ../../getvers.sh -s)
 
-all: ../lib/libDwmCredence.a
+all: ../lib/libDwmCredence.la
 
-../lib/libDwmCredence.a: ${OBJFILES}
-	ar rv $@ $^
-	-ranlib $@
+../lib/libDwmCredence.la: ${SHARED_OBJFILES}
+	${LTLINK} -o $@ $^ -rpath ${INSTALLPREFIX}/lib -version-info ${shlib_version} ${LDFLAGS} ${DWMLIBS} ${SODIUMLIB}
 
 #  dependency rule
 deps/%_deps: %.cc
@@ -45,20 +51,20 @@ ifneq ($(MAKECMDGOALS),distclean)
 endif
 endif
 
-../obj/%.o: %.cc deps/%_deps
-	${CXX} ${CXXFLAGS} ${PTHREADCXXFLAGS} ${ALLINC} -c $< -o $@
+../obj/%.lo ../obj/%.o: %.cc deps/%_deps
+	${LTCOMPILE} ${CXXFLAGS} ${PTHREADCXXFLAGS} ${ALLINC} -c $< -o $@
 
-tarprep: ${TARDIR}/lib/libDwmCredence.a
+tarprep: ${TARDIR}/lib/libDwmCredence.la
 
-${TARDIR}/lib/libDwmCredence.a: ../lib/libDwmCredence.a
-	${LIBTOOL} --mode=install ../../install-sh -c $< ${TARDIR}/lib/libDwmCredence.a
+${TARDIR}/lib/libDwmCredence.la: ../lib/libDwmCredence.la
+	${LTINSTALL} -c $< ${TARDIR}/lib/libDwmCredence.la
 
 clean:: clean-tarprep
-	rm -f ../lib/libDwmCredence.a ${OBJFILES}
+	${LTCLEAN} ../lib/libDwmCredence.la ${SHARED_OBJFILES}
 
 distclean:: clean
 	rm -f deps/*_deps
 
 clean-tarprep::
-	${LIBTOOL} --mode=clean rm -f ${TARDIR}/lib/libDwmCredence.a
+	${LTUNINSTALL} ${TARDIR}/lib/libDwmCredence.la
 

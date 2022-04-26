@@ -1,5 +1,6 @@
 include ../../Makefile.vars
 
+LTLINK   = ${LIBTOOL} --tag=CXX --mode=link ${CXX}
 OBJFILES = TestChallenge.o \
            TestEd25519KeyPair.o \
            TestKeyStash.o \
@@ -16,7 +17,7 @@ CXXFLAGS += -g
 LDFLAGS  += -g -Wl,-rpath,${DWMDIR}/lib
 ALLINC   = ${DWMINCS}
 ALLINC   += -I../include -I.
-ALLLIBS  = -L../../classes/lib -lDwmCredence ${DWMLIBS} ${SODIUMLIB}
+ALLLIBS  = ${DWMLIBS} ${SODIUMLIB}
 
 all: ${TESTS}
 
@@ -47,10 +48,10 @@ endif
 %.o: %.cc deps/%_deps
 	${CXX} ${CXXFLAGS} ${PTHREADCXXFLAGS} ${ALLINC} -c $<
 
-Test%: Test%.o ../lib/libDwmCredence.a
-	${CXX} ${LDFLAGS} -o $@ $< ${ALLLIBS}
+Test%: Test%.o ../lib/libDwmCredence.la
+	${LTLINK} ${LDFLAGS} -o $@ $^ ${ALLLIBS}
 
-../lib/libDwmCredence.a::
+../lib/libDwmCredence.la::
 	${MAKE} -C ../src
 
 clean:
