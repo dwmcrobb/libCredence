@@ -12,7 +12,7 @@ TARTARGETS  = ${TARDIR}/bin/credence-keygen
 all: credence-keygen
 
 credence-keygen: credence-keygen.o ../../classes/lib/libDwmCredence.la
-	${LTLINK} ${LDFLAGS} -o $@ $^ ${ALLLIBS}
+	${LTLINK} ${LDFLAGS} -o $@ $^ -rpath ${INSTALLPREFIX}/lib ${ALLLIBS}
 
 #  dependency rule
 deps/%_deps: %.cc 
@@ -36,10 +36,10 @@ endif
 tarprep: ${TARTARGETS}
 
 ${TARDIR}/bin/credence-keygen: credence-keygen
-	../../install-sh -s -c -m 555 $< $@
+	${LIBTOOL} --mode=install ../../install-sh -s -c -m 555 $< $@
 
 clean: clean-tarprep
-	rm -f credence-keygen ${OBJFILES}
+	${LIBTOOL} --mode=clean rm -f credence-keygen ${OBJFILES}
 
 clean-tarprep::
-	rm -f ${TARDIR}/bin/credence-keygen
+	${LIBTOOL} --mode=uninstall rm -f ${TARDIR}/bin/credence-keygen
