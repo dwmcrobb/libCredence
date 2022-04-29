@@ -19,7 +19,7 @@ GENERATE_TREEVIEW    = YES
 
 PROJECT_NAME         = "libDwmCredence-@TAGVERSION@"
 
-PROJECT_LOGO         = 
+PROJECT_LOGO         = credence_logo.svg
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number.
 # This could be handy for archiving the generated documentation or 
