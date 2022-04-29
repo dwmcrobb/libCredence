@@ -159,5 +159,5 @@ AC_SUBST(BUILD_DOCS)
 
 AC_CONFIG_FILES([Makefile.vars classes/include/DwmCredenceVersion.hh
                  packaging/debcontrol packaging/fbsd_manifest
-		 packaging/libDwmCredence.pc])
+		 packaging/libDwmCredence.pc doc/Doxyfile])
 AC_OUTPUT

@@ -1,0 +1,280 @@
+/*----------------------------------------------------------------------------
+ *  Style for general body.
+ *---------------------------------------------------------------------------*/
+
+body {
+    color: #000;
+    font-family: Helvetica, sans-serif;
+    /*    background-image: url('/structure/backgrounds/background.gif'); */
+    background: #FFF;
+    background-attachment: fixed;
+}
+
+tbody {
+    color: #000;
+    background: #FFF;
+}
+
+.contents a:visited {
+    color: #00A0FF;
+}
+		  
+div {
+    color: #000;
+    background: #FFF;
+}
+
+div.directory {
+    border-top: 1px solid #273A99;
+    border-bottom: 1px solid #273A99;
+}
+
+div.fragment {
+    background-color: #FFF;
+    border: 0px solid #273A99;
+}
+
+div.header {
+    border-bottom: 1px solid #273A99;
+}
+
+div.qindex, div.navtab {
+    background-color: #D0D0D0;
+    border-color: #303030;
+}
+
+div.contents h1,h2,h3 {
+    color: #0078f2;
+}
+
+div.toc {
+    background-color: #FFF;
+    border: 1px solid #273A99;
+}
+
+div.toc h3 {
+    color: #68A;
+    font: 13px/1.2 Verdana, DejaVu Sans, Geneva, sans-serif;
+}
+
+h2.groupheader {
+    border-bottom: 1px solid #273A99;
+}
+
+tr:nth-child(even) {
+    color: #000;
+    background: #FFF;
+}    
+
+tr:nth-child(odd) {
+    color: #000;
+    background: #FFF;
+}    
+
+.directory .levels span {
+    color: #00A0FF;
+}
+
+.directory tr.even {
+    color: #000;
+    background: #FFF;
+}    
+.directory tr.odd {
+    color: #000;
+    background: #FFF;
+}    
+
+.memSeparator {
+    border-bottom: 1px solid #273A99;
+}
+
+.navpath li {
+    color: #00A0FF;
+    background: #FFF;
+}
+
+.navpath li.navelem a {
+    text-shadow: none;
+    color: #0050a1;
+}
+
+.navpath ul {
+    color: #000;
+    background: #FFF;
+    height:40px;
+    line-height:40px;
+    border: none;
+    border-top: 1px solid #DDD;
+}
+
+#nav-tree {
+    background: #FFF;
+    color: #000;
+}
+
+.mdescLeft, .mdescRight,
+.memItemLeft, .memItemRight,
+.memTemplItemLeft, .memTemplItemRight, .memTemplParams {
+    background-color: #FFF;
+    color: #000;
+}
+
+div.pageDiv {
+    padding: 20px;
+}
+
+h2.groupheader {
+    color: #000;
+}
+
+.memproto, dl.reflist dt {
+    background: #EEE;
+    text-shadow: none;
+    border-top: 1px solid #273A99;
+    border-left: 1px solid #273A99;
+    border-right: 1px solid #273A99;
+}
+
+.memdoc, dl.reflist dd {
+    background: #FFF;
+    border-bottom: 1px solid #273A99;
+    border-left: 1px solid #273A99;
+    border-right: 1px solid #273A99;
+    -webkit-box-shadow: none;
+}
+
+.memname, tbody.memname {
+    background: #EEE;
+    color: #333320;
+}
+
+tr td table.memname tbody tr td {
+    background: #EEE;
+}
+
+.mlabels, .mlabels-left, .mlabels-right {
+    background: #EEE;
+}
+
+.paramname {
+    color: #4aa04a;
+}
+
+.paramtype {
+    color: #408AAA;
+}
+
+span.comment {
+    color: #770;
+}
+
+span.keyword, span.keywordtype {
+    color: #770;
+}
+
+span.lineno {
+    background: #DDD;
+}
+
+span.lineno a {
+    background: #FFF;
+    font-family: monospace, fixed;
+    font-size: 13px;
+}
+
+span.lineno a:hover {
+    background: #FFF;
+    font-family: monospace, fixed;
+    font-size: 13px;
+}
+
+span.preprocessor {
+    color: #070;
+}
+
+span.stringliteral {
+    color: #070;
+}
+
+.tablist a {
+    text-shadow: none;
+}
+
+.tablist li {
+    background: #333;
+}
+
+.tabs, .tabs2, .tabs3 {
+    background: #000;
+}
+
+.ui-resizable-e {
+    background: #0078f2;
+    border-left: 1px solid #0096ff;
+    border-right: 1px solid #0096ff;
+    width: 4px;
+}
+
+.dataType {
+    color: #0DD;
+}
+
+.variableName {
+    color: yellow;
+}
+
+.headerName {
+    color: #0F0;
+}
+
+.nameSpace {
+    color: magenta;
+}
+
+#projectname {
+    font: 150% Tahoma, Arial, sans-serif;
+    color: #68A;
+}
+    
+/*----------------------------------------------------------------------------
+ *  Style for links.
+ *---------------------------------------------------------------------------*/
+a.code, A:link {
+    text-decoration: none;
+    font-family: Helvetica, sans-serif;
+    font-weight: bold;
+    color: #0050a1;
+}
+
+a.code:visited, A:visited {
+    text-decoration: none;
+    font-family: helvetica, sans-serif;
+    font-weight: bold;
+    color: rgba(165,235,255,0.7);
+    color: #0078f2;
+}
+
+/* miscellany  */
+a.code:hover, A:hover {
+    color: #ff8e01;
+}
+
+.sm-dox {
+    background: #DDDDDD;
+}
+
+div.line {
+    font-size: 14px;
+}
+
+span.keywordflow {
+    color: #b04000;
+}
+
+#titlearea {
+    border-bottom: none;
+}
+
+div.toc li {
+    font: 13px/1.2 Verdana, DejaVu Sans, Geneva, sans-serif;
+}
