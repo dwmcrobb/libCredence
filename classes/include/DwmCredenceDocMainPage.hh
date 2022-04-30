@@ -40,4 +40,28 @@
  *
  *  \tableofcontents
  *
-*/
+ *  \section examples Examples
+ *
+ *  \subsection example_assumptions Assumptions
+ *
+ *  The examples assume that you have created your key files by running
+ *  <code>credence keygen</code>, and that they are present in the default
+ *  directory (<code>~/.credence</code>).  They also assume that you have
+ *  your own public key (from <code>~/.credence/id_ed25519.pub</code>)
+ *  in the default <code>~/.credence/known_keys</code> file.
+ *
+ *  \subsection echo_example Simple echo
+ *
+ *  \subsubsection echo_client_example Simple echo client
+ *
+ *  \includelineno PeerClientExample1.cc
+ *
+ *  \subsubsection echo_server_example Simple echo server
+ *
+ *  Note that this server only accepts one client, and will exit after
+ *  communicating with the client.  In other words, it's not typical, but
+ *  instead is a minimal illustration.
+ *
+ *  \includelineno PeerServerExample1.cc
+ *
+ */
