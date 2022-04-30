@@ -75,7 +75,7 @@ namespace Dwm {
       //----------------------------------------------------------------------
       //!  Reads the nonce from the given istream @c is.  Returns @c is.
       //----------------------------------------------------------------------
-      std::istream & Read(std::istream & is)
+      std::istream & Read(std::istream & is) override
       {
         if (is) {
           is.read((char *)_nonce, crypto_secretbox_NONCEBYTES);
@@ -86,7 +86,7 @@ namespace Dwm {
       //----------------------------------------------------------------------
       //!  Writes the nonce to the given ostream @c os.  Returns @c os.
       //----------------------------------------------------------------------
-      std::ostream & Write(std::ostream & os) const
+      std::ostream & Write(std::ostream & os) const override
       {
         if (os) {
           os.write((const char *)_nonce, crypto_secretbox_NONCEBYTES);
