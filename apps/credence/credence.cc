@@ -34,9 +34,9 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file credence-keygen.cc
+//!  \file credence.cc
 //!  \author Daniel W. McRobb
-//!  \brief credence key generator (Ed25519 keys)
+//!  \brief credence key generator and checker (Ed25519 keys)
 //---------------------------------------------------------------------------
 
 #include "DwmArguments.hh"
@@ -45,28 +45,44 @@
 
 using namespace std;
 
-typedef   Dwm::Arguments<Dwm::Argument<'c',bool,true>,
-                         Dwm::Argument<'i',string>,
-                         Dwm::Argument<'d',string>,
-                         Dwm::Argument<'g',bool,true>,
-                         Dwm::Argument<'v',bool>> MyArgType;
+typedef   Dwm::Arguments<Dwm::Argument<'i',string>,
+                         Dwm::Argument<'d',string>> KeyGenArgType;
+
+typedef   Dwm::Arguments<Dwm::Argument<'d',string>> KeyCheckArgType;
 
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
-static void InitArgs(MyArgType & args)
+static void Usage(const char *argv0)
 {
-  args.SetHelp<'c'>("check key stash validity");
+  cerr << "Usage: " << argv0 << " keygen [-i id] [-d directory]\n"
+       << "       " << argv0 << " keycheck [-d directory]\n"
+       << "       " << argv0 << " -v\n";
+  return;
+}
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+static void InitKeyGenArgs(KeyGenArgType & args)
+{
   args.SetValueName<'i'>("identity");
   Dwm::Credence::Ed25519KeyPair  kp;
   args.SetHelp<'i'>("Use the given identity (defaults to " + kp.Id().Value() + ")");
   args.SetValueName<'d'>("directory");
   args.SetHelp<'d'>("directory in which to store keys (defaults to ~/.credence)");
   args.Set<'d'>("~/.credence");
-  args.SetHelp<'g'>("generate key stash");
-  args.SetHelp<'v'>("show version");
-  args.SetConflicts({ {'c','g','v'} });
-  
+  return;
+}
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+static void InitKeyCheckArgs(KeyCheckArgType & args)
+{
+  args.SetValueName<'d'>("directory");
+  args.SetHelp<'d'>("directory in which to store keys (defaults to ~/.credence)");
+  args.Set<'d'>("~/.credence");
   return;
 }
 
@@ -84,9 +100,59 @@ static bool CheckKeyStash(const string & keyDir)
 //----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
+#if 1
+  KeyCheckArgType  keycheckArgs;
+  KeyGenArgType    keygenArgs;
+  InitKeyCheckArgs(keycheckArgs);
+  InitKeyGenArgs(keygenArgs);
+
+  if (argc < 2) {
+    Usage(argv[0]);
+    return 1;
+  }
+  else {
+    if (string(argv[1]) == "keygen") {
+      int  argind = keygenArgs.Parse(argc-1, &argv[1]);
+      if (argind < 0) {
+        cerr << keygenArgs.Usage(string(argv[0]) + ' ' + argv[1], "");
+        return 1;
+      }
+      Dwm::Credence::Ed25519KeyPair  keys(keygenArgs.Get<'i'>());
+      Dwm::Credence::KeyStash        keyStash(keygenArgs.Get<'d'>());
+      if (keyStash.Save(keys)) {
+        return 0;
+      }
+    }
+    else if (string(argv[1]) == "keycheck") {
+      int  argind = keycheckArgs.Parse(argc-1, &argv[1]);
+      if (argind < 0) {
+        cerr << keycheckArgs.Usage(string(argv[0]) + ' ' + argv[1], "");
+        return 1;
+      }
+      if (CheckKeyStash(keycheckArgs.Get<'d'>())) {
+        cout << "Valid key stash '" << keycheckArgs.Get<'d'>() << "'\n";
+        return 0;
+      }
+      else {
+        cerr << "Invalid key stash '" << keycheckArgs.Get<'d'>() << "'\n";
+        return 1;
+      }
+    }
+    else if (string(argv[1]) == "-v") {
+      cout << Dwm::Credence::Version.Version() << '\n';
+      return 0;
+    }
+    else {
+      Usage(argv[0]);
+      return 1;
+    }
+  }
+  
+#else
+
   MyArgType  args;
   InitArgs(args);
-
+  
   int  argind = args.Parse(argc, argv);
   if (argind < 0) {
     cerr << args.Usage(argv[0],"");
@@ -120,6 +186,7 @@ int main(int argc, char *argv[])
       return 0;
     }
   }
+#endif
   
   return 1;
 }

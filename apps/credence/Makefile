@@ -2,16 +2,16 @@ include ../../Makefile.vars
 
 LDFLAGS  = -Wl,-rpath ${DWMDIR}/lib
 LTLINK   = ${LIBTOOL} --tag=CXX --mode=link ${CXX}
-OBJFILES = credence-keygen.o
+OBJFILES = credence.o
 OBJDEPS	 = $(OBJFILES:%.o=deps/%_deps)
 ALLINC   = ${DWMINCS}
 ALLINC   += -I../../classes/include -I.
 ALLLIBS  = ${DWMLIBS} ${SODIUMLIB}
-TARTARGETS  = ${TARDIR}/bin/credence-keygen
+TARTARGETS  = ${TARDIR}/bin/credence
 
-all: credence-keygen
+all: credence
 
-credence-keygen: credence-keygen.o ../../classes/lib/libDwmCredence.la
+credence: credence.o ../../classes/lib/libDwmCredence.la
 	${LTLINK} ${LDFLAGS} -o $@ $^ -rpath ${INSTALLPREFIX}/lib ${ALLLIBS}
 
 #  dependency rule
@@ -35,11 +35,11 @@ endif
 
 tarprep: ${TARTARGETS}
 
-${TARDIR}/bin/credence-keygen: credence-keygen
+${TARDIR}/bin/credence: credence
 	${LIBTOOL} --mode=install ../../install-sh -s -c -m 555 $< $@
 
 clean: clean-tarprep
-	${LIBTOOL} --mode=clean rm -f credence-keygen ${OBJFILES}
+	${LIBTOOL} --mode=clean rm -f credence ${OBJFILES}
 
 clean-tarprep::
-	${LIBTOOL} --mode=uninstall rm -f ${TARDIR}/bin/credence-keygen
+	${LIBTOOL} --mode=uninstall rm -f ${TARDIR}/bin/credence
