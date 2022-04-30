@@ -132,7 +132,8 @@ COLLABORATION_GRAPH  = YES
 CALL_GRAPH	     = YES
 
 # If the SOURCE_BROWSER tag is set to YES then a list of source files will
-# be generated. Documented entities will be cross-referenced with these sources.
+# be generated. Documented entities will be cross-referenced with these
+# sources.
 
 SOURCE_BROWSER       = NO
 

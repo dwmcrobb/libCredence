@@ -128,7 +128,7 @@ h2.groupheader {
 }
 
 .memproto, dl.reflist dt {
-    background: #EEE;
+    background: #FFF;
     text-shadow: none;
     border-top: 1px solid #273A99;
     border-left: 1px solid #273A99;
@@ -144,12 +144,26 @@ h2.groupheader {
 }
 
 .memname, tbody.memname {
-    background: #EEE;
+    background: #FFF;
     color: #333320;
 }
 
+td.memname {
+    color: #0058D2;
+    font-weight: bold;
+}
+
+table.memname {
+    background: #FFF;
+    border: 0px solid white;
+    border-spacing: 0px;
+    border-collapse: separate;
+}
+
 tr td table.memname tbody tr td {
-    background: #EEE;
+    background: #FFF;
+    border: 0px solid white;
+    border-collapse: separate;
 }
 
 .mlabels, .mlabels-left, .mlabels-right {
@@ -157,11 +171,13 @@ tr td table.memname tbody tr td {
 }
 
 .paramname {
-    color: #4aa04a;
+    color: #2a705a;
+    border: 0px solid white;
 }
 
 .paramtype {
-    color: #408AAA;
+    color: #206A8A;
+    border: 0px solid white;
 }
 
 span.comment {

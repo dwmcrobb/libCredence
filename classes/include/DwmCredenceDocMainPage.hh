@@ -6,9 +6,10 @@
  *  \section intro_sec Introduction
  *
  *  This class library may be used for secure, authenticated network
- *  communicator over TCP.  The main three classes are Peer, KeyStash
- *  and KnownKeys.  Utilizing just these three classes, it is relatively
- *  easy to create secure TCP applications.
+ *  communication over TCP.  The main three classes are Dwm::Credence::Peer,
+ *  Dwm::Credence::KeyStash and Dwm::Credence::KnownKeys.  Utilizing just
+ *  these three classes, it is relatively easy to create secure TCP
+ *  applications.
  *
  *  The library depends on libsodium, boost::asio and libDwm.
  *
