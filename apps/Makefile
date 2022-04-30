@@ -1,4 +1,4 @@
-APPS       = credence-keygen
+APPS       = credence
 APPLSCLEAN = $(APPS:%=%-clean)
 TARPREP    = $(APPS:%=%-tarprep)
 
