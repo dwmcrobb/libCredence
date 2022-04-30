@@ -12,6 +12,8 @@
 #---------------------------------------------------------------------------
 
 BUILTIN_STL_SUPPORT  = YES
+CLANG_ASSISTED_PARSING = YES
+CLANG_DATABASE_PATH    = ../classes/src
 GENERATE_TREEVIEW    = YES
 
 # The PROJECT_NAME tag is a single word (or a sequence of word surrounded
@@ -399,7 +401,7 @@ SEARCH_INCLUDES      = YES
 # contain include files that are not input files but should be processed by
 # the preprocessor.
 
-INCLUDE_PATH         =
+INCLUDE_PATH         = ../classes/include /usr/local/include/libDwm
 
 # The PREDEFINED tag can be used to specify one or more macro names that
 # are defined before the preprocessor is started (similar to the -D option of
@@ -421,7 +423,7 @@ EXPAND_ONLY_PREDEF   = NO
 
 # The TAGFILES tag can be used to specify one or more tagfiles. 
 
-TAGFILES             =
+TAGFILES             = ../../libDwm/doc/libDwm.tag=../libDwm
 
 # When a file name is specified after GENERATE_TAGFILE, doxygen will create
 # a tag file that is based on the input files it reads.

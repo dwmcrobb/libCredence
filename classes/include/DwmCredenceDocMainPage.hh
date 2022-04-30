@@ -11,7 +11,9 @@
  *  these three classes, it is relatively easy to create secure TCP
  *  applications.
  *
- *  The library depends on libsodium, boost::asio and libDwm.
+ *  The library depends on <A HREF="https://doc.libsodium.org/">libsodium</A>,
+ *  <A HREF="https://www.boost.org/doc/libs/1_79_0/doc/html/boost_asio.html">
+ *  boost::asio</A> and <A HREF="..\libDwm">libDwm</A>.
  *
  *  Since I'm using libsodium, I'm using XChaCha20Poly1305 for
  *  encryption.  User and server authentication uses signatures

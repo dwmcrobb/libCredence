@@ -34,7 +34,7 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceVersion.cc
+//!  \file DwmCredenceVersion.hh
 //!  \author Daniel W. McRobb
 //!  \brief DWM_CREDENCE_VERSION macro and Dwm::Credence::Version declaration
 //---------------------------------------------------------------------------
