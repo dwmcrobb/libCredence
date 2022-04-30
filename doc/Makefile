@@ -1,5 +1,7 @@
 include ../Makefile.vars
 
+HTMLDOCINSTALLDIR = ${TARDIR}/share/doc/libDwmCredence
+
 .PHONY : clean clean-install clean-tarprep install tarprep uninstall
 
 html/index.html: ../classes/include/*.hh examples/*.cc doxygenDocs.css
@@ -9,16 +11,17 @@ html/index.html: ../classes/include/*.hh examples/*.cc doxygenDocs.css
 www: html/index.html
 	tar --exclude=\*.md5 -zcvf html.tgz html
 
-tarprep: html/index.html
+tarprep: ${HTMLDOCINSTALLDIR}/index.html
 	mkdir -p ${TARDIR}/share/doc/libDwmCredence
 	find html -name \*.md5 -exec rm {} \;
 	cp html/* ${TARDIR}/share/doc/libDwmCredence
 
 install: ${DOCINSTALLDIR}/index.html
 
-${DOCINSTALLDIR}/index.html: html/index.html
-	mkdir -p ${DOCINSTALLDIR}
-	cp html/* ${DOCINSTALLDIR}
+${HTMLDOCINSTALLDIR}/index.html: html/index.html
+	mkdir -p ${HTMLDOCINSTALLDIR}
+	cp html/* ${HTMLDOCINSTALLDIR}
+	find ${HTMLDOCINSTALLDIR} -name \*.md5 -exec rm {} \;
 
 uninstall: clean-install
 
@@ -26,10 +29,10 @@ clean:: clean-tarprep
 	rm -Rf html latex man
 
 clean-install::
-	rm -Rf ${DOCINSTALLDIR}
+	rm -Rf ${HTMLDOCINSTALLDIR}
 
 clean-tarprep::
-	rm -Rf ${TARDIR}/share/doc/libDwmCredence
+	rm -Rf ${HTMLDOCINSTALLDIR}
 
 distclean::
 	rm -f Doxyfile
