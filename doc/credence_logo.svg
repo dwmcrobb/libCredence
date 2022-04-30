@@ -160,7 +160,7 @@
      inkscape:pageopacity="1"
      inkscape:pageshadow="2"
      inkscape:zoom="1.1460819"
-     inkscape:cx="136.6429"
+     inkscape:cx="296.02722"
      inkscape:cy="375.32947"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
@@ -235,15 +235,16 @@
     </g>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:25.4px;line-height:1.25;font-family:sans-serif;fill:#00ff00;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="27.955647"
-       y="120.4063"
-       id="text1354"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:30.3px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';fill:#00ffff;fill-opacity:1;stroke:none;stroke-width:0.303"
+       x="7.7747192"
+       y="108.1708"
+       id="text1354"
+       transform="scale(0.87321167,1.1451977)"><tspan
          sodipodi:role="line"
          id="tspan1352"
-         x="27.955647"
-         y="120.4063"
-         style="font-size:25.4px;fill:#00ff00;stroke-width:0.264583">credence</tspan></text>
+         x="7.7747192"
+         y="108.1708"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:30.3px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';fill:#00ffff;stroke-width:0.303">CREDENCE</tspan></text>
     <ellipse
        style="fill:url(#radialGradient1322);fill-opacity:1;fill-rule:evenodd;stroke:url(#linearGradient1346);stroke-width:12;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:8;stroke-dasharray:none;stroke-opacity:1"
        id="path1182-4"

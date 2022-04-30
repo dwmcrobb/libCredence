@@ -24,9 +24,8 @@
  *  
  *  \section history_sec History
  *
- *  This library came about when I grew tired of problems introduced
- *  in Crypto++ that forced me to maintain my own personal fork that
- *  was needed by libDwmAuth.  In my own applications, libDwmAuth will
+ *  This library came about when I needed a replacement for Crypto++
+ *  (needed by libDwmAuth).  In my own applications, libDwmAuth will
  *  be replaced by libDwmCredence.  The new name is a hint that it's
  *  not the same as libDwmAuth under the hood, and allows me to migrate
  *  my applications as I have time.
