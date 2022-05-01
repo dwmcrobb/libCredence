@@ -44,6 +44,7 @@
 
 #include <iostream>
 #include <memory>
+#include <streambuf>
 #include <string>
 
 #include "DwmCredenceNonce.hh"
