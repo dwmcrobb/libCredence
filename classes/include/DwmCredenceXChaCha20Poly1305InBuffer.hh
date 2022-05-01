@@ -77,7 +77,7 @@ namespace Dwm {
 
       protected:
         //--------------------------------------------------------------------
-        //!  
+        //!  Implements std::streambuf::underflow()
         //--------------------------------------------------------------------
         int_type underflow() override;
 
