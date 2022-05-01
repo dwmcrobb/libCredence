@@ -7,7 +7,7 @@ OBJDEPS	 = $(OBJFILES:%.o=deps/%_deps)
 ALLINC   = ${DWMINCS}
 ALLINC   += -I../../classes/include -I.
 ALLLIBS  = ${DWMLIBS} ${SODIUMLIB}
-TARTARGETS  = ${TARDIR}/bin/credence
+TARTARGETS  = ${TARDIR}/bin/credence ${TARDIR}/share/man/man1/credence.1
 
 all: credence
 
@@ -38,8 +38,11 @@ tarprep: ${TARTARGETS}
 ${TARDIR}/bin/credence: credence
 	${LIBTOOL} --mode=install ../../install-sh -s -c -m 555 $< $@
 
+${TARDIR}/share/man/man1/credence.1: credence.1
+	${LIBTOOL} --mode=install ../../install-sh -c -m 644 $< $@
+
 clean: clean-tarprep
 	${LIBTOOL} --mode=clean rm -f credence ${OBJFILES}
 
 clean-tarprep::
-	${LIBTOOL} --mode=uninstall rm -f ${TARDIR}/bin/credence
+	${LIBTOOL} --mode=uninstall rm -f ${TARTARGETS}
