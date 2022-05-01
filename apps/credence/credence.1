@@ -18,8 +18,8 @@
 .Nm
 is a simple command-line utility for creating and checking
 public/private keypairs (Ed25519) to be used by services that
-utilize libDwmCredence for authentication.  It operates in a somewhat
-similar manner to
+utilize libDwmCredence for authentication.
+It operates in a somewhat similar manner to
 .Xr ssh-keygen 1 but does not use passphrases and only uses Ed25519 keys
 (other key types are not supported).
 .Pp
@@ -30,81 +30,84 @@ similar manner to
 .Op Fl i Ar identity
 .Op Fl d Ar directory
 .Pp
-Generates public and private key files.  The following command line options
-are available:
-.Pp
+Generates public and private key files.
+The following command line options are available:
 .Bl -tag -width indent
 .It Fl i Ar identity
-Specify the identity.  If this option is not used, a default of
-username@hostname will be used, where \fIusername\fR will be determined via
+Specify the identity.
+If this option is not used, a default of username@hostname will be used,
+where \fIusername\fR will be determined via
 .Xr getuid 2 and
-.Xr getpwuid 2 and \fIhostname\fR will be  determined via 
+.Xr getpwuid 2 and \fIhostname\fR will be  determined via
 .Xr gethostname 3 .
 .It Fl d Ar directory
-Specify the directory in which the keys should be stored.  The public
-key will be stored in 'id_ed25519.pub' and the private key will be
+Specify the directory in which the keys should be stored.
+The public key will be stored in 'id_ed25519.pub' and the private key will be
 stored in 'id_ed25519' in the given directory.
 If this option is not used, ~/.credence will be used as the default directory.
 .El
 .Pp
 A user will normally use their email address as the \fIidentity\fR, and not
-use the \fI-d directory\fR argument.  They may then copy the contents
-of their \fI~/.credence\fR directory onto any host from which they need access
-to services using libDwmCredence, taking care to maintain 0600 permissions on
-their key files and 0700 permissions on their \fI~/.credence\fR directory.
+use the \fI-d directory\fR argument.
+They may then copy the contents of their \fI~/.credence\fR directory onto any
+host from which they need access to services using libDwmCredence, taking care
+to maintain 0600 permissions on their key files and 0700 permissions on their
+\fI~/.credence\fR directory.
 For example:
 .Bd -literal
 % credence keygen -i dwm@mcplex.net
 .Ed
 .Pp
 A service will normally use a service name and hostname as the \fIidentity\fR,
-and an appropriate location for the key files.  For example:
+and an appropriate location for the key files.
+For example:
 .Bd -literal
-# credence keygen -c mcblockd@gw.mcplex.net -d /usr/local/etc/mcblockd
+# credence keygen -i mcblockd@gw.mcplex.net -d /usr/local/etc/mcblockd
 .Ed
 .Ss Key checking
 .Nm
 .Cm keycheck
 .Op Fl d Ar directory
 .Pp
-Checks the validity of a public/private key pair.  The following command
-line options are available:
-.Pp
+Checks the validity of a public/private key pair.
+The following command line options are available:
 .Bl -tag -width indent
 .It Fl d Ar directory
-Specify the directory in which the keys are stored.  If this option is
-not used, the default ~/.credence directory is used.
+Specify the directory in which the keys are stored.
+If this option is not used, the default ~/.credence directory is used.
 .El
 .Pp
-If the key pair is valid, nothing will be printed and the
+If the key pair is valid, "Valid key stash '<directory>'" will be printed
+on stdout and the
 .Xr credence 1
-process will exit with status 0.  If any error occurs (invalid keypair,
-missing file(s), etc.),
+process will exit with status 0.
+If any error occurs (invalid keypair, missing file(s), etc.),
 .Xr credence 1
-will print an error and exit with status 1.
+will print an error on stderr and exit with status 1.
 .Sh FILES
 .Bl -tag -width indent
 .It Pa ${HOME}/.credence/id_ed25519
 The user's credence private key file, created with
-.Xr credence 1 .  This file should be owned by the user and have
-permissions 0600.  It must contain the private part of an Ed25519 key pair.
+.Xr credence 1 .
+This file should be owned by the user and have permissions 0600.
+It must contain the private part of an Ed25519 key pair.
 .It Pa ${HOME}/.credence/id_ed25519.pub
 The user's credence public key file, created with
-.Xr credence 1 .  This file should be owned by the user and have
-permissions 0600.  It must contain the public part of an Ed25519 key pair.
+.Xr credence 1 .
+This file should be owned by the user and have permissions 0600.
+It must contain the public part of an Ed25519 key pair.
 .It Pa ${HOME}/.credence/known_keys
-The user's credence known keys file.  This file must contain the public
-keys of services the user will access.  Each public key is used to authenticate
-a remote service during authentication.
+The user's credence known keys file.
+This file must contain the public keys of services the user will access.
+Each public key is used to authenticate a remote service during
+authentication.
 .It Pa <service>/known_keys
 A service utilizing libDwmCredence will have a file containing the public keys
-of those allowed to access the service.  The location of this file is service
-dependent.
+of those allowed to access the service.
+The location of this file is service dependent.
 .El
 .Sh SEE ALSO
 .Lk .. "Manpage Index"
 .Sh AUTHORS
-Copyright (c) 2022 Daniel W. McRobb
-.Mt dwm@mcplex.net
-.Pp
-
+Copyright \(co 2022
+.An Daniel W. McRobb Aq Mt dwm@mcplex.net

@@ -8,6 +8,10 @@ ALLINC   = ${DWMINCS}
 ALLINC   += -I../../classes/include -I.
 ALLLIBS  = ${DWMLIBS} ${SODIUMLIB}
 TARTARGETS  = ${TARDIR}/bin/credence ${TARDIR}/share/man/man1/credence.1
+ifeq ("${MANDOC}", "mandoc")
+MANHTML = ${MANDOC} -Thtml -Ostyle=../mcplexman.css,man=../html%S/%N.%S.html
+TARTARGETS += ${TARDIR}/${HTMLMAN}/html1/credence.1.html
+endif
 
 all: credence
 
@@ -40,6 +44,11 @@ ${TARDIR}/bin/credence: credence
 
 ${TARDIR}/share/man/man1/credence.1: credence.1
 	${LIBTOOL} --mode=install ../../install-sh -c -m 644 $< $@
+
+${TARDIR}/${HTMLMAN}/html1/credence.1.html: credence.1
+	${MANHTML} $< > $<.html
+	../../install-sh -c -m 644 $<.html $@
+	rm $<.html
 
 clean: clean-tarprep
 	${LIBTOOL} --mode=clean rm -f credence ${OBJFILES}
