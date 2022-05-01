@@ -81,7 +81,7 @@ static void InitKeyGenArgs(KeyGenArgType & args)
 static void InitKeyCheckArgs(KeyCheckArgType & args)
 {
   args.SetValueName<'d'>("directory");
-  args.SetHelp<'d'>("directory in which to store keys (defaults to ~/.credence)");
+  args.SetHelp<'d'>("key directory (defaults to ~/.credence)");
   args.Set<'d'>("~/.credence");
   return;
 }
@@ -100,7 +100,6 @@ static bool CheckKeyStash(const string & keyDir)
 //----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-#if 1
   KeyCheckArgType  keycheckArgs;
   KeyGenArgType    keygenArgs;
   InitKeyCheckArgs(keycheckArgs);
@@ -147,46 +146,6 @@ int main(int argc, char *argv[])
       return 1;
     }
   }
-  
-#else
-
-  MyArgType  args;
-  InitArgs(args);
-  
-  int  argind = args.Parse(argc, argv);
-  if (argind < 0) {
-    cerr << args.Usage(argv[0],"");
-    return 1;
-  }
-
-  if (args.Get<'v'>()) {
-    cout << Dwm::Credence::Version.Version() << '\n';
-    return 0;
-  }
-
-  if ((! args.Get<'c'>()) && (! args.Get<'g'>())) {
-    cerr << args.Usage(argv[0],"");
-    return 1;
-  }
-  
-  if (args.Get<'c'>()) {
-    if (CheckKeyStash(args.Get<'d'>())) {
-      cout << "Valid key stash '" << args.Get<'d'>() << "'\n";
-      return 0;
-    }
-    else {
-      cerr << "Invalid key stash '" << args.Get<'d'>() << "'\n";
-      return 1;
-    }
-  }
-  else if (args.Get<'g'>()) {
-    Dwm::Credence::Ed25519KeyPair  keys(args.Get<'i'>());
-    Dwm::Credence::KeyStash        keyStash(args.Get<'d'>());
-    if (keyStash.Save(keys)) {
-      return 0;
-    }
-  }
-#endif
   
   return 1;
 }
