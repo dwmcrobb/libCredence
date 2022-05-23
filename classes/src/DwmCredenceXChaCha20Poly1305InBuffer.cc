@@ -119,7 +119,7 @@ namespace Dwm {
           }
         }
         else {
-          Syslog(LOG_ERR, "Failed to read message: %m");
+          Syslog(LOG_DEBUG, "Failed to read message");
           throw std::ios_base::failure("Failed to read message");
         }
         if (rc < 0) {
@@ -145,7 +145,7 @@ namespace Dwm {
                 rc = true;
               }
               else {
-                  Syslog(LOG_ERR, "Failed to read cipherText: %m");
+                Syslog(LOG_DEBUG, "Failed to read cipherText");
               }
             }
             catch (...) {
@@ -153,11 +153,11 @@ namespace Dwm {
             }
           }
           else {
-            Syslog(LOG_ERR, "Failed to read cipher text length: %m");
+            Syslog(LOG_DEBUG, "Failed to read cipher text length");
           }
         }
         else {
-          Syslog(LOG_ERR, "Failed to read nonce: %m");
+          Syslog(LOG_DEBUG, "Failed to read nonce");
         }
         return rc;
       }
