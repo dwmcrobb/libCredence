@@ -69,19 +69,27 @@ namespace Dwm {
     {
       bool  rc = false;
       theirId.clear();
-      _endPoint = s.socket().remote_endpoint();
-      _xis = make_unique<XChaCha20Poly1305::Istream>(s, agreedKey);
-      _xos = make_unique<XChaCha20Poly1305::Ostream>(s, agreedKey);
-      if ((nullptr != _xis) && (nullptr != _xos)) {
-        Ed25519KeyPair  myKeys;
-        ShortString     theirIdShort;
-        string          theirPubKey;
-        if (ExchangeIds(s, myKeys, theirIdShort, theirPubKey)) {
-          if (ExchangeChallenges(myKeys.SecretKey(), theirIdShort.Value(),
-                                 theirPubKey)) {
-            theirId = theirIdShort.Value();
-            rc = true;
+      if (s.socket().is_open()) {
+        boost::system::error_code  ec;
+        _endPoint = s.socket().remote_endpoint(ec);
+        if (! ec) {
+          _xis = make_unique<XChaCha20Poly1305::Istream>(s, agreedKey);
+          _xos = make_unique<XChaCha20Poly1305::Ostream>(s, agreedKey);
+          if ((nullptr != _xis) && (nullptr != _xos)) {
+            Ed25519KeyPair  myKeys;
+            ShortString     theirIdShort;
+            string          theirPubKey;
+            if (ExchangeIds(s, myKeys, theirIdShort, theirPubKey)) {
+              if (ExchangeChallenges(myKeys.SecretKey(), theirIdShort.Value(),
+                                     theirPubKey)) {
+                theirId = theirIdShort.Value();
+                rc = true;
+              }
+            }
           }
+        }
+        else {
+          Syslog(LOG_ERR, "Failed to get remote_endpoint");
         }
       }
       

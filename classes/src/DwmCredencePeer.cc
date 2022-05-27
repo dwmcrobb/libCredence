@@ -149,10 +149,12 @@ namespace Dwm {
     {
       bool  rc = false;
       _theirId.clear();
-      Authenticator  authenticator(keyStash, knownKeys);
-      authenticator.SetIdExchangeTimeout(_idExchangeTimeout);
-      if (authenticator.Authenticate(*_ios, _agreedKey, _theirId)) {
-        rc = true;
+      if (_ios) {
+        Authenticator  authenticator(keyStash, knownKeys);
+        authenticator.SetIdExchangeTimeout(_idExchangeTimeout);
+        if (authenticator.Authenticate(*_ios, _agreedKey, _theirId)) {
+          rc = true;
+        }
       }
       return rc;
     }

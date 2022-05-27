@@ -97,6 +97,42 @@ void ServerThread(const std::string & plaintext,
   return;
 }
 
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+void ServerThread2(const std::string & plaintext,
+                   const std::atomic<bool> & shouldRun,
+                   std::atomic<bool> & running)
+{
+  using namespace boost::asio;
+
+  io_context                 ioContext;
+  boost::system::error_code  ec;
+  ip::tcp::endpoint  endPoint(ip::address::from_string("127.0.0.1"), 7789);
+  ip::tcp::acceptor  acc(ioContext, endPoint);
+  boost::asio::ip::tcp::acceptor::reuse_address option(true);
+  acc.set_option(option, ec);
+  acc.non_blocking(true, ec);
+
+  ip::tcp::socket    sock(ioContext);
+  ip::tcp::endpoint  client;
+  running = true;
+  while (shouldRun) {
+    acc.accept(sock, client, ec);
+    if (ec != boost::asio::error::would_block) {
+      break;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+  }
+  if (! ec) {
+    sock.native_non_blocking(false, ec);
+    Credence::Peer       peer;
+    UnitAssert(peer.Accept(std::move(sock)));
+  }
+  running = false;
+  return;
+}
+
 void TestServer()
 {}
 
@@ -150,9 +186,25 @@ int main(int argc, char *argv[])
           }
         }
       }
+      peer.Disconnect();
     }
     serverShouldRun = false;
     serverThread.join();
+
+    serverShouldRun = true;
+    serverIsRunning = false;
+    std::thread  serverThread2(ServerThread2, fileContents,
+                               std::ref(serverShouldRun),
+                               std::ref(serverIsRunning));
+    while (! serverIsRunning) { }
+    if (UnitAssert(peer.Connect("127.0.0.1", 7789))) {
+      peer.Disconnect();
+      Credence::KeyStash   keyStash("./inputs");
+      Credence::KnownKeys  knownKeys("./inputs");
+      UnitAssert(! peer.Authenticate(keyStash, knownKeys));
+    }
+    serverShouldRun = false;
+    serverThread2.join();
   }
 
   if (Assertions::Total().Failed()) {
