@@ -44,6 +44,7 @@ extern "C" {
 }
 
 #include <cstring>
+#include <boost/asio.hpp>
 
 #include "DwmPortability.hh"
 #include "DwmSysLogger.hh"
@@ -89,7 +90,7 @@ namespace Dwm {
         }
         return rc;
       }
-    
+
       //----------------------------------------------------------------------
       //!  
       //----------------------------------------------------------------------
@@ -157,7 +158,20 @@ namespace Dwm {
           }
         }
         else {
-          Syslog(LOG_DEBUG, "Failed to read nonce");
+          try {
+            boost::asio::ip::tcp::iostream & bais =
+              dynamic_cast<boost::asio::ip::tcp::iostream &>(_is);
+            if ((bais.error() == boost::asio::error::eof)
+                || (bais.error() == boost::asio::error::connection_reset)) {
+              Syslog(LOG_DEBUG, "Connection lost");
+            }
+            else {
+              Syslog(LOG_DEBUG, "Failed to read nonce");
+            }
+          }
+          catch (...) {
+            Syslog(LOG_DEBUG, "Failed to read nonce");
+          }
         }
         return rc;
       }
