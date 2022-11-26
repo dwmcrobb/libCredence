@@ -164,7 +164,7 @@ namespace Dwm {
             rc = true;
           }
           else {
-            Syslog(LOG_ERR, "Failed to receive message from %s",
+            Syslog(LOG_DEBUG, "Failed to receive message from %s",
                    EndPointString().c_str());
           }
         }
