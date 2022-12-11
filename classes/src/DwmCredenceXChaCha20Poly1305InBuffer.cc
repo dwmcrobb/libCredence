@@ -103,24 +103,30 @@ namespace Dwm {
           size_t  bufLen =
             cipherText.size() - crypto_aead_xchacha20poly1305_ietf_ABYTES;
           //  NOTE: make_unique will throw an exception on failure, which
-          //  will normally be caught by the istream and used to set badbit
+          //  would normally be caught by the istream and used to set badbit
           //  on the istream.
-          _buffer = std::make_unique<char_type[]>(bufLen);
-          string  msg;
-          if (Decrypt(msg, cipherText, nonce, _key)) {
-            rc = bufLen;
-            memcpy(_buffer.get(), msg.data(), bufLen);
-            setg(_buffer.get(), _buffer.get(),
-                 _buffer.get() + bufLen);
+          try {
+            _buffer = std::make_unique<char_type[]>(bufLen);
+            string  msg;
+            if (Decrypt(msg, cipherText, nonce, _key)) {
+              rc = bufLen;
+              memcpy(_buffer.get(), msg.data(), bufLen);
+              setg(_buffer.get(), _buffer.get(),
+                   _buffer.get() + bufLen);
+            }
+            else {
+              Syslog(LOG_ERR, "Decrypt() of %zu bytes failed!",
+                     cipherText.size());
+              throw std::ios_base::failure("Decryption failed");
+            }
           }
-          else {
-            Syslog(LOG_ERR, "Decrypt() of %zu bytes failed!",
-                   cipherText.size());
-            throw std::ios_base::failure("Decryption failed");
+          catch (...) {
+            Syslog(LOG_ERR, "Exception making buffer of %zu bytes",
+                   bufLen);
           }
         }
         else {
-          Syslog(LOG_DEBUG, "Failed to read message");
+          Syslog(LOG_ERR, "Failed to read message");
           throw std::ios_base::failure("Failed to read message");
         }
         if (rc < 0) {
