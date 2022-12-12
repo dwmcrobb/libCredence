@@ -15,6 +15,7 @@ OBJFILESNP   = DwmCredenceAuthenticator.o \
                DwmCredenceKnownKeys.o \
                DwmCredenceKXKeyPair.o \
                DwmCredencePeer.o \
+               DwmCredenceServerConfig.o \
                DwmCredenceShortString.o \
                DwmCredenceSigner.o \
                DwmCredenceUtils.o \
