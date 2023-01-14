@@ -1,3 +1,10 @@
+2023-01-14  Daniel McRobb  <dwm@mcplex.net>
+
+	* Tagged as libDwmCredence-0.1.15
+
+	* classes/src/DwmCredenceXChaCha20Poly1305.cc: Log exception what()
+	if we catch a atd::exception.
+
 2023-01-13  dwm  <dwmcrobb@me.com>
 
 	* Tagged as libDwmCredence-0.1.13
