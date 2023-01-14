@@ -53,6 +53,32 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
+    static bool
+    GetSetSocketNoDelayOption(boost::asio::ip::tcp::socket & sck,
+                              boost::asio::ip::tcp::no_delay & orig,
+                              boost::asio::ip::tcp::no_delay & noDelay)
+    {
+      bool  rc = false;
+      boost::system::error_code  ec;
+      sck.get_option(orig, ec);
+      if (! ec) {
+        sck.set_option(noDelay, ec);
+        if (! ec) {
+          rc = true;
+        }
+        else {
+          Syslog(LOG_ERR, "sck.set_option(no_delay) failed");
+        }
+      }
+      else {
+        Syslog(LOG_ERR, "sck.get_option(no_delay) failed");
+      }
+      return rc;
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
     bool KeyExchanger::ExchangeKeys(boost::asio::ip::tcp::iostream & s,
                                     std::string & agreedKey,
                                     std::chrono::milliseconds timeout)
