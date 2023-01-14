@@ -82,6 +82,9 @@ namespace Dwm {
             cipherText.clear();
           }
         }
+        catch (const std::exception & ex) {
+          Syslog(LOG_ERR, "Got exception in Encrypt(): %s", ex.what());
+        }
         catch (...) {
           Syslog(LOG_ERR, "Got exception in Encrypt()");
         }
@@ -102,7 +105,6 @@ namespace Dwm {
           cipherText.size() - crypto_aead_xchacha20poly1305_ietf_ABYTES;
         try {
           message.resize(msglen);
-          uint8_t  *msgbuf = (uint8_t *)message.data();
           if (xcc20p1305dec((uint8_t *)message.data(), &msglen, nullptr,
                             (const uint8_t *)cipherText.data(),
                             cipherText.size(),
@@ -115,6 +117,9 @@ namespace Dwm {
             Syslog(LOG_ERR, "xcc20p1305dec() failed in Decrypt()");
             message.clear();
           }
+        }
+        catch (const std::exception & ex) {
+          Syslog(LOG_ERR, "Got exception in Encrypt(): %s", ex.what());
         }
         catch (...) {
           message.clear();
