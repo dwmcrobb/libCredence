@@ -43,6 +43,7 @@ extern "C" {
   #include <sodium.h>
 }
 
+#include "DwmSysLogger.hh"
 #include "DwmCredenceXChaCha20Poly1305.hh"
 
 namespace Dwm {
@@ -65,20 +66,24 @@ namespace Dwm {
         bool  rc = false;
         unsigned long long  cbuflen =
           message.size() + crypto_aead_xchacha20poly1305_ietf_ABYTES;
-        uint8_t  cbuf[cbuflen];
-      
-        if (xcc20p1305enc(cbuf, &cbuflen,
-                          (const uint8_t *)message.data(),
-                          message.size(),
-                          nullptr, 0,
-                          nullptr, nonce,
-                          (const uint8_t *)secretKey.data())
-            == 0) {
-          cipherText.assign((const char *)cbuf, cbuflen);
-          rc = true;
+        try {
+          cipherText.resize(cbuflen);
+          if (xcc20p1305enc((uint8_t *)cipherText.data(), &cbuflen,
+                            (const uint8_t *)message.data(),
+                            message.size(),
+                            nullptr, 0,
+                            nullptr, nonce,
+                            (const uint8_t *)secretKey.data())
+              == 0) {
+            rc = true;
+          }
+          else {
+            Syslog(LOG_ERR, "xcc20p1305enc() failed in Encrypt()");
+            cipherText.clear();
+          }
         }
-        else {
-          cipherText.clear();
+        catch (...) {
+          Syslog(LOG_ERR, "Got exception in Encrypt()");
         }
         return rc;
       }
@@ -95,20 +100,27 @@ namespace Dwm {
         bool  rc = false;
         unsigned long long  msglen =
           cipherText.size() - crypto_aead_xchacha20poly1305_ietf_ABYTES;
-        uint8_t  msgbuf[msglen];
-
-        if (xcc20p1305dec(msgbuf, &msglen, nullptr,
-                          (const uint8_t *)cipherText.data(),
-                          cipherText.size(),
-                          nullptr, 0,
-                          nonce, (const uint8_t *)secretKey.data())
-            == 0) {
-          message.assign((const char *)msgbuf, msglen);
-          rc = true;
+        try {
+          message.resize(msglen);
+          uint8_t  *msgbuf = (uint8_t *)message.data();
+          if (xcc20p1305dec((uint8_t *)message.data(), &msglen, nullptr,
+                            (const uint8_t *)cipherText.data(),
+                            cipherText.size(),
+                            nullptr, 0,
+                            nonce, (const uint8_t *)secretKey.data())
+              == 0) {
+            rc = true;
+          }
+          else {
+            Syslog(LOG_ERR, "xcc20p1305dec() failed in Decrypt()");
+            message.clear();
+          }
         }
-        else {
+        catch (...) {
           message.clear();
+          Syslog(LOG_ERR, "Got exception in Decrypt()");
         }
+        
         return rc;
       }
     
