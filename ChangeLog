@@ -1,0 +1,11 @@
+2023-01-13  dwm  <dwmcrobb@me.com>
+
+	* classes/src/DwmCredenceXChaCha20Poly1305.cc: Don't put our write
+	buffers on the stack.  We might have very large messages to
+	encrypt/decrypt and hence using the heap is more appropriate.
+	We're passed a string reference for output; just resize() it and
+	populate it.  Catch exceptions sinze resize() can throw.
+
+	* DwmCredenceKeyExchanger.cc: Add GetSetSocketNoDelayOption()
+	function, currently unused.
+
