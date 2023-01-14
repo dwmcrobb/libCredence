@@ -1,5 +1,7 @@
 2023-01-13  dwm  <dwmcrobb@me.com>
 
+	* Tagged as libDwmCredence-0.1.13
+
 	* classes/src/DwmCredenceXChaCha20Poly1305.cc: Don't put our write
 	buffers on the stack.  We might have very large messages to
 	encrypt/decrypt and hence using the heap is more appropriate.
