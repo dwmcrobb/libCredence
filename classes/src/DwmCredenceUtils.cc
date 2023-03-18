@@ -54,6 +54,7 @@ extern "C" {
 }
 
 #include <cstdlib>
+#include <thread>
 
 #include "DwmStreamIO.hh"
 #include "DwmSysLogger.hh"
