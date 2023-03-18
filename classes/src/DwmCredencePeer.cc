@@ -39,6 +39,8 @@
 //!  \brief Dwm::Credence::Peer class implementation
 //---------------------------------------------------------------------------
 
+#include <chrono>
+
 #include "DwmCredenceAuthenticator.hh"
 #include "DwmCredenceKeyExchanger.hh"
 #include "DwmCredencePeer.hh"
@@ -99,12 +101,22 @@ namespace Dwm {
     bool Peer::Connect(const string & host, uint16_t port)
     {
       using namespace boost::asio;
-      
+      using std::chrono::operator""ms;
+        
       bool  rc = false;
       _agreedKey.clear();
       if (nullptr == _ios) {
-        _ios = make_unique<ip::tcp::iostream>(host, to_string(port));
+        // _ios = make_unique<ip::tcp::iostream>(host, to_string(port));
+        _ios = make_unique<ip::tcp::iostream>();
         if (nullptr != _ios) {
+          _ios->expires_from_now(5000ms);
+          try {
+            _ios->connect(host, to_string(port));
+          }
+          catch (...) {
+            _ios = nullptr;
+            return rc;
+          }
           boost::system::error_code  ec;
           _endPoint = _ios->socket().remote_endpoint(ec);
           if (! ec) {
