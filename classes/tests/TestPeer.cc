@@ -41,6 +41,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <thread>
 
 #include "DwmIO.hh"
 #include "DwmSysLogger.hh"
