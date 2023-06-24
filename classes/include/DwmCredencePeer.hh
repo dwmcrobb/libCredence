@@ -87,10 +87,12 @@ namespace Dwm {
       bool Accept(boost::asio::ip::tcp::socket && s);
       
       //----------------------------------------------------------------------
-      //!  Used by a client to connect to @c host at the given @c port.
-      //!  Returns true on success, false on failure.
+      //!  Used by a client to connect to @c host at the given @c port,
+      //!  waiting @c timeOut for success.  Returns true on success, false
+      //!  on failure.
       //----------------------------------------------------------------------
-      bool Connect(const std::string & host, uint16_t port);
+      bool Connect(const std::string & host, uint16_t port,
+                   std::chrono::milliseconds timeOut = std::chrono::milliseconds(5000));
 
       //----------------------------------------------------------------------
       //!  Sets the time we'll wait for the peer to send its ID during

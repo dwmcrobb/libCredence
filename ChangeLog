@@ -1,3 +1,10 @@
+2023-06-24  Daniel McRobb  <dwm@mcplex.net>
+
+	* tagged as libDwmCredence-0.1.16
+
+	* classes/include/DwmCredencePeer.hh, classes/src/DwmCredencePeer.cc:
+	Added defaulted timeOut paramater to Peer::Connect().
+
 2023-01-14  Daniel McRobb  <dwm@mcplex.net>
 
 	* Tagged as libDwmCredence-0.1.15

@@ -98,18 +98,17 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    bool Peer::Connect(const string & host, uint16_t port)
+    bool Peer::Connect(const string & host, uint16_t port,
+                       std::chrono::milliseconds timeOut)
     {
       using namespace boost::asio;
-      using std::chrono::operator""ms;
         
       bool  rc = false;
       _agreedKey.clear();
       if (nullptr == _ios) {
-        // _ios = make_unique<ip::tcp::iostream>(host, to_string(port));
         _ios = make_unique<ip::tcp::iostream>();
         if (nullptr != _ios) {
-          _ios->expires_from_now(5000ms);
+          _ios->expires_from_now(timeOut);
           try {
             _ios->connect(host, to_string(port));
           }
