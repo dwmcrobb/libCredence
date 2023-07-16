@@ -89,6 +89,7 @@ void ServerThread(const std::string & plaintext,
         string  receivedtext;
         if (UnitAssert(peer.Receive(receivedtext))) {
           UnitAssert(plaintext == receivedtext);
+          UnitAssert(peer.ReceiveWouldBlock(1));
         }
         UnitAssert(peer.Send(receivedtext));
       }
@@ -182,6 +183,7 @@ int main(int argc, char *argv[])
           if (UnitAssert(peer.Send(fileContents))) {
             string  recoveredContents;
             if (UnitAssert(peer.Receive(recoveredContents))) {
+              UnitAssert(peer.ReceiveWouldBlock(1));
               UnitAssert(recoveredContents == fileContents);
             }
           }
