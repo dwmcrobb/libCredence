@@ -173,6 +173,17 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
+    bool Peer::ReceiveWouldBlock(size_t numBytes)
+    {
+      if (_ios) {
+        return (Utils::BytesReady(_ios->socket()) < numBytes);
+      }
+      return false;
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
     std::string Peer::EndPointString() const
     {
       return Utils::EndPointString(_endPoint);

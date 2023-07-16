@@ -1,3 +1,10 @@
+2023-07-16  Daniel W. McRobb  <dwm@mcplex.net>
+
+	* tagged as libDwmCredence-0.1.17
+	
+	* classes/include/DwmCredencePeer.hh, classes/src/DwmCredencePeer.cc:
+	Added Peer::ReceiveWouldBlock(size_t numBytes)
+
 2023-06-24  Daniel McRobb  <dwm@mcplex.net>
 
 	* tagged as libDwmCredence-0.1.16
