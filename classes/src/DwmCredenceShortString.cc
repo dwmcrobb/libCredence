@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2022, 2023
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -36,10 +36,12 @@
 //---------------------------------------------------------------------------
 //!  \file DwmCredenceShortString.cc
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief Dwm::Credence::ShortString class implementation
 //---------------------------------------------------------------------------
 
+#include "DwmSysLogger.hh"
 #include "DwmCredenceShortString.hh"
+#include "DwmCredenceUtils.hh"
 
 namespace Dwm {
 
@@ -87,7 +89,7 @@ namespace Dwm {
     {
       return _s;
     }
-    
+
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
@@ -98,9 +100,13 @@ namespace Dwm {
         uint8_t  len;
         if (is.read((char *)&len, sizeof(len))) {
           if (len) {
-            char  buf[len];
-            if (is.read(buf, len)) {
-              _s.assign(buf, len);
+            try {
+              _s.resize(len);
+              is.read(_s.data(), len);
+            }
+            catch (...) {
+              is.setstate(std::ios_base::badbit);
+              Syslog(LOG_ERR, "Failed to allocate %hhu bytes", len);
             }
           }
         }
