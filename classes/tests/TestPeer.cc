@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2022, 2023
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,12 @@
 //---------------------------------------------------------------------------
 //!  \file TestPeer.cc
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief Unit tests for Dwm::Credence::Peer
 //---------------------------------------------------------------------------
+
+extern "C" {
+  #include <unistd.h>
+}
 
 #include <fstream>
 #include <sstream>
@@ -163,7 +167,16 @@ int main(int argc, char *argv[])
 {
   using namespace boost::asio;
 
-  // Dwm::SysLogger::Open("TestPeer", LOG_PID|LOG_PERROR, LOG_USER);
+  int  optChar;
+  while ((optChar = getopt(argc, argv, "d")) != -1) {
+    switch (optChar) {
+      case 'd':
+        Dwm::SysLogger::Open("TestPeer", LOG_PID|LOG_PERROR, LOG_USER);
+        break;
+      default:
+        break;
+    }
+  }
   
   std::atomic<bool>  serverShouldRun = true;
   std::atomic<bool>  serverIsRunning = false;
