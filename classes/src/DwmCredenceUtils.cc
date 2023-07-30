@@ -87,6 +87,8 @@ namespace Dwm {
         std::size_t  bytesReady = 0;
         while ((bytesReady = BytesReady(sck)) < numBytes) {
           if (Clock::now() > endTime) {
+            Syslog(LOG_DEBUG, "Gave up waiting for %u bytes",
+                   numBytes - bytesReady);
             break;
           }
           else {
