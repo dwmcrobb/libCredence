@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2022, 2023
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,9 @@
 //---------------------------------------------------------------------------
 
 extern "C" {
+  #include <sys/types.h>
+  #include <sys/time.h>
+  #include <sys/resource.h>
   #include <sodium.h>
 }
 
@@ -58,6 +61,24 @@ namespace Dwm {
     namespace XChaCha20Poly1305 {
 
       using namespace std;
+
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
+      static uint64_t GetRlimitData()
+      {
+        uint64_t  rc = 1000000000ULL;
+        struct rlimit  rl;
+        if (0 == getrlimit(RLIMIT_DATA, &rl)) {
+          rc = rl.rlim_max;
+        }
+        return rc;
+      }
+
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
+      uint64_t InBuffer::_maxMessageLength = GetRlimitData();
       
       //----------------------------------------------------------------------
       //!  
@@ -146,17 +167,22 @@ namespace Dwm {
           uint64_t  msgLen;
           if (_is.read((char *)&msgLen, sizeof(msgLen))) {
             msgLen = be64toh(msgLen);
-            try {
-              cipherText.resize(msgLen);
-              if (_is.read(cipherText.data(), msgLen)) {
-                rc = true;
+            if (msgLen <= _maxMessageLength) {
+              try {
+                cipherText.resize(msgLen);
+                if (_is.read(cipherText.data(), msgLen)) {
+                  rc = true;
+                }
+                else {
+                  Syslog(LOG_DEBUG, "Failed to read cipherText");
+                }
               }
-              else {
-                Syslog(LOG_DEBUG, "Failed to read cipherText");
+              catch (...) {
+                Syslog(LOG_ERR, "Failed to allocate %llu bytes", msgLen);
               }
             }
-            catch (...) {
-              Syslog(LOG_ERR, "Failed to allocate %llu bytes", msgLen);
+            else {
+              Syslog(LOG_ERR, "Invalid message length %llu", msgLen);
             }
           }
           else {

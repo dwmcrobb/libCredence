@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2022, 2023
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -85,7 +85,8 @@ namespace Dwm {
         std::istream                  &_is;
         std::string                    _key;
         std::unique_ptr<char_type[]>   _buffer;
-        
+        static uint64_t                _maxMessageLength;
+
         //--------------------------------------------------------------------
         //!  Reads and decrypts the next message from the istream given in the
         //!  first argument of our constructor.  Places the decrypted data in

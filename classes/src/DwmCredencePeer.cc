@@ -138,6 +138,9 @@ namespace Dwm {
     {
       _xos = nullptr;
       _xis = nullptr;
+      if (_ios) {
+        _ios->close();
+      }
       _ios = nullptr;
       _agreedKey.clear();
       return;
@@ -176,7 +179,10 @@ namespace Dwm {
     bool Peer::ReceiveWouldBlock(size_t numBytes)
     {
       if (_ios) {
-        return (Utils::BytesReady(_ios->socket()) < numBytes);
+        ssize_t  bytesReady = Utils::BytesReady(_ios->socket());
+        if ((0 <= bytesReady) && (bytesReady < numBytes)) {
+          return true;
+        }
       }
       return false;
     }

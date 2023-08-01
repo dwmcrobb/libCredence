@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2022, 2023
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -71,12 +71,13 @@ namespace Dwm {
       using BoostTcpSocket =
         boost::asio::basic_socket<boost::asio::ip::tcp, boost::asio::executor>;
 #endif
-      
+
       //----------------------------------------------------------------------
       //!  Returns the number of bytes ready to read (without blocking) from
-      //!  the given socket @c sck.
+      //!  the given socket @c sck.  Returns -1 if there is an error on the
+      //!  socket.
       //----------------------------------------------------------------------
-      static std::size_t BytesReady(BoostTcpSocket & sck);
+      static ssize_t BytesReady(BoostTcpSocket & sck);
 
       //----------------------------------------------------------------------
       //!  Waits for at least @c numBytes to be ready to read (without

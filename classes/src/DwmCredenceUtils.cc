@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2022, 2023
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 extern "C" {
 #if (defined(__unix__) || defined(unix) || defined(__unix)) || defined(__APPLE__)
   #include <sys/types.h>
+  #include <sys/select.h>
   #include <unistd.h>
   #include <pwd.h>
   #if defined(__APPLE__)
@@ -69,11 +70,16 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    std::size_t Utils::BytesReady(BoostTcpSocket & sck)
+    ssize_t Utils::BytesReady(BoostTcpSocket & sck)
     {
-      boost::asio::socket_base::bytes_readable  cmd(true);
-      sck.io_control(cmd);
-      return cmd.get();
+      ssize_t  rc = -1;
+      try {
+        size_t  bytesReady = sck.available();
+        rc = bytesReady;
+      }
+      catch (...) {
+      }
+      return rc;
     }
 
     //------------------------------------------------------------------------
@@ -84,11 +90,15 @@ namespace Dwm {
     {
       bool  rc = false;
       if (sck.is_open()) {
-        std::size_t  bytesReady = 0;
+        ssize_t  bytesReady = 0;
         while ((bytesReady = BytesReady(sck)) < numBytes) {
           if (Clock::now() > endTime) {
             Syslog(LOG_DEBUG, "Gave up waiting for %u bytes",
                    numBytes - bytesReady);
+            break;
+          }
+          else if (bytesReady < 0) {
+            Syslog(LOG_DEBUG, "Error on socket");
             break;
           }
           else {
