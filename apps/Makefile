@@ -1,5 +1,5 @@
 APPS       = credence
-APPLSCLEAN = $(APPS:%=%-clean)
+APPSCLEAN  = $(APPS:%=%-clean)
 TARPREP    = $(APPS:%=%-tarprep)
 
 all:: ${APPS}

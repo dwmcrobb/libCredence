@@ -57,6 +57,8 @@ namespace Dwm {
     class ServerConfig
     {
     public:
+      bool ParseString(const std::string & configString);
+      
       //----------------------------------------------------------------------
       //!  
       //----------------------------------------------------------------------

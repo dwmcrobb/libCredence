@@ -15,7 +15,8 @@ OBJFILESNP   = DwmCredenceAuthenticator.o \
                DwmCredenceKnownKeys.o \
                DwmCredenceKXKeyPair.o \
                DwmCredencePeer.o \
-               DwmCredenceServerConfig.o \
+               DwmCredenceServerConfigLex.o \
+               DwmCredenceServerConfigParse.o \
                DwmCredenceShortString.o \
                DwmCredenceSigner.o \
                DwmCredenceUtils.o \
@@ -27,10 +28,10 @@ OBJFILESNP   = DwmCredenceAuthenticator.o \
 ifeq ($(MAKECMDGOALS),tarprep)
 OBJFILESNP   += DwmCredenceVersion.o
 endif
-OBJFILES     = $(OBJFILESNP:%=../obj/%)
+OBJFILES        = $(OBJFILESNP:%=../obj/%)
 SHARED_OBJFILES = $(OBJFILES:%.o=%.lo)
-OBJDEPS      = $(OBJFILESNP:%.o=deps/%_deps)
-shlib_version = $(shell ../../getvers.sh -s)
+OBJDEPS         = $(OBJFILESNP:%.o=deps/%_deps)
+shlib_version   = $(shell ../../getvers.sh -s)
 
 all: ../lib/libDwmCredence.la
 
@@ -55,6 +56,14 @@ endif
 ../obj/%.lo ../obj/%.o: %.cc deps/%_deps
 	${LTCOMPILE} ${CXXFLAGS} ${PTHREADCXXFLAGS} ${ALLINC} -c $< -o $@
 
+DwmCredenceServerConfigLex.cc: DwmCredenceServerConfigLex.lex DwmCredenceServerConfigParse.hh
+	flex -o$@ $<
+
+DwmCredenceServerConfigParse.hh: DwmCredenceServerConfigParse.cc
+
+DwmCredenceServerConfigParse.cc: DwmCredenceServerConfigParse.y
+	bison -d -o$@ $<
+
 tarprep: ${TARDIR}/lib/libDwmCredence.la
 
 ${TARDIR}/lib/libDwmCredence.la: ../lib/libDwmCredence.la
@@ -62,6 +71,8 @@ ${TARDIR}/lib/libDwmCredence.la: ../lib/libDwmCredence.la
 
 clean:: clean-tarprep
 	${LTCLEAN} ../lib/libDwmCredence.la ${SHARED_OBJFILES}
+	${LTCLEAN} DwmCredenceServerConfigParse.hh DwmCredenceServerConfigParse.cc \
+	  DwmCredenceServerConfigLex.cc
 
 distclean:: clean
 	rm -f deps/*_deps
