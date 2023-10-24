@@ -1,1 +1,4 @@
 *~
+DwmCredenceServerConfigLex.cc
+DwmCredenceServerConfigParse.cc
+DwmCredenceServerConfigParse.hh
