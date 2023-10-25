@@ -1,16 +1,21 @@
-2023-10-24  Daniel McRobb  <dwm@mcplex.net>
+2023-10-24  Daniel McRobb  <dwm@spark.mcplex.net>
+
+	* tagged as libDwmCredence-0.1.21
 
 	* classes/src/DwmCredenceServerConfigParse.y:
-	Correct type of second argument to credenceservercfg_scan_bytes().
+	Type of second argument to credenceservercfg_scan_bytes() is
+	different for different versions of flex. :-(  Update all of
+	my hosts to at least flex 2.6.4 so I have consistent 'int'
+	as second argument type.
 
-2023-10-24  Daniel McRobb  <dwm@mcplex.net>
+2023-10-24  Daniel McRobb  <dwm@spark.mcplex.net>
 
 	* tagged as libDwmCredence-0.1.20
 
 	* Added classes/src/DwmCredenceServerConfigLex.lex and
 	DwmCredenceServerConfigParse.y
 
-2023-10-23  Daniel McRobb  <dwm@mcplex.net>
+2023-10-23  Daniel McRobb  <dwm@spark.mcplex.net>
 
 	* tagged as libDwmCredence-0.1.19
 
