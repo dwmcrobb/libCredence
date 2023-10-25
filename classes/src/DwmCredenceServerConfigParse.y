@@ -14,9 +14,8 @@
   }
 
   typedef struct yy_buffer_state * YY_BUFFER_STATE;
-  extern YY_BUFFER_STATE credenceservercfg_scan_bytes(const char *, size_t);
+  extern YY_BUFFER_STATE credenceservercfg_scan_bytes(const char *, int);
   extern void credenceservercfg_switch_to_buffer(YY_BUFFER_STATE buffer);
-
 }
 
 %{
