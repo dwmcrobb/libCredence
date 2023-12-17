@@ -60,6 +60,12 @@ namespace Dwm {
                                std::string & agreedKey,
                                std::chrono::milliseconds timeout =
                                std::chrono::milliseconds(1000));
+
+      static bool
+      ExchangeKeys(boost::asio::local::stream_protocol::iostream & s,
+                   std::string & agreedKey,
+                   std::chrono::milliseconds timeout =
+                   std::chrono::milliseconds(1000));
     };
     
   }  // namespace Credence

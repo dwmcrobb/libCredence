@@ -85,6 +85,14 @@ namespace Dwm {
       //!  (via Boost::asio::ip::tcp::acceptor::accept()).
       //----------------------------------------------------------------------
       bool Accept(boost::asio::ip::tcp::socket && s);
+
+      //----------------------------------------------------------------------
+      //!  Used by a server to accept a new connection.  Returns true on
+      //!  success, false on failure.  Note that @c s is expected to be
+      //!  a socket that was already accepted
+      //!  (via Boost::asio::local::stream_protocol::acceptor::accept()).
+      //----------------------------------------------------------------------
+      bool Accept(boost::asio::local::stream_protocol::socket && s);
       
       //----------------------------------------------------------------------
       //!  Used by a client to connect to @c host at the given @c port,
@@ -94,6 +102,12 @@ namespace Dwm {
       bool Connect(const std::string & host, uint16_t port,
                    std::chrono::milliseconds timeOut = std::chrono::milliseconds(5000));
 
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
+      bool Connect(const std::string & path,
+                   std::chrono::milliseconds timeOut = std::chrono::milliseconds(5000));
+      
       //----------------------------------------------------------------------
       //!  Sets the time we'll wait for the peer to send its ID during
       //!  authentication.  If not set, a default of 1000 milliseconds
@@ -196,12 +210,13 @@ namespace Dwm {
       std::chrono::milliseconds                        _keyExchangeTimeout;
       std::chrono::milliseconds                        _idExchangeTimeout;
       boost::asio::ip::tcp::endpoint                   _endPoint;
+      boost::asio::local::stream_protocol::endpoint    _lendPoint;
       std::string                                      _theirId;
       std::string                                      _agreedKey;
       std::unique_ptr<boost::asio::ip::tcp::iostream>  _ios;
+      std::unique_ptr<boost::asio::local::stream_protocol::iostream>  _lios;
       std::unique_ptr<XChaCha20Poly1305::Istream>      _xis;
       std::unique_ptr<XChaCha20Poly1305::Ostream>      _xos;
-
     };
     
   }  // namespace Credence

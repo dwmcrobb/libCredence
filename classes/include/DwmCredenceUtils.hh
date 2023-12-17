@@ -66,10 +66,18 @@ namespace Dwm {
       using TimePoint = std::chrono::time_point<Clock>;
 #if BOOST_VERSION >= 107400
       using BoostTcpSocket =
-        boost::asio::basic_socket<boost::asio::ip::tcp, boost::asio::any_io_executor>;
+        boost::asio::basic_socket<boost::asio::ip::tcp,
+                                  boost::asio::any_io_executor>;
+      using BoostUnixSocket =
+        boost::asio::basic_socket<boost::asio::local::stream_protocol,
+                                  boost::asio::any_io_executor>;
 #else
       using BoostTcpSocket =
-        boost::asio::basic_socket<boost::asio::ip::tcp, boost::asio::executor>;
+        boost::asio::basic_socket<boost::asio::ip::tcp,
+                                  boost::asio::executor>;
+      using BoostUnixSocket =
+        boost::asio::basic_socket<boost::asio::local::stream_protocol,
+                                  boost::asio::executor>;
 #endif
 
       //----------------------------------------------------------------------
@@ -78,6 +86,7 @@ namespace Dwm {
       //!  socket.
       //----------------------------------------------------------------------
       static ssize_t BytesReady(BoostTcpSocket & sck);
+      static ssize_t BytesReady(BoostUnixSocket & sck);
 
       //----------------------------------------------------------------------
       //!  Waits for at least @c numBytes to be ready to read (without
@@ -86,6 +95,8 @@ namespace Dwm {
       //!  returns true.
       //----------------------------------------------------------------------
       static bool WaitUntilBytesReady(BoostTcpSocket & sck,
+                                      uint32_t numBytes, TimePoint endTime);
+      static bool WaitUntilBytesReady(BoostUnixSocket & sck,
                                       uint32_t numBytes, TimePoint endTime);
 
       //----------------------------------------------------------------------
@@ -96,12 +107,17 @@ namespace Dwm {
       //----------------------------------------------------------------------
       static bool WaitForBytesReady(BoostTcpSocket & sck, uint32_t numBytes,
                                     std::chrono::milliseconds timeout);
+      static bool WaitForBytesReady(BoostUnixSocket & sck, uint32_t numBytes,
+                                    std::chrono::milliseconds timeout);
 
       //----------------------------------------------------------------------
       //!  
       //----------------------------------------------------------------------
       static ssize_t
       ReadLengthRestrictedString(boost::asio::ip::tcp::socket & sck,
+                                 std::string & s, uint64_t maxLen);
+      static ssize_t
+      ReadLengthRestrictedString(boost::asio::local::stream_protocol::socket & sck,
                                  std::string & s, uint64_t maxLen);
       
       //----------------------------------------------------------------------
@@ -116,6 +132,10 @@ namespace Dwm {
       //----------------------------------------------------------------------
       static ssize_t
       ReadLengthRestrictedString(boost::asio::ip::tcp::socket & sck,
+                                 std::string & s, uint64_t maxLen,
+                                 TimePoint endTime);
+      static ssize_t
+      ReadLengthRestrictedString(boost::asio::local::stream_protocol::socket & sck,
                                  std::string & s, uint64_t maxLen,
                                  TimePoint endTime);
 

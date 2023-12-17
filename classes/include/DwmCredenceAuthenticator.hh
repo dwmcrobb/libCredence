@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2022, 2023
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -85,17 +85,35 @@ namespace Dwm {
                         const std::string & agreedKey,
                         std::string & theirId);
 
+      //----------------------------------------------------------------------
+      //!  Authenticate the peer connected to @c s using the previously
+      //!  negotiated encryption key @c agreedKey to encrypt and decrypt all
+      //!  communication.  For success, the peer's public key must be in our
+      //!  KnownKeys and the peer must be able to properly sign a random
+      //!  challenge we transmit to them.  In addition, our public key must
+      //!  be in the peer's KnownKeys and we must be able to properly sign a
+      //!  random challenge received from the peer.
+      //!  Returns true on success and sets @c theirId to the ID of the peer.
+      //----------------------------------------------------------------------
+      bool Authenticate(boost::asio::local::stream_protocol::iostream & s,
+                        const std::string & agreedKey,
+                        std::string & theirId);
+      
     private:
-      KeyStash                                     _keyStash;
-      KnownKeys                                    _knownKeys;
-      std::chrono::milliseconds                    _timeout;
-      boost::asio::ip::tcp::endpoint               _endPoint;
-      std::unique_ptr<XChaCha20Poly1305::Ostream>  _xos;
-      std::unique_ptr<XChaCha20Poly1305::Istream>  _xis;
+      KeyStash                                        _keyStash;
+      KnownKeys                                       _knownKeys;
+      std::chrono::milliseconds                       _timeout;
+      boost::asio::ip::tcp::endpoint                  _endPoint;
+      boost::asio::local::stream_protocol::endpoint   _lendPoint;
+      std::unique_ptr<XChaCha20Poly1305::Ostream>     _xos;
+      std::unique_ptr<XChaCha20Poly1305::Istream>     _xis;
 
       bool ExchangeIds(boost::asio::ip::tcp::iostream & s,
                        Ed25519KeyPair & myKeys,
                        ShortString & theirId,
+                       std::string & theirPubKey);
+      bool ExchangeIds(boost::asio::local::stream_protocol::iostream & s,
+                       Ed25519KeyPair & myKeys, ShortString & theirId,
                        std::string & theirPubKey);
       bool ExchangeChallenges(const std::string & ourSecretKey,
                               const std::string & theirId,

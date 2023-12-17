@@ -57,8 +57,8 @@ namespace Dwm {
     //------------------------------------------------------------------------
     Peer::Peer()
         : _keyExchangeTimeout(1000), _idExchangeTimeout(1000), _endPoint(),
-          _theirId(), _agreedKey(), _ios(nullptr), _xis(nullptr),
-          _xos(nullptr)
+          _theirId(), _agreedKey(), _ios(nullptr), _lios(nullptr),
+          _xis(nullptr), _xos(nullptr)
     { }
 
     //------------------------------------------------------------------------
@@ -70,8 +70,6 @@ namespace Dwm {
       return;
     }
 
-    //------------------------------------------------------------------------
-    //!  
     //------------------------------------------------------------------------
     bool Peer::Accept(boost::asio::ip::tcp::socket && s)
     {
@@ -96,7 +94,28 @@ namespace Dwm {
     }
 
     //------------------------------------------------------------------------
-    //!  
+    bool Peer::Accept(boost::asio::local::stream_protocol::socket && s)
+    {
+      using XChaCha20Poly1305::Istream, XChaCha20Poly1305::Ostream;
+      
+      bool  rc = false;
+      _agreedKey.clear();
+      _lios = make_unique<boost::asio::local::stream_protocol::iostream>(std::move(s));
+      if (nullptr != _lios) {
+        boost::system::error_code  ec;
+        _lendPoint = _lios->socket().remote_endpoint(ec);
+        if (! ec) {
+          if (KeyExchanger::ExchangeKeys(*_lios, _agreedKey,
+                                         _keyExchangeTimeout)) {
+            _xis = make_unique<Istream>(*_lios, _agreedKey);
+            _xos = make_unique<Ostream>(*_lios, _agreedKey);
+            rc = ((nullptr != _xis) && (nullptr != _xos));
+          }
+        }
+      }
+      return rc;
+    }
+    
     //------------------------------------------------------------------------
     bool Peer::Connect(const string & host, uint16_t port,
                        std::chrono::milliseconds timeOut)
@@ -132,6 +151,39 @@ namespace Dwm {
     }
 
     //------------------------------------------------------------------------
+    bool Peer::Connect(const string & path, std::chrono::milliseconds timeOut)
+    {
+      using namespace boost::asio;
+        
+      bool  rc = false;
+      _agreedKey.clear();
+      if (nullptr == _lios) {
+        _lios = make_unique<local::stream_protocol::iostream>();
+        if (nullptr != _lios) {
+          _lios->expires_from_now(timeOut);
+          try {
+            _lios->connect(local::stream_protocol::endpoint(path.c_str()));
+          }
+          catch (...) {
+            _lios = nullptr;
+            return rc;
+          }
+          boost::system::error_code  ec;
+          _lendPoint = _lios->socket().remote_endpoint(ec);
+          if (! ec) {
+            if (KeyExchanger::ExchangeKeys(*_lios, _agreedKey,
+                                           _keyExchangeTimeout)) {
+              _xis = make_unique<XChaCha20Poly1305::Istream>(*_lios, _agreedKey);
+              _xos = make_unique<XChaCha20Poly1305::Ostream>(*_lios, _agreedKey);
+              rc = ((nullptr != _xis) && (nullptr != _xos));
+            }
+          }
+        }
+      }
+      return rc;
+    }
+    
+    //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
     void Peer::Disconnect()
@@ -140,8 +192,12 @@ namespace Dwm {
       _xis = nullptr;
       if (_ios) {
         _ios->close();
+        _ios = nullptr;
       }
-      _ios = nullptr;
+      if (_lios) {
+        _lios->close();
+        _lios = nullptr;
+      }
       _agreedKey.clear();
       return;
     }
@@ -170,6 +226,13 @@ namespace Dwm {
           rc = true;
         }
       }
+      else if (_lios) {
+        Authenticator  authenticator(keyStash, knownKeys);
+        authenticator.SetIdExchangeTimeout(_idExchangeTimeout);
+        if (authenticator.Authenticate(*_lios, _agreedKey, _theirId)) {
+          rc = true;
+        }
+      }
       return rc;
     }
 
@@ -184,6 +247,12 @@ namespace Dwm {
           return true;
         }
       }
+      else if (_lios) {
+        ssize_t  bytesReady = Utils::BytesReady(_lios->socket());
+        if ((0 <= bytesReady) && (bytesReady < numBytes)) {
+          return true;
+        }
+      }
       return false;
     }
 
@@ -192,7 +261,14 @@ namespace Dwm {
     //------------------------------------------------------------------------
     std::string Peer::EndPointString() const
     {
-      return Utils::EndPointString(_endPoint);
+      std::string  rc;
+      if (_ios) {
+        rc = Utils::EndPointString(_endPoint);
+      }
+      else if (_lios) {
+        rc = _lendPoint.path();
+      }
+      return rc;
     }
     
     

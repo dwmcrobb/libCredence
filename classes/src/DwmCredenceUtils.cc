@@ -68,9 +68,8 @@ namespace Dwm {
     using namespace std;
 
     //------------------------------------------------------------------------
-    //!  
-    //------------------------------------------------------------------------
-    ssize_t Utils::BytesReady(BoostTcpSocket & sck)
+    template <typename SocketT>
+    ssize_t ASIO_BytesReady(SocketT & sck)
     {
       ssize_t  rc = -1;
       try {
@@ -81,18 +80,25 @@ namespace Dwm {
       }
       return rc;
     }
+    
+    //------------------------------------------------------------------------
+    ssize_t Utils::BytesReady(BoostTcpSocket & sck)
+    { return ASIO_BytesReady(sck); }
 
     //------------------------------------------------------------------------
-    //!  
+    ssize_t Utils::BytesReady(BoostUnixSocket & sck)
+    { return ASIO_BytesReady(sck); }
+
     //------------------------------------------------------------------------
-    bool Utils::WaitUntilBytesReady(BoostTcpSocket & sck,
-                                    uint32_t numBytes, TimePoint endTime)
+    template <typename SocketT>
+    bool ASIO_WaitUntilBytesReady(SocketT & sck,
+                                  uint32_t numBytes, Utils::TimePoint endTime)
     {
       bool  rc = false;
       if (sck.is_open()) {
         ssize_t  bytesReady = 0;
-        while ((bytesReady = BytesReady(sck)) < numBytes) {
-          if (Clock::now() > endTime) {
+        while ((bytesReady = Utils::BytesReady(sck)) < numBytes) {
+          if (Utils::Clock::now() > endTime) {
             Syslog(LOG_DEBUG, "Gave up waiting for %u bytes",
                    numBytes - bytesReady);
             break;
@@ -109,16 +115,27 @@ namespace Dwm {
       }
       return rc;
     }
+      
+    //------------------------------------------------------------------------
+    bool Utils::WaitUntilBytesReady(BoostTcpSocket & sck, uint32_t numBytes,
+                                    TimePoint endTime)
+    { return ASIO_WaitUntilBytesReady(sck, numBytes, endTime); }
 
     //------------------------------------------------------------------------
-    //!  
+    bool Utils::WaitUntilBytesReady(BoostUnixSocket & sck, uint32_t numBytes,
+                                    TimePoint endTime)
+    { return ASIO_WaitUntilBytesReady(sck, numBytes, endTime); }
+    
     //------------------------------------------------------------------------
     bool Utils::WaitForBytesReady(BoostTcpSocket & sck,
                                   uint32_t numBytes,
                                   std::chrono::milliseconds timeout)
-    {
-      return WaitUntilBytesReady(sck, numBytes, Clock::now() + timeout);
-    }
+    { return WaitUntilBytesReady(sck, numBytes, Clock::now() + timeout); }
+
+    //------------------------------------------------------------------------
+    bool Utils::WaitForBytesReady(BoostUnixSocket & sck, uint32_t numBytes,
+                                  std::chrono::milliseconds timeout)
+    { return WaitUntilBytesReady(sck, numBytes, Clock::now() + timeout); }
 
     //------------------------------------------------------------------------
     //!  

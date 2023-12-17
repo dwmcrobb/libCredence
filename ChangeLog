@@ -1,7 +1,23 @@
+2023-12-16  Daniel McRobb  <dwm@spark.mcplex.net>
+
+	* classes/include/DwmCredenceAuthenticator.hh,
+	classes/include/DwmCredenceKeyExchanger.hh,
+	classes/include/DwmCredencePeer.hh,
+	classes/include/DwmCredenceUtils.hh,
+	classes/src/DwmCredenceAuthenticator.cc,
+	classes/src/DwmCredenceKeyExchanger.cc,
+	classes/src/DwmCredencePeer.cc, classes/src/DwmCredenceUtils.cc,
+	classes/tests/TestChallenge.cc, classes/tests/TestPeer.cc,
+	configure, configure.ac:
+
+	Added support for boost::asio::local::stream_protocol::socket.
+	Not ideal at the moment since I duplicated the streams, but it
+	works.  Requires C++20 due to libDwm now requiring it.
+
 2023-10-27  Daniel McRobb  <dwm@spark.mcplex.net>
 
 	* tagged as libDwmCredence-0.1.22
-	
+
 	* Makefile: use correct identifier when building package on macOS:
 	net.mcplex.libDwmCredence
 

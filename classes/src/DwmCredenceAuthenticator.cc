@@ -53,15 +53,11 @@ namespace Dwm {
     using namespace std;
     
     //------------------------------------------------------------------------
-    //!  
-    //------------------------------------------------------------------------
     Authenticator::Authenticator(const KeyStash & keyStash,
                                  const KnownKeys & knownKeys)
         : _keyStash(keyStash), _knownKeys(knownKeys)
     {}
 
-    //------------------------------------------------------------------------
-    //!  
     //------------------------------------------------------------------------
     bool Authenticator::Authenticate(boost::asio::ip::tcp::iostream & s,
                                      const std::string & agreedKey,
@@ -97,7 +93,39 @@ namespace Dwm {
     }
 
     //------------------------------------------------------------------------
-    //!  
+    bool Authenticator::
+    Authenticate(boost::asio::local::stream_protocol::iostream & s,
+                 const std::string & agreedKey, string & theirId)
+    {
+      bool  rc = false;
+      theirId.clear();
+      if (s.socket().is_open()) {
+        boost::system::error_code  ec;
+        _lendPoint = s.socket().remote_endpoint(ec);
+        if (! ec) {
+          _xis = make_unique<XChaCha20Poly1305::Istream>(s, agreedKey);
+          _xos = make_unique<XChaCha20Poly1305::Ostream>(s, agreedKey);
+          if ((nullptr != _xis) && (nullptr != _xos)) {
+            Ed25519KeyPair  myKeys;
+            ShortString     theirIdShort;
+            string          theirPubKey;
+            if (ExchangeIds(s, myKeys, theirIdShort, theirPubKey)) {
+              if (ExchangeChallenges(myKeys.SecretKey(), theirIdShort.Value(),
+                                     theirPubKey)) {
+                theirId = theirIdShort.Value();
+                rc = true;
+              }
+            }
+          }
+        }
+        else {
+          Syslog(LOG_ERR, "Failed to get remote_endpoint");
+        }
+      }
+      
+      return rc;
+    }
+    
     //------------------------------------------------------------------------
     void Authenticator::SetIdExchangeTimeout(std::chrono::milliseconds ms)
     {
@@ -105,8 +133,6 @@ namespace Dwm {
       return;
     }
 
-    //------------------------------------------------------------------------
-    //!  
     //------------------------------------------------------------------------
     bool Authenticator::ExchangeIds(boost::asio::ip::tcp::iostream & s,
                                     Ed25519KeyPair & myKeys,
@@ -135,6 +161,49 @@ namespace Dwm {
           else {
             Syslog(LOG_ERR, "Peer at %s failed to send ID within %lld"
                    " milliseconds", EndPointString().c_str(), _timeout.count());
+          }
+        }
+        else {
+          Syslog(LOG_ERR, "Failed to send ID to peer at %s",
+                 EndPointString().c_str());
+        }
+      }
+      else {
+        Syslog(LOG_ERR, "Failed to get my keys from KeyStash in '%s'",
+               _keyStash.DirName().c_str());
+      }
+      return rc;
+    }
+
+    //------------------------------------------------------------------------
+    bool Authenticator::
+    ExchangeIds(boost::asio::local::stream_protocol::iostream & s,
+                Ed25519KeyPair & myKeys, ShortString & theirId,
+                string & theirPubKey)
+    {
+      bool  rc = false;
+      if (_keyStash.Get(myKeys)) {
+        if (Send(myKeys.Id())) {
+          uint32_t  minBytes = crypto_secretbox_NONCEBYTES
+            + crypto_aead_xchacha20poly1305_ietf_ABYTES + 1;
+          if (Utils::WaitForBytesReady(s.socket(), minBytes, _timeout)) {
+            if (Receive(theirId)) {
+              theirPubKey = _knownKeys.Find(theirId.Value());
+              rc = (! theirPubKey.empty());
+              if (! rc) {
+                Syslog(LOG_ERR, "Unknown ID %s from peer at %s",
+                       theirId.Value().c_str(), EndPointString().c_str());
+              }
+            }
+            else {
+              Syslog(LOG_ERR, "Failed to read ID from peer at %s",
+                     EndPointString().c_str());
+            }
+          }
+          else {
+            Syslog(LOG_ERR, "Peer at %s failed to send ID within %lld"
+                   " milliseconds", EndPointString().c_str(),
+                   _timeout.count());
           }
         }
         else {

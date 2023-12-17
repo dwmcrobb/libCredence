@@ -106,6 +106,51 @@ void ServerThread(const std::string & plaintext,
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
+void UnixServerThread(const std::string & plaintext,
+                      const std::atomic<bool> & shouldRun,
+                      std::atomic<bool> & running)
+{
+  using namespace boost::asio;
+
+  io_context                 ioContext;
+  boost::system::error_code  ec;
+  local::stream_protocol::endpoint  endPoint("./TestPeer.sock");
+  local::stream_protocol::acceptor  acc(ioContext, endPoint);
+  acc.non_blocking(true, ec);
+
+  local::stream_protocol::socket    sock(ioContext);
+  while (shouldRun) {
+    acc.accept(sock, ec);
+    running = true;
+    if (ec != boost::asio::error::would_block) {
+      break;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+  }
+  if (! ec) {
+    sock.native_non_blocking(false, ec);
+    Credence::Peer       peer;
+    if (UnitAssert(peer.Accept(std::move(sock)))) {
+      Credence::KeyStash   keyStash("./inputs");
+      Credence::KnownKeys  knownKeys("./inputs");
+      if (UnitAssert(peer.Authenticate(keyStash, knownKeys))) {
+        UnitAssert(peer.Id() == "test@mcplex.net");
+        string  receivedtext;
+        if (UnitAssert(peer.Receive(receivedtext))) {
+          UnitAssert(plaintext == receivedtext);
+          UnitAssert(peer.ReceiveWouldBlock(1));
+        }
+        UnitAssert(peer.Send(receivedtext));
+      }
+    }
+  }
+  running = false;
+  return;
+}
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
 void ServerThread2(const std::string & plaintext,
                    const std::atomic<bool> & shouldRun,
                    std::atomic<bool> & running)
@@ -139,6 +184,42 @@ void ServerThread2(const std::string & plaintext,
   return;
 }
 
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+void UnixServerThread2(const std::string & plaintext,
+                       const std::atomic<bool> & shouldRun,
+                       std::atomic<bool> & running)
+{
+  using namespace boost::asio;
+
+  io_context                        ioContext;
+  boost::system::error_code         ec;
+  local::stream_protocol::endpoint  endPoint("./TestPeer.sock");
+  local::stream_protocol::acceptor  acc(ioContext, endPoint);
+  acc.non_blocking(true, ec);
+
+  local::stream_protocol::socket    sock(ioContext);
+  while (shouldRun) {
+    acc.accept(sock, ec);
+    running = true;
+    if (ec != boost::asio::error::would_block) {
+      break;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+  }
+  if (! ec) {
+    sock.native_non_blocking(false, ec);
+    Credence::Peer       peer;
+    UnitAssert(peer.Accept(std::move(sock)));
+  }
+  running = false;
+  return;
+}
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
 void TestServer()
 {}
 
@@ -158,6 +239,60 @@ bool GetFileContents(string & fileContents)
     rc = true;
   }
   return rc;
+}
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+void TestUnixSocket()
+{
+  std::atomic<bool>  serverShouldRun = true;
+  std::atomic<bool>  serverIsRunning = false;
+  
+  string  fileContents;
+  if (UnitAssert(GetFileContents(fileContents))) {
+    std::thread  serverThread(UnixServerThread, fileContents,
+                              std::ref(serverShouldRun),
+                              std::ref(serverIsRunning));
+    while (! serverIsRunning) { }
+    Credence::Peer  peer;
+    if (UnitAssert(peer.Connect("./TestPeer.sock"))) {
+      Credence::KeyStash   keyStash("./inputs");
+      Credence::KnownKeys  knownKeys("./inputs");
+      if (UnitAssert(peer.Authenticate(keyStash, knownKeys))) {
+        if (UnitAssert(peer.Id() == "test@mcplex.net")) {
+          if (UnitAssert(peer.Send(fileContents))) {
+            string  recoveredContents;
+            if (UnitAssert(peer.Receive(recoveredContents))) {
+              UnitAssert(peer.ReceiveWouldBlock(1));
+              UnitAssert(recoveredContents == fileContents);
+            }
+          }
+        }
+      }
+      peer.Disconnect();
+    }
+    serverShouldRun = false;
+    serverThread.join();
+    unlink("./TestPeer.sock");
+    
+    serverShouldRun = true;
+    serverIsRunning = false;
+    std::thread  serverThread2(UnixServerThread2, fileContents,
+                               std::ref(serverShouldRun),
+                               std::ref(serverIsRunning));
+    while (! serverIsRunning) { }
+    if (UnitAssert(peer.Connect("./TestPeer.sock"))) {
+      peer.Disconnect();
+      Credence::KeyStash   keyStash("./inputs");
+      Credence::KnownKeys  knownKeys("./inputs");
+      UnitAssert(! peer.Authenticate(keyStash, knownKeys));
+    }
+    serverShouldRun = false;
+    serverThread2.join();
+    unlink("./TestPeer.sock");
+  }
+  return;
 }
 
 //----------------------------------------------------------------------------
@@ -223,6 +358,8 @@ int main(int argc, char *argv[])
     serverThread2.join();
   }
 
+  TestUnixSocket();
+  
   if (Assertions::Total().Failed()) {
     Assertions::Print(cerr, true);
     return 1;

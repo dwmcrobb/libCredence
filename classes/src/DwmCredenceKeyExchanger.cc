@@ -128,6 +128,59 @@ namespace Dwm {
 
       return rc;
     }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool KeyExchanger::
+    ExchangeKeys(boost::asio::local::stream_protocol::iostream & s,
+                 std::string & agreedKey,
+                 std::chrono::milliseconds timeout)
+    {
+      bool  rc = false;
+      agreedKey.clear();
+      if (s.socket().is_open()) {
+        boost::system::error_code  ec;
+        boost::asio::local::stream_protocol::endpoint  endPoint =
+          s.socket().remote_endpoint(ec);
+        if (! ec) {
+          KXKeyPair  kxKeys;
+          if (StreamIO::Write(s, kxKeys.PublicKey())) {
+            s.flush();
+            if (Utils::WaitForBytesReady(s.socket(),
+                                         kxKeys.PublicKeyMinimumStreamedLength(),
+                                         timeout)) {
+              ShortString  theirPubKey;
+              if (StreamIO::Read(s, theirPubKey)) {
+                agreedKey = kxKeys.SharedKey(theirPubKey.Value());
+                rc = true;
+              }
+              else {
+                Syslog(LOG_ERR, "Failed to read public key from %s",
+                       endPoint.path().c_str());
+              }
+            }
+            else {
+              Syslog(LOG_ERR, "Peer at %s failed to send public key within"
+                     " %lld milliseconds",
+                     endPoint.path().c_str(), timeout.count());
+            }
+          }
+          else {
+            Syslog(LOG_ERR, "Failed to send public key to %s",
+                   endPoint.path().c_str());
+          }
+        }
+        else {
+          Syslog(LOG_ERR, "Failed to get endpoint");
+        }
+      }
+      else {
+        Syslog(LOG_ERR, "socket is not open");
+      }
+
+      return rc;
+    }
     
     
   }  // namespace Credence

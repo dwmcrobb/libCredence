@@ -79,15 +79,13 @@ int main(int argc, char *argv[])
   
   Credence::Ed25519KeyPair  keyPair("dwm");
   Credence::Challenge       challenge(true);
-  string                    signedMessage;
+  string                    signedMessage("hello");
   
   if (UnitAssert(Credence::Signer::Sign(challenge,
                                         keyPair.SecretKey(), signedMessage))) {
     Credence::ChallengeResponse  response;
     UnitAssert(response.Create(keyPair.SecretKey(), challenge));
     UnitAssert(response.Verify(keyPair.PublicKey(), challenge));
-    
-    // UnitAssert(challenge.Verify(signedMessage));
   }
 
   TestIO();
