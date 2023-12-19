@@ -1,3 +1,7 @@
+2023-12-19  Daniel W. McRobb  <dwm@depot.mcplex.net>
+
+	* tagged as libDwmCredence-0.1.23
+
 2023-12-16  Daniel McRobb  <dwm@spark.mcplex.net>
 
 	* classes/include/DwmCredenceAuthenticator.hh,
