@@ -1,3 +1,10 @@
+2023-12-28  Daniel McRobb  <dwm@thrip.mcplex.net>
+
+	* tagged as libDwmCredence-0.1.24
+
+	* classes/src/DwmCredencePeer.cc: Tweak EndPointString() so we can
+	still use it after stream is closed.
+
 2023-12-19  Daniel W. McRobb  <dwm@depot.mcplex.net>
 
 	* tagged as libDwmCredence-0.1.23
