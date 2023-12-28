@@ -262,10 +262,10 @@ namespace Dwm {
     std::string Peer::EndPointString() const
     {
       std::string  rc;
-      if (_ios) {
+      if (_endPoint.data()) {
         rc = Utils::EndPointString(_endPoint);
       }
-      else if (_lios) {
+      else if (_lendPoint.data()) {
         rc = _lendPoint.path();
       }
       return rc;
