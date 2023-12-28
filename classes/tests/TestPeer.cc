@@ -307,6 +307,7 @@ int main(int argc, char *argv[])
     switch (optChar) {
       case 'd':
         Dwm::SysLogger::Open("TestPeer", LOG_PID|LOG_PERROR, LOG_USER);
+        Dwm::SysLogger::MinimumPriority(LOG_DEBUG);
         break;
       default:
         break;
