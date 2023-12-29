@@ -1,5 +1,7 @@
 2023-12-29  Daniel McRobb  <dwm@spark.mcplex.net>
 
+	* tagged as libDwmCredence-0.1.24
+
 	* dwm.m4, configure.ac, configure: Add and use new
 	DWM_REQUIRES_DWMPKG macro.
 
