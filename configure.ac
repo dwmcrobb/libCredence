@@ -34,7 +34,6 @@ case $host_os in
     CXXFLAGS="-O2"
     KVMLIB=""
     LDFLAGS="$LDFLAGS"
-    AC_CHECK_LIB(procps, readproctab, [OSLIBS+=" -lprocps"], [exit 1])
     DEBARCH=`dpkg --print-architecture`
     AC_SUBST(DEBARCH)
     ;;
@@ -53,9 +52,6 @@ echo "host_os ${host_os}"
 dnl  Check for C++20
 DWM_CHECK_CPLUSPLUS_20
 
-DWM_CHECK_NEED_LIBATOMIC
-DWM_CHECK_NEED_LIBRT
-
 AC_SUBST(KVMLIB)
 AC_SUBST(LIBTOOL)
 AC_SUBST(OSLIBS)
@@ -69,6 +65,8 @@ DWMLIBS=`pkg-config --libs libDwm`
 AC_SUBST(DWMDIR)
 AC_SUBST(DWMINCS)
 AC_SUBST(DWMLIBS)
+
+DWM_CHECK_NEED_LIBATOMIC
 
 dnl  Look for libtermcap
 AC_LANG_PUSH(C++)
@@ -130,17 +128,12 @@ AC_SUBST(LDFLAGS)
 AC_SUBST(PCAPINC)
 AC_SUBST(PCAPLIB)
 
-DWM_CHECK_STRTOF()
+dnl DWM_CHECK_STRTOF()
 
 DWM_PREREQ_PATH(htmlman,share/htmlman,[HTML manpage path])
 
 DWM_SET_PKGVARS(libDwmCredence,[libDwmCredence-0.0.0])
 DWM_GET_TAG([libDwmCredence])
-
-dnl ------------------------------------------------------------------------
-dnl //  Check for <kvm.h>
-dnl ------------------------------------------------------------------------
-AC_CHECK_HEADER(kvm.h, [AC_DEFINE(HAVE_KVM_H)])
 
 AC_CHECK_PROG([MANDOC], [mandoc], [mandoc], [])
 
