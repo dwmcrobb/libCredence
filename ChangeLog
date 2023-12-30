@@ -1,3 +1,7 @@
+2023-12-29  Daniel McRobb  <dwm@spark.mcplex.net>
+
+	* tagged as libDwmCredence-0.1.27
+
 2023-12-29  dwm  <dwm@nomnom.mcplex.net>
 
 	* configure, configure.ac, dwm.m4: clean up some old cruft just
