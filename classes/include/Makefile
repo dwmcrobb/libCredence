@@ -28,3 +28,4 @@ clean-tarprep::
 	rm -f ${TARPREPHEADERS}
 
 distclean: clean
+	rm -f DwmCredenceVersion.hh

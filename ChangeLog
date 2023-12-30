@@ -1,3 +1,8 @@
+2023-12-29  dwm  <dwm@nomnom.mcplex.net>
+
+	* classes/Makefile, classes/include/Makefile,
+	classes/tests/Makefile: fix 'distclean' target.
+
 2023-12-29  Daniel McRobb  <dwm@spark.mcplex.net>
 
 	* tagged as libDwmCredence-0.1.25
