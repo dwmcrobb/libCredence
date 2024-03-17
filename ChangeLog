@@ -1,3 +1,11 @@
+2024-03-17  dwm  <dwm@ria.mcplex.net>
+
+	* tagged as libDwmCredence-0.1.28
+
+	* classes/src/DwmCredencePeer.cc: Change deprecated
+	expires_from_now() to expires_after().  In Connect(), reset the
+	expiration timeout to 60 seconds after we connect.
+
 2023-12-29  Daniel McRobb  <dwm@spark.mcplex.net>
 
 	* tagged as libDwmCredence-0.1.27
