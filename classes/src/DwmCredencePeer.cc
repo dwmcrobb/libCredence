@@ -127,7 +127,7 @@ namespace Dwm {
       if (nullptr == _ios) {
         _ios = make_unique<ip::tcp::iostream>();
         if (nullptr != _ios) {
-          _ios->expires_from_now(timeOut);
+          _ios->expires_after(timeOut);
           try {
             _ios->connect(host, to_string(port));
           }
@@ -135,6 +135,7 @@ namespace Dwm {
             _ios = nullptr;
             return rc;
           }
+          _ios->expires_after(std::chrono::milliseconds(60000));
           boost::system::error_code  ec;
           _endPoint = _ios->socket().remote_endpoint(ec);
           if (! ec) {
@@ -160,7 +161,7 @@ namespace Dwm {
       if (nullptr == _lios) {
         _lios = make_unique<local::stream_protocol::iostream>();
         if (nullptr != _lios) {
-          _lios->expires_from_now(timeOut);
+          _lios->expires_after(timeOut);
           try {
             _lios->connect(local::stream_protocol::endpoint(path.c_str()));
           }
@@ -168,6 +169,7 @@ namespace Dwm {
             _lios = nullptr;
             return rc;
           }
+          _lios->expires_after(std::chrono::milliseconds(60000));
           boost::system::error_code  ec;
           _lendPoint = _lios->socket().remote_endpoint(ec);
           if (! ec) {
