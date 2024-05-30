@@ -169,12 +169,21 @@ namespace Dwm {
       string  rc;
       if (! s.empty()) {
         size_t   buflen = (s.size() * 3) / 4;
-        uint8_t  buf[buflen];
-        size_t   binlen;
-        if (sodium_base642bin(buf, buflen, s.data(), s.size(),
-                              nullptr, &binlen, nullptr,
-                              sodium_base64_VARIANT_ORIGINAL) == 0) {
-          rc.assign((const char *)buf, binlen);
+        try {
+          rc.resize(buflen);
+          size_t   binlen;
+          if (sodium_base642bin((uint8_t *)rc.data(), buflen, s.data(),
+                                s.size(), nullptr, &binlen, nullptr,
+                                sodium_base64_VARIANT_ORIGINAL) == 0) {
+            rc.resize(binlen);
+          }
+          else {
+            Syslog(LOG_ERR, "sodium_base642bin() failed!");
+            rc.clear();
+          }
+        }
+        catch (...) {
+          Syslog(LOG_ERR, "rc.resize(%zu) failed!", buflen);
         }
       }
       return rc;
@@ -190,10 +199,13 @@ namespace Dwm {
       int    buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
       if (buflen > 0) {
         //  Use password entry for user ID
-        char  buf[buflen];
-        struct passwd  pwd, *result = nullptr;
-        if (getpwuid_r(getuid(), &pwd, buf, buflen, &result) == 0) {
-          rc = pwd.pw_dir;
+        char  *buf = (char *)malloc(buflen);
+        if (buf) {
+          struct passwd  pwd, *result = nullptr;
+          if (getpwuid_r(getuid(), &pwd, buf, buflen, &result) == 0) {
+            rc = pwd.pw_dir;
+          }
+          free(buf);
         }
       }
       else {
@@ -225,10 +237,13 @@ namespace Dwm {
       int    buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
       if (buflen > 0) {
         //  Use password entry for user ID
-        char  buf[buflen];
-        struct passwd  pwd, *result = nullptr;
-        if (getpwuid_r(getuid(), &pwd, buf, buflen, &result) == 0) {
-          rc = pwd.pw_name;
+        char  *buf = (char *)malloc(buflen);
+        if (buf) {
+          struct passwd  pwd, *result = nullptr;
+          if (getpwuid_r(getuid(), &pwd, buf, buflen, &result) == 0) {
+            rc = pwd.pw_name;
+          }
+          free(buf);
         }
       }
       else {
