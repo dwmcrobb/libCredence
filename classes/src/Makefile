@@ -36,13 +36,13 @@ shlib_version   = $(shell ../../getvers.sh -s)
 all: ../lib/libDwmCredence.la
 
 ../lib/libDwmCredence.la: ${SHARED_OBJFILES}
-	${LTLINK} -o $@ $^ -rpath ${INSTALLPREFIX}/lib -version-info ${shlib_version} ${LDFLAGS} ${DWMLIBS} ${SODIUMLIB}
+	${LTLINK} -o $@ $^ -rpath ${INSTALLPREFIX}/lib -version-info ${shlib_version} ${LDFLAGS} ${DWMLIBSONLY} ${SODIUMLIB}
 
 #  dependency rule
 deps/%_deps: %.cc
 	@echo "making dependencies for $<"
 	@set -e; \
-	${CXX} -MM ${CXXFLAGS} ${PTHREADCXXFLAGS} ${ALLINC} -c $< | \
+	${CXX} -MM ${CXXFLAGS} ${ALLINC} -c $< | \
 	 sed 's/\($*\)\.o[ :]*/\1.o $(@D)\/$(@F) : /g' > $@ ; [ -s $@ ] || \
 	 rm -f $@
 
@@ -54,7 +54,7 @@ endif
 endif
 
 ../obj/%.lo ../obj/%.o: %.cc deps/%_deps
-	${LTCOMPILE} ${CXXFLAGS} ${PTHREADCXXFLAGS} ${ALLINC} -c $< -o $@
+	${LTCOMPILE} ${CXXFLAGS} ${ALLINC} -c $< -o $@
 
 DwmCredenceServerConfigLex.cc: DwmCredenceServerConfigLex.lex DwmCredenceServerConfigParse.hh
 	flex -o$@ $<

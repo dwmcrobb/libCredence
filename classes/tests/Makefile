@@ -15,8 +15,8 @@ OBJDEPS	 = $(OBJFILES:%.o=deps/%_deps)
 TESTS	 = $(OBJFILES:%.o=%)
 CXXFLAGS += -g
 LDFLAGS  += -g -Wl,-rpath,${DWMDIR}/lib
-ALLINC   = ${DWMINCS}
-ALLINC   += -I../include -I.
+ALLINC   = -I../include -I.
+ALLINC   += ${DWMINCS}
 ALLLIBS  = ${DWMLIBS} ${SODIUMLIB}
 
 all: ${TESTS}

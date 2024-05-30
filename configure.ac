@@ -59,12 +59,14 @@ AC_SUBST(OSLIBS)
 DWM_REQUIRES_DWMPKG(libDwm,0.9.22)
 
 DWMDIR=`pkg-config --variable=prefix libDwm`
-DWMINCS=`pkg-config --cflags-only-I libDwm`
+DWMINCS=`pkg-config --cflags libDwm`
 DWMLIBS=`pkg-config --libs libDwm`
+DWMLIBSONLY=`pkg-config --libs-only-L --libs-only-l libDwm`
 
 AC_SUBST(DWMDIR)
 AC_SUBST(DWMINCS)
 AC_SUBST(DWMLIBS)
+AC_SUBST(DWMLIBSONLY)
 
 DWM_CHECK_NEED_LIBATOMIC
 
