@@ -1,3 +1,9 @@
+2024-05-29  dwm  <dwm@ria.mcplex.net>
+
+	* classes/src/DwmCredenceUtils.cc:
+	Replace use of variable-length arrays since it's a clang extension
+	(though part of C99, it's not standard C++).
+
 2024-03-17  dwm  <dwm@ria.mcplex.net>
 
 	* tagged as libDwmCredence-0.1.28
