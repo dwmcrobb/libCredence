@@ -26,9 +26,11 @@ deps/%_deps: %.cc
 	 sed 's/\($*\)\.o[ :]*/\1.o $(@D)\/$(@F) : /g' > $@ ; [ -s $@ ] || \
 	 rm -f $@
 
-#  only include dependency makefiles if target is not 'clean'
+#  only include dependency makefiles if target is not 'clean' or 'distclean'
 ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(MAKECMDGOALS),distclean)
 -include ${OBJDEPS}
+endif
 endif
 
 %.o: %.cc deps/%_deps
@@ -49,6 +51,9 @@ ${TARDIR}/${HTMLMAN}/html1/credence.1.html: credence.1
 	${MANHTML} $< > $<.html
 	../../install-sh -c -m 644 $<.html $@
 	rm $<.html
+
+distclean:: clean
+	rm -f ${OBJDEPS}
 
 clean: clean-tarprep
 	${LIBTOOL} --mode=clean rm -f credence ${OBJFILES}

@@ -1,3 +1,8 @@
+2024-06-01  Daniel W. McRobb  <dwm@kiva.mcplex.net>
+
+	* Makefile, apps/Makefile, apps/credence/Makefile: Fix up
+	'distclean' target.
+
 2024-05-30  dwm  <dwm@nomnom.mcplex.net>
 
 	* tagged as libDwmCredence-0.1.29

@@ -36,6 +36,7 @@ clean::
 	${MAKE} -C classes $@
 
 distclean:: clean
+	${MAKE} -C apps $@
 	${MAKE} -C classes $@
 	${MAKE} -C doc $@
 	${MAKE} -C packaging $@
