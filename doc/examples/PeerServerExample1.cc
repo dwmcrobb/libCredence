@@ -4,6 +4,7 @@ using namespace std;
 using namespace boost::asio;
 using namespace Dwm;
 
+//----------------------------------------------------------------------------
 static bool AcceptPeer(io_context & ioContext, const string & addr,
                        const string & port, Credence::Peer & peer)
 {
@@ -33,7 +34,7 @@ static bool AcceptPeer(io_context & ioContext, const string & addr,
   return rc;
 }
 
-
+//----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
   if (argc < 3) {
@@ -48,12 +49,12 @@ int main(int argc, char *argv[])
     Credence::KeyStash   keyStash;
     Credence::KnownKeys  knownKeys;
     if (peer.Authenticate(keyStash, knownKeys)) {
+      rc = 0;
       string  msg;
       do {
-        if (! peer.Receive(msg)) { break; }
-        if (! peer.Send(msg))    { break; }
+        if (! peer.Receive(msg)) { rc = 1; break; }
+        if (! peer.Send(msg))    { rc = 1; break; }
       } while (msg != "Goodbye");
-      rc = 0;
     }
     else {
       cerr << "Authentication failed\n";
