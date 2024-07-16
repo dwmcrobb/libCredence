@@ -1,3 +1,7 @@
+2024-07-16  Daniel W. McRobb  <dwm@spark.mcplex.net>
+
+	* classes/include/DwmCredencePeer.hh: Tweak documentation comments.
+
 2024-06-01  Daniel W. McRobb  <dwm@kiva.mcplex.net>
 
 	* tagged as libDwmCredence-0.1.30

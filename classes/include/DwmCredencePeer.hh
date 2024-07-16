@@ -60,7 +60,8 @@ namespace Dwm {
     //!  Encapsulate a network peer.
     //!  Note that once a connection is set up with Accept() or Connect(),
     //!  all traffic will be encrypted with XChacha20Poly1305.
-    //!  Identity authentication is optional but highly recommended, as I
+    //!  Identity authentication (via the Authenticate() member function)
+    //!  after Accept() or Connect() is optional but highly recommended, as I
     //!  don't have any production code that doesn't use it.
     //------------------------------------------------------------------------
     class Peer
@@ -79,17 +80,17 @@ namespace Dwm {
       void SetKeyExchangeTimeout(std::chrono::milliseconds ms);
       
       //----------------------------------------------------------------------
-      //!  Used by a server to accept a new connection.  Returns true on
-      //!  success, false on failure.  Note that @c s is expected to be
-      //!  a socket that was already accepted
+      //!  Used by a server to accept a new connection on the given TCP socket
+      //!  @c s.  Returns true on success, false on failure.  Note that @c s
+      //!  is expected to be a socket that was already accepted
       //!  (via Boost::asio::ip::tcp::acceptor::accept()).
       //----------------------------------------------------------------------
       bool Accept(boost::asio::ip::tcp::socket && s);
 
       //----------------------------------------------------------------------
-      //!  Used by a server to accept a new connection.  Returns true on
-      //!  success, false on failure.  Note that @c s is expected to be
-      //!  a socket that was already accepted
+      //!  Used by a server to accept a new connection on the given UNIX
+      //!  domain socket @c s.  Returns true on success, false on failure.
+      //!  Note that @c s is expected to be a socket that was already accepted
       //!  (via Boost::asio::local::stream_protocol::acceptor::accept()).
       //----------------------------------------------------------------------
       bool Accept(boost::asio::local::stream_protocol::socket && s);
@@ -103,7 +104,9 @@ namespace Dwm {
                    std::chrono::milliseconds timeOut = std::chrono::milliseconds(5000));
 
       //----------------------------------------------------------------------
-      //!  
+      //!  Used by a client to connect to a UNIX domain socket at the given
+      //!  @c path, waiting @c timeOut for success.  Returns true on success,
+      //!  false on failure.
       //----------------------------------------------------------------------
       bool Connect(const std::string & path,
                    std::chrono::milliseconds timeOut = std::chrono::milliseconds(5000));
