@@ -49,11 +49,10 @@ int main(int argc, char *argv[])
     Credence::KnownKeys  knownKeys;
     if (peer.Authenticate(keyStash, knownKeys)) {
       string  msg;
-      while (msg != "Goodbye") {
+      do {
         if (! peer.Receive(msg)) { break; }
         if (! peer.Send(msg))    { break; }
-      }
-      peer.Send(msg);
+      } while (msg != "Goodbye");
       rc = 0;
     }
     else {
