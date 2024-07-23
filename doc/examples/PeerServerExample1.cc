@@ -5,32 +5,36 @@ using namespace boost::asio;
 using namespace Dwm;
 
 //----------------------------------------------------------------------------
+static ip::tcp::socket AcceptSocket(io_context & ioContext,
+                                    const string & addr, uint16_t port)
+{
+  ip::tcp::endpoint  endPoint(ip::address::from_string(addr), port);
+  ip::tcp::acceptor  acc(ioContext, endPoint);
+  boost::asio::ip::tcp::acceptor::reuse_address  option(true);
+  acc.set_option(option);
+  acc.non_blocking(false);
+
+  ip::tcp::endpoint  client;
+  ip::tcp::socket    sock(ioContext);
+  acc.accept(sock, client);
+  sock.native_non_blocking(false);
+  return sock;
+}
+
+//----------------------------------------------------------------------------
 static bool AcceptPeer(io_context & ioContext, const string & addr,
                        const string & port, Credence::Peer & peer)
 {
-  bool                       rc = false;
-  boost::system::error_code  ec;
-  ip::tcp::endpoint          endPoint(ip::address::from_string(addr),
-                                      std::stoul(port));
-  ip::tcp::acceptor          acc(ioContext, endPoint);
-  boost::asio::ip::tcp::acceptor::reuse_address option(true);
-  acc.set_option(option, ec);
-  if (! ec) {
-    acc.non_blocking(false, ec);
-    if (! ec) {
-      ip::tcp::socket    sock(ioContext);
-      ip::tcp::endpoint  client;
-      acc.accept(sock, client, ec);
-      if (! ec) {
-        sock.native_non_blocking(false, ec);
-        rc = peer.Accept(std::move(sock));
-      }
-      else { cerr << "accept() failed\n"; }
+  bool  rc = false;
+  try {
+    ip::tcp::socket  sock = AcceptSocket(ioContext, addr, std::stoul(port));
+    if (sock.is_open()) {
+      rc = peer.Accept(std::move(sock));
     }
-    else { cerr << "Failed to set socket as blocking\n"; }
   }
-  else { cerr << "Failed to set reuse_addr option\n"; }
-  
+  catch (std::exception & ex) {
+    cerr << "Exception: " << ex.what() << '\n';
+  }
   return rc;
 }
 

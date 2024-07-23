@@ -128,7 +128,7 @@ h2.groupheader {
 }
 
 .memproto, dl.reflist dt {
-    background: #FFF;
+    background: #EEE;
     text-shadow: none;
     border-top: 1px solid #273A99;
     border-left: 1px solid #273A99;
@@ -144,26 +144,12 @@ h2.groupheader {
 }
 
 .memname, tbody.memname {
-    background: #FFF;
+    background: #EEE;
     color: #333320;
 }
 
-td.memname {
-    color: #0058D2;
-    font-weight: bold;
-}
-
-table.memname {
-    background: #FFF;
-    border: 0px solid white;
-    border-spacing: 0px;
-    border-collapse: separate;
-}
-
 tr td table.memname tbody tr td {
-    background: #FFF;
-    border: 0px solid white;
-    border-collapse: separate;
+    background: #EEE;
 }
 
 .mlabels, .mlabels-left, .mlabels-right {
@@ -171,13 +157,11 @@ tr td table.memname tbody tr td {
 }
 
 .paramname {
-    color: #2a705a;
-    border: 0px solid white;
+    color: #4aa04a;
 }
 
 .paramtype {
-    color: #206A8A;
-    border: 0px solid white;
+    color: #408AAA;
 }
 
 span.comment {
@@ -255,26 +239,14 @@ span.stringliteral {
 /*----------------------------------------------------------------------------
  *  Style for links.
  *---------------------------------------------------------------------------*/
-A:link {
+a.code, A:link {
     text-decoration: none;
     font-family: Helvetica, sans-serif;
     font-weight: bold;
     color: #0050a1;
 }
 
-a.code {
-    text-decoration: none;
-    font-family: Courier, serif;
-    font-weight: bold;
-    color: #0050a1;
-}
-
-a.code:visited {
-    color: rgba(165,235,255,0.7);
-    color: #0078f2;
-}
-
-A:visited {
+a.code:visited, A:visited {
     text-decoration: none;
     font-family: helvetica, sans-serif;
     font-weight: bold;

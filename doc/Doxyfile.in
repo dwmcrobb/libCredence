@@ -279,7 +279,7 @@ HTML_FOOTER          = footer.html
 
 HTML_STYLESHEET      = 
 
-HTML_EXTRA_STYLESHEET = doxygenDocs.css
+# HTML_EXTRA_STYLESHEET = doxygenDocs.css
 
 # If the GENERATE_HTMLHELP tag is set to YES, additional index files
 # will be generated that can be used as input for tools like the
