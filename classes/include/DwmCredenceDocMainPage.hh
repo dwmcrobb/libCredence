@@ -23,14 +23,52 @@
  *  protected).  This is intentional since my main usage is in applications
  *  that are not launched interactively.  I may later add password
  *  protected keys.
+ *
+ *  \section main_abstractions_sec Main Library Abstractions
+ *  \subsection peer_subsec Peer
+ *  The @ref Dwm::Credence::Peer "Peer" class encapsulates a connection,
+ *  via TCP or a UNIX domain socket.  It is the main interface through
+ *  which connections are initiated (via the
+ *  @ref Dwm::Credence::Peer::Connect() "Connect()" member),
+ *  accepted (via the @ref Dwm::Credence::Peer::Accept() "Accept()" member),
+ *  and authenticated (via the @ref Dwm::Credence::Peer::Authenticate
+ *  "Authenticate()" member).  It is also the interface through which
+ *  messages are sent (via the @ref Dwm::Credence::Peer::Send() "Send()"
+ *  member) and received (via the @ref Dwm::Credence::Peer::Receive()
+ *  "Receive()" member).
+ *  \subsubsection peer_connect_subsubsec Connection Establishment
+ *  A client utilizes the @ref Dwm::Credence::Peer::Connect() "Connect()"
+ *  member to connect to a server.  A server accepts incoming connections
+ *  via the @ref Dwm::Credence::Peer::Accept() "Accept()" member.  As part
+ *  of the connection setup, a shared encryption key is derived by each
+ *  side.  This key is ephemeral (only used for this connection), and
+ *  used to encrypt all future traffic between the peers.
  *  
+ *  \subsubsection authentication_subsubsec Mutual Authentication
+ *  The @ref Dwm::Credence::Peer::Authenticate "Authenticate()" member of
+ *  the @ref Dwm::Credence::Peer "Peer" class performs mutual authentication.
+ *  It verifies the claimed identity of the remote service and provides
+ *  verifiable evidence of the identity of the local application to the
+ *  remote service.  It returns true if authentication succeeds, false if
+ *  it fails.
+ *  \subsubsection send_receive_subsec Send and Receive Messages
+ *  Messages are exchanged using the @ref Dwm::Credence::Peer::Send()
+ *  "Send()" and @ref Dwm::Credence::Peer::Receive() "Receive()" members
+ *  of the @ref Dwm::Credence::Peer "Peer" class.  These are member
+ *  function templates, and use @c Dwm::StreamIO functionality from libDwm
+ *  to allow sending and receiving all types supported directly by libDwm
+ *  as well as all types which implement the Dwm::StreamIOCapable interface.
+ *  \subsection key_stash_known_keys_subsec Key Stash and Known Keys
+ *  \subsubsection key_stash_subsubsec Key Stash
+ *  \subsubsection known_keys_subsubsec Known Keys
+ *
  *  \section history_sec History
  *
  *  This library came about when I needed a replacement for Crypto++
- *  (needed by libDwmAuth).  In my own applications, libDwmAuth will
- *  be replaced by libDwmCredence.  The new name is a hint that it's
- *  not the same as libDwmAuth under the hood, and allows me to migrate
- *  my applications as I have time.
+ *  (needed by libDwmAuth).  In my own applications, libDwmAuth was
+ *  replaced by libDwmCredence.  The new name is a hint that it's
+ *  not the same as libDwmAuth under the hood, and allowed me to migrate
+ *  my applications as I had time.
  *
  *  \section platforms_sec Platforms
  *
