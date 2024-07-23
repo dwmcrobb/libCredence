@@ -1,5 +1,14 @@
 2024-07-23  Daniel W. McRobb  <dwm@spark.mcplex.net>
 
+	* classes/include/DwmCredenceAuthenticator.hh,
+          classes/include/DwmCredenceChallenge.hh,
+          classes/include/DwmCredenceChallengeResponse.hh,
+          classes/include/DwmCredenceNonce.hh,
+          classes/include/DwmCredencePeer.hh,
+          classes/include/DwmCredenceShortString.hh,
+          classes/src/DwmCredenceAuthenticator.cc:
+	No longer need to inherit from StreamIOCapable; use concepts instead.
+
 	* Added README.md
 
 2024-07-16  Daniel W. McRobb  <dwm@spark.mcplex.net>
