@@ -57,7 +57,8 @@
  *  of the @ref Dwm::Credence::Peer "Peer" class.  These are member
  *  function templates, and use @c Dwm::StreamIO functionality from libDwm
  *  to allow sending and receiving all types supported directly by libDwm
- *  as well as all types which implement the Dwm::StreamIOCapable interface.
+ *  as well as all types which implement the requirements of the
+ *  Dwm::HasStreamRead and Dwm::HasStreamWrite concepts.
  *  \subsection key_stash_known_keys_subsec Key Stash and Known Keys
  *  \subsubsection key_stash_subsubsec Key Stash
  *  \subsubsection known_keys_subsubsec Known Keys

@@ -47,8 +47,7 @@ extern "C" {
 }
 
 #include <cstdint>
-
-#include "DwmStreamIOCapable.hh"
+#include <iostream>
 
 namespace Dwm {
 
@@ -58,7 +57,6 @@ namespace Dwm {
     //!  Encapsulates a nonce for encryption.
     //------------------------------------------------------------------------
     class Nonce
-      : public StreamIOCapable
     {
     public:
       //----------------------------------------------------------------------
@@ -75,7 +73,7 @@ namespace Dwm {
       //----------------------------------------------------------------------
       //!  Reads the nonce from the given istream @c is.  Returns @c is.
       //----------------------------------------------------------------------
-      std::istream & Read(std::istream & is) override
+      std::istream & Read(std::istream & is)
       {
         if (is) {
           is.read((char *)_nonce, crypto_secretbox_NONCEBYTES);
@@ -86,7 +84,7 @@ namespace Dwm {
       //----------------------------------------------------------------------
       //!  Writes the nonce to the given ostream @c os.  Returns @c os.
       //----------------------------------------------------------------------
-      std::ostream & Write(std::ostream & os) const override
+      std::ostream & Write(std::ostream & os) const
       {
         if (os) {
           os.write((const char *)_nonce, crypto_secretbox_NONCEBYTES);

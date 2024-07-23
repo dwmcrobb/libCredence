@@ -42,7 +42,6 @@
 #ifndef _DWMCREDENCECHALLENGE_HH_
 #define _DWMCREDENCECHALLENGE_HH_
 
-#include "DwmStreamIOCapable.hh"
 #include "DwmCredenceShortString.hh"
 
 namespace Dwm {
@@ -55,7 +54,6 @@ namespace Dwm {
     //!  of random data.
     //------------------------------------------------------------------------
     class Challenge
-      : public StreamIOCapable
     {
     public:
       //----------------------------------------------------------------------
@@ -87,13 +85,13 @@ namespace Dwm {
       //!  Reads the challenge from the given istream @c is.  Returns @c is.
       //!  @c is normally a reference to an XChaChaPoly1305::Istream.
       //----------------------------------------------------------------------
-      std::istream & Read(std::istream & is) override;
+      std::istream & Read(std::istream & is);
       
       //----------------------------------------------------------------------
       //!  Writes the challenge to the given ostream @c os.  Returns @c os.
       //!  @c os is normally a reference to an XChaChapoly1305::Ostream.
       //----------------------------------------------------------------------
-      std::ostream & Write(std::ostream & os) const override;
+      std::ostream & Write(std::ostream & os) const;
       
     private:
       ShortString  _challenge;

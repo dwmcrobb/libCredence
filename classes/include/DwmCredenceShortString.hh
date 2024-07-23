@@ -44,8 +44,6 @@
 
 #include <string>
 
-#include "DwmStreamIOCapable.hh"
-
 namespace Dwm {
 
   namespace Credence {
@@ -56,7 +54,6 @@ namespace Dwm {
     //!  a server during session initialization.
     //------------------------------------------------------------------------
     class ShortString
-      : public StreamIOCapable
     {
     public:
       //----------------------------------------------------------------------
@@ -106,13 +103,13 @@ namespace Dwm {
       //!  Reads the short string from the given istream @c is.  Returns
       //!  @c is.
       //----------------------------------------------------------------------
-      std::istream & Read(std::istream & is) override;
+      std::istream & Read(std::istream & is);
 
       //----------------------------------------------------------------------
       //!  Writes the shirt string to the given ostream @c os.  Returns
       //!  @c os.
       //----------------------------------------------------------------------
-      std::ostream & Write(std::ostream & os) const override;
+      std::ostream & Write(std::ostream & os) const;
 
       //----------------------------------------------------------------------
       //!  ostream operator <<

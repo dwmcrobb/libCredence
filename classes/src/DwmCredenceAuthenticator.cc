@@ -300,7 +300,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    bool Authenticator::Send(const StreamWritable & msg)
+    bool Authenticator::Send(const HasStreamWrite auto & msg)
     {
       bool  rc = false;
       if (_xos) {
@@ -339,7 +339,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    bool Authenticator::Receive(StreamReadable & msg)
+    bool Authenticator::Receive(HasStreamRead auto & msg)
     {
       bool  rc = false;
       if (_xis) {

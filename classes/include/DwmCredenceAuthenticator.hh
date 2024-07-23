@@ -119,9 +119,9 @@ namespace Dwm {
                               const std::string & theirId,
                               const std::string & theirPubKey);
       bool Send(const std::string & msg);
-      bool Send(const StreamWritable & msg);
+      bool Send(const HasStreamWrite auto & msg);
       bool Receive(std::string & msg);
-      bool Receive(StreamReadable & msg);
+      bool Receive(HasStreamRead auto & msg);
       std::string EndPointString() const;
     };
     

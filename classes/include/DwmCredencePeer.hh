@@ -139,7 +139,7 @@ namespace Dwm {
       //!  Sends the given @c msg to the peer.  Returns true on success,
       //!  false on failure.  Note that T must be supported directly by
       //!  a Dwm::StreamIO::Write() function (see DwmStreamIO.hh in libDwm)
-      //!  or implement the Dwm::StreamWritable interface (see
+      //!  or meet the requirements of the Dwm::HasStreamWrite concept (see
       //!  DwmStreamIOCapable.hh in libDwm).
       //----------------------------------------------------------------------
       template <typename T>
@@ -171,7 +171,7 @@ namespace Dwm {
       //!  Receives the given @c msg from the peer.  Returns true on success,
       //!  false on failure.  Note that T must be supported directly by a
       //!  Dwm::StreamIO::Read() function (See DwmStreamIO.hh in libDwm) or
-      //!  implement the Dwm::StreamReadable interface (see
+      //!  meet the requirements of the Dwm::HasStreamRead concept (see
       //!  DwmStreamIOCapable.hh in libDwm).
       //----------------------------------------------------------------------
       template <typename T>

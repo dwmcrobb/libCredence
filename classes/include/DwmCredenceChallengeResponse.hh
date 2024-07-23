@@ -44,7 +44,6 @@
 
 #include <string>
 
-#include "DwmStreamIOCapable.hh"
 #include "DwmCredenceChallenge.hh"
 
 namespace Dwm {
@@ -56,7 +55,6 @@ namespace Dwm {
     //!  to a Challenge during authentication to a client or server.
     //------------------------------------------------------------------------
     class ChallengeResponse
-      : public StreamIOCapable
     {
     public:
       //----------------------------------------------------------------------
@@ -81,14 +79,14 @@ namespace Dwm {
       //!  Returns @c is.  @c is is normally a reference to an
       //!  XChaCha20Poly1305::Istream (an encrypted stream).
       //----------------------------------------------------------------------
-      std::istream & Read(std::istream & is) override;
+      std::istream & Read(std::istream & is);
       
       //----------------------------------------------------------------------
       //!  Writes the challenge response to the given ostream @c os.
       //!  Returns @c os.  @c os is normally a reference to an
       //!  XChaCha20Poly1305::Ostream (an encrypted stream).
       //----------------------------------------------------------------------
-      std::ostream & Write(std::ostream & os) const override;
+      std::ostream & Write(std::ostream & os) const;
       
       //----------------------------------------------------------------------
       //!  Using the given @c publicKey of the source of the response,
