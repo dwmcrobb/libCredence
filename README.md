@@ -6,9 +6,35 @@ communication over TCP.  The main three classes are
 and 
 [Dwm::Credence::KnownKeys](https://www.mcplex.net/Software/Documentation/libDwmCredence/classDwm_1_1Credence_1_1KnownKeys.html).
 Utilizing just these three classes, it is relatively easy to create secure TCP
-applications.
+applications.  There is an example in the [library documentation](https://www.mcplex.net/Software/Documentation/libDwmCredence/).
+
+Since I wanted something I could use across a variety of C++ client/server
+applications, I needed something that made it easy to send and receive
+objects of a wide range of abstract data types.  The easiest way to do this
+was to utilize the 
+[Dwm::StreamIO](https://www.mcplex.net/Software/Documentation/libDwm/classDwm_1_1StreamIO.html)
+abstractions from [libDwm](https://github.com/dwmcrobb/libDwm), which only
+requires that my messages are composed from fundamental types, objects which
+implement the
+[Dwm::HasStreamRead](https://www.mcplex.net/Software/Documentation/libDwm/conceptDwm_1_1HasStreamRead.html)
+and [Dwm::HasStreamWrite](https://www.mcplex.net/Software/Documentation/libDwm/conceptDwm_1_1HasStreamWrite.html) concepts, and
+containers of either or both.  To be able to send and recieve the contents
+of a given class, I only need to implement Read(istream &) and Write(ostream &)
+members, and those are typically easy to do given the facilities in
+[Dwm::StreamIO](https://www.mcplex.net/Software/Documentation/libDwm/classDwm_1_1StreamIO.html).
+As a result, I have more than half a dozen client/server application systems
+that utilize the library.
 
 ## History
+This library replaced my older Dwm::Auth library that used Crypto++
+under the hood.  I had some problems with Crypto++ that went
+unresolved after reporting them, which forced me to maintain
+my own private fork with my fixes and start designing a new library
+around something else.  That something else being 
+[libsodium](https://doc.libsodium.org), which is much smaller, and a
+good fit for my needs.  It has its frailties (C arrays and pointers
+that require care), but it's well-maintained, proven, widely used and
+has good documentation.
 
 ## Platforms
 FreeBSD, linux (Debian-based systems including Ubuntu and Raspberry Pi OS)
