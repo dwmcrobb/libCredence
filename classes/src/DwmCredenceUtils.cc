@@ -99,8 +99,8 @@ namespace Dwm {
         ssize_t  bytesReady = 0;
         while ((bytesReady = Utils::BytesReady(sck)) < numBytes) {
           if (Utils::Clock::now() > endTime) {
-            Syslog(LOG_DEBUG, "Gave up waiting for %u bytes",
-                   numBytes - bytesReady);
+            FSyslog(LOG_DEBUG, "Gave up waiting for {} bytes",
+                    numBytes - bytesReady);
             break;
           }
           else if (bytesReady < 0) {
@@ -183,7 +183,7 @@ namespace Dwm {
           }
         }
         catch (...) {
-          Syslog(LOG_ERR, "rc.resize(%zu) failed!", buflen);
+          FSyslog(LOG_ERR, "rc.resize({}) failed!", buflen);
         }
       }
       return rc;
@@ -332,8 +332,8 @@ namespace Dwm {
               }
             }
             else {
-              Syslog(LOG_ERR, "String length %llu exceeds max of %llu",
-                     len, maxLen);
+              FSyslog(LOG_ERR, "String length {} exceeds max of {}",
+                      len, maxLen);
             }
           }
         }

@@ -149,28 +149,28 @@ namespace Dwm {
               theirPubKey = _knownKeys.Find(theirId.Value());
               rc = (! theirPubKey.empty());
               if (! rc) {
-                Syslog(LOG_ERR, "Unknown ID %s from peer at %s",
-                       theirId.Value().c_str(), EndPointString().c_str());
+                FSyslog(LOG_ERR, "Unknown ID {} from peer at {}",
+                        theirId.Value(), EndPointString());
               }
             }
             else {
-              Syslog(LOG_ERR, "Failed to read ID from peer at %s",
-                     EndPointString().c_str());
+              FSyslog(LOG_ERR, "Failed to read ID from peer at {}",
+                      EndPointString());
             }
           }
           else {
-            Syslog(LOG_ERR, "Peer at %s failed to send ID within %lld"
-                   " milliseconds", EndPointString().c_str(), _timeout.count());
+            FSyslog(LOG_ERR, "Peer at {} failed to send ID within {}"
+                    " milliseconds", EndPointString(), _timeout.count());
           }
         }
         else {
-          Syslog(LOG_ERR, "Failed to send ID to peer at %s",
-                 EndPointString().c_str());
+          FSyslog(LOG_ERR, "Failed to send ID to peer at {}",
+                  EndPointString());
         }
       }
       else {
-        Syslog(LOG_ERR, "Failed to get my keys from KeyStash in '%s'",
-               _keyStash.DirName().c_str());
+        FSyslog(LOG_ERR, "Failed to get my keys from KeyStash in '{}'",
+                _keyStash.DirName());
       }
       return rc;
     }
@@ -191,29 +191,28 @@ namespace Dwm {
               theirPubKey = _knownKeys.Find(theirId.Value());
               rc = (! theirPubKey.empty());
               if (! rc) {
-                Syslog(LOG_ERR, "Unknown ID %s from peer at %s",
-                       theirId.Value().c_str(), EndPointString().c_str());
+                FSyslog(LOG_ERR, "Unknown ID {} from peer at {}",
+                        theirId.Value(), EndPointString());
               }
             }
             else {
-              Syslog(LOG_ERR, "Failed to read ID from peer at %s",
-                     EndPointString().c_str());
+              FSyslog(LOG_ERR, "Failed to read ID from peer at {}",
+                      EndPointString());
             }
           }
           else {
-            Syslog(LOG_ERR, "Peer at %s failed to send ID within %lld"
-                   " milliseconds", EndPointString().c_str(),
-                   _timeout.count());
+            FSyslog(LOG_ERR, "Peer at {} failed to send ID within {}"
+                    " milliseconds", EndPointString(), _timeout.count());
           }
         }
         else {
-          Syslog(LOG_ERR, "Failed to send ID to peer at %s",
-                 EndPointString().c_str());
+          FSyslog(LOG_ERR, "Failed to send ID to peer at {}",
+                  EndPointString());
         }
       }
       else {
-        Syslog(LOG_ERR, "Failed to get my keys from KeyStash in '%s'",
-               _keyStash.DirName().c_str());
+        FSyslog(LOG_ERR, "Failed to get my keys from KeyStash in '{}'",
+                _keyStash.DirName());
       }
       return rc;
     }
@@ -241,35 +240,35 @@ namespace Dwm {
               if (Receive(theirResponse)) {
                 if (theirResponse.Verify(theirPubKey, ourChallenge)) {
                   rc = true;
-                  Syslog(LOG_INFO, "Authenticated peer %s at %s",
-                         theirId.c_str(), EndPointString().c_str());
+                  FSyslog(LOG_INFO, "Authenticated peer {} at {}",
+                          theirId, EndPointString());
                 }
                 else {
-                  Syslog(LOG_INFO, "Failed to authenticate peer %s at %s",
-                         theirId.c_str(), EndPointString().c_str());
+                  FSyslog(LOG_INFO, "Failed to authenticate peer {} at {}",
+                          theirId, EndPointString());
                 }
               }
               else {
-                Syslog(LOG_ERR, "Failed to read challenge response from"
-                       " peer %s at %s",
-                       theirId.c_str(), EndPointString().c_str());
+                FSyslog(LOG_ERR, "Failed to read challenge response from"
+                        " peer {} at {}",
+                       theirId, EndPointString());
               }
             }
             else {
-              Syslog(LOG_ERR, "Failed to send challenge response to peer"
-                     " %s at %s",
-                     theirId.c_str(), EndPointString().c_str());
+              FSyslog(LOG_ERR, "Failed to send challenge response to peer"
+                      " {} at {}",
+                      theirId, EndPointString());
             }
           }
         }
         else {
-          Syslog(LOG_ERR, "Failed to read challenge from peer %s at %s",
-                 theirId.c_str(), EndPointString().c_str());
+          FSyslog(LOG_ERR, "Failed to read challenge from peer {} at {}",
+                  theirId, EndPointString());
         }
       }
       else {
-        Syslog(LOG_ERR, "Failed to send challenge to peer %s at %s",
-               theirId.c_str(), EndPointString().c_str());
+        FSyslog(LOG_ERR, "Failed to send challenge to peer {} at {}",
+                theirId, EndPointString());
       }
 
       return rc;

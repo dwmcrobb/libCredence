@@ -136,14 +136,13 @@ namespace Dwm {
                    _buffer.get() + bufLen);
             }
             else {
-              Syslog(LOG_ERR, "Decrypt() of %zu bytes failed!",
-                     cipherText.size());
+              FSyslog(LOG_ERR, "Decrypt() of {} bytes failed!",
+                      cipherText.size());
               throw std::ios_base::failure("Decryption failed");
             }
           }
           catch (...) {
-            Syslog(LOG_ERR, "Exception making buffer of %zu bytes",
-                   bufLen);
+            FSyslog(LOG_ERR, "Exception making buffer of {} bytes", bufLen);
           }
         }
         else {
@@ -178,11 +177,11 @@ namespace Dwm {
                 }
               }
               catch (...) {
-                Syslog(LOG_ERR, "Failed to allocate %llu bytes", msgLen);
+                FSyslog(LOG_ERR, "Failed to allocate {} bytes", msgLen);
               }
             }
             else {
-              Syslog(LOG_ERR, "Invalid message length %llu", msgLen);
+              FSyslog(LOG_ERR, "Invalid message length {}", msgLen);
             }
           }
           else {

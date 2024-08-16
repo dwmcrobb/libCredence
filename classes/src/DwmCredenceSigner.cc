@@ -84,8 +84,8 @@ namespace Dwm {
           free(buf);
         }
         else {
-          Syslog(LOG_ERR, "Failed to allocate %ull bytes for signed messsage",
-                 buflen);
+          FSyslog(LOG_ERR, "Failed to allocate {} bytes for signed messsage",
+                  buflen);
         }
       }
       else {
@@ -124,7 +124,7 @@ namespace Dwm {
         free(buf);
       }
       else {
-        Syslog(LOG_ERR, "Failed to allocate %zu bytes for message", buflen);
+        FSyslog(LOG_ERR, "Failed to allocate {} bytes for message", buflen);
       }
       return rc;
     }

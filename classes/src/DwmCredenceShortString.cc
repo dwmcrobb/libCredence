@@ -106,7 +106,7 @@ namespace Dwm {
             }
             catch (...) {
               is.setstate(std::ios_base::badbit);
-              Syslog(LOG_ERR, "Failed to allocate %hhu bytes", len);
+              FSyslog(LOG_ERR, "Failed to allocate {} bytes", len);
             }
           }
         }

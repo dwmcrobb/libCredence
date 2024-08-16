@@ -102,20 +102,19 @@ namespace Dwm {
                 rc = true;
               }
               else {
-                Syslog(LOG_ERR, "Failed to read public key from %s",
-                       Utils::EndPointString(endPoint).c_str());
+                FSyslog(LOG_ERR, "Failed to read public key from {}",
+                        Utils::EndPointString(endPoint));
               }
             }
             else {
-              Syslog(LOG_ERR, "Peer at %s failed to send public key within"
-                     " %lld milliseconds",
-                     Utils::EndPointString(endPoint).c_str(),
-                     timeout.count());
+              FSyslog(LOG_ERR, "Peer at {} failed to send public key within"
+                      " {} milliseconds",
+                      Utils::EndPointString(endPoint), timeout.count());
             }
           }
           else {
-            Syslog(LOG_ERR, "Failed to send public key to %s",
-                   Utils::EndPointString(endPoint).c_str());
+            FSyslog(LOG_ERR, "Failed to send public key to {}",
+                    Utils::EndPointString(endPoint));
           }
         }
         else {
@@ -156,19 +155,19 @@ namespace Dwm {
                 rc = true;
               }
               else {
-                Syslog(LOG_ERR, "Failed to read public key from %s",
-                       endPoint.path().c_str());
+                FSyslog(LOG_ERR, "Failed to read public key from {}",
+                        endPoint.path());
               }
             }
             else {
-              Syslog(LOG_ERR, "Peer at %s failed to send public key within"
-                     " %lld milliseconds",
-                     endPoint.path().c_str(), timeout.count());
+              FSyslog(LOG_ERR, "Peer at {} failed to send public key within"
+                      " {} milliseconds",
+                      endPoint.path(), timeout.count());
             }
           }
           else {
-            Syslog(LOG_ERR, "Failed to send public key to %s",
-                   endPoint.path().c_str());
+            FSyslog(LOG_ERR, "Failed to send public key to {}",
+                    endPoint.path());
           }
         }
         else {

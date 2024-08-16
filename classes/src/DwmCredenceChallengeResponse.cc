@@ -105,15 +105,15 @@ namespace Dwm {
           rc = true;
         }
         else {
-          Syslog(LOG_ERR, "Challenge content mismatch: %s != %s",
-                 Utils::Bin2Base64(challengeString).c_str(),
-                 Utils::Bin2Base64(signedContent).c_str());
+          FSyslog(LOG_ERR, "Challenge content mismatch: {} != {}",
+                  Utils::Bin2Base64(challengeString),
+                  Utils::Bin2Base64(signedContent));
         }
       }
       else {
-        Syslog(LOG_ERR, "ChallengeResponse::Verify(%s,%s) failed",
-               Utils::Bin2Base64(publicKey).c_str(),
-               Utils::Bin2Base64(challengeString).c_str());
+        FSyslog(LOG_ERR, "ChallengeResponse::Verify({},{}) failed",
+                Utils::Bin2Base64(publicKey),
+                Utils::Bin2Base64(challengeString));
       }
       return rc;
     }
