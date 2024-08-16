@@ -143,6 +143,7 @@ namespace Dwm {
       //!  DwmStreamIOCapable.hh in libDwm).
       //----------------------------------------------------------------------
       template <typename T>
+      requires IsStreamWritable<T>
       bool Send(const T & msg)
       {
         bool  rc = false;
@@ -152,13 +153,13 @@ namespace Dwm {
               rc = true;
             }
             else {
-              Syslog(LOG_ERR, "Failed to flush encrypted stream to %s",
-                     EndPointString().c_str());
+              FSyslog(LOG_ERR, "Failed to flush encrypted stream to {}",
+                     EndPointString());
             }
           }
           else {
-            Syslog(LOG_ERR, "Failed to send message to %s",
-                   EndPointString().c_str());
+            FSyslog(LOG_ERR, "Failed to send message to {}",
+                    EndPointString());
           }
         }
         else {
@@ -175,6 +176,7 @@ namespace Dwm {
       //!  DwmStreamIOCapable.hh in libDwm).
       //----------------------------------------------------------------------
       template <typename T>
+      requires IsStreamReadable<T>
       bool Receive(T & msg)
       {
         bool  rc = false;
@@ -183,8 +185,8 @@ namespace Dwm {
             rc = true;
           }
           else {
-            Syslog(LOG_DEBUG, "Failed to receive message from %s",
-                   EndPointString().c_str());
+            FSyslog(LOG_DEBUG, "Failed to receive message from {}",
+                    EndPointString());
           }
         }
         else {
