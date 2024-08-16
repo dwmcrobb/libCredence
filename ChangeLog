@@ -1,3 +1,21 @@
+2024-08-16  Daniel W. McRobb  <dwm@spark.mcplex.net>
+
+	* src/DwmCredenceAuthenticator.cc,
+	src/DwmCredenceChallengeResponse.cc,
+	src/DwmCredenceKeyExchanger.cc,
+	src/DwmCredenceShortString.cc,
+	src/DwmCredenceSigner.cc,
+	src/DwmCredenceUtils.cc,
+	src/DwmCredenceXChaCha20Poly1305InBuffer.cc: Use FSyslog()
+	in place of Syslog() when there are parameters to be
+	formatted.
+
+	* classes/include/DwmCredencePeer.hh: Added 'requires
+	IsStreamWritable<T>' to Send(const T &) and 'requires
+	IsStreamReadable<T>' to Receive(T &).  Also use FSyslog()
+	in place of Syslog() when there are parameters to be
+	formatted.
+
 2024-07-26  Daniel McRobb  <dwm@thrip.mcplex.net>
 
 	* tagged as libDwmCredence-0.1.32
