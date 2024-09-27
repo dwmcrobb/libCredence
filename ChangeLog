@@ -1,5 +1,10 @@
 2024-09-27  Daniel W. McRobb  <dwm@spark.mcplex.net>
 
+	* tagged as libDwmCredence-0.1.35
+
+	* classes/src/DwmCredenceKnownKeys.cc: syslog the number of keys
+	loaded.
+
 	* tagged as libDwmCredence-0.1.34
 
 2024-09-26  Daniel W. McRobb  <dwm@spark.mcplex.net>
