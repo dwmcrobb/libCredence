@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2022, 2024
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 #include <fstream>
 #include <regex>
 
+#include "DwmSysLogger.hh"
 #include "DwmCredenceKnownKeys.hh"
 #include "DwmCredenceUtils.hh"
 
@@ -121,6 +122,8 @@ namespace Dwm {
       while (ReadKey(is, key)) {
         _keys[key.first] = key.second;
       }
+      FSyslog(LOG_INFO, "Loaded {} keys from {}/known_keys",
+              _keys.size(), _dirName);
       return (! _keys.empty());
     }
 
