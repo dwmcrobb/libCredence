@@ -1,3 +1,11 @@
+2024-09-27  Daniel McRobb  <dwm@thrip.mcplex.net>
+
+	* tagged as libDwmCredence-0.1.36
+
+	* classes/src/DwmCredenceKnownKeys.cc: Don't reload keys in
+	copy constructor, just copy them after obtaining shared lock
+	on source.
+
 2024-09-27  Daniel W. McRobb  <dwm@spark.mcplex.net>
 
 	* tagged as libDwmCredence-0.1.35
