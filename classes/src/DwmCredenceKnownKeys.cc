@@ -55,7 +55,7 @@ namespace Dwm {
     //!  
     //------------------------------------------------------------------------
     KnownKeys::KnownKeys(const string & dirName)
-        : _dirName(dirName)
+        : _dirName(dirName), _keysMtx()
     {
       static const regex  rgx("^~\\/.*");
       if (regex_match(_dirName, rgx)) {
@@ -71,9 +71,19 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
+    KnownKeys::KnownKeys(const KnownKeys & knownKeys)
+        : _dirName(knownKeys._dirName), _keysMtx()
+    {
+      LoadKeys();
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
     string KnownKeys::Find(const string & id) const
     {
       string  rc;
+      std::shared_lock  lck(_keysMtx);
       auto  it = _keys.find(id);
       if (it != _keys.end()) {
         rc = it->second;
@@ -84,9 +94,19 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    const map<string,string> & KnownKeys::Keys() const
+    map<string,string> KnownKeys::Keys() const
     {
-      return _keys;
+      std::shared_lock  lck(_keysMtx);
+      return map<string,string>(_keys);
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    void KnownKeys::Reload()
+    {
+      LoadKeys();
+      return;
     }
     
     //------------------------------------------------------------------------
@@ -94,6 +114,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     bool KnownKeys::LoadKeys()
     {
+      std::unique_lock  lck(_keysMtx);
       _keys.clear();
       ifstream  is(_dirName + "/known_keys");
       pair<string,string>  key;
@@ -112,10 +133,12 @@ namespace Dwm {
       if (is) {
         string  id, keyType, keystr;
         if (is >> id >> keyType >> keystr) {
-          if (keyType == "ed25519") {
+          if ((keyType == "ed25519") && (! keystr.empty())) {
             key.first = id;
             key.second = Utils::Base642Bin(keystr);
-            rc = true;
+            if (! key.second.empty()) {
+              rc = true;
+            }
           }
         }
       }

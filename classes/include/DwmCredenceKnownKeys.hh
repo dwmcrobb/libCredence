@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2022, 2024
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@
 
 #include <iostream>
 #include <map>
+#include <shared_mutex>
 #include <string>
 
 namespace Dwm {
@@ -64,20 +65,28 @@ namespace Dwm {
       //!  the directory where the 'known_keys' file will be stored.
       //----------------------------------------------------------------------
       KnownKeys(const std::string & dirName = "~/.credence");
-      
+
+      KnownKeys(const KnownKeys & knownKeys);
+
       //----------------------------------------------------------------------
       //!  Returns the public key for the given key owner @c id on success.
       //!  Returns an empty string if no key is found for @c id.
       //----------------------------------------------------------------------
       std::string Find(const std::string & id) const;
+
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
+      void Reload();
       
       //----------------------------------------------------------------------
-      //!  Returns a const reference to the encapsulated keys.
+      //!  Returns a copy of the encapsulated keys.
       //----------------------------------------------------------------------
-      const std::map<std::string,std::string> & Keys() const;
+      std::map<std::string,std::string> Keys() const;
       
     private:
       std::string                        _dirName;
+      mutable std::shared_mutex          _keysMtx;
       std::map<std::string,std::string>  _keys;
 
       bool LoadKeys();
