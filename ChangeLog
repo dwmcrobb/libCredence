@@ -1,3 +1,11 @@
+2024-09-26  Daniel W. McRobb  <dwm@spark.mcplex.net>
+
+	* classes/include/DwmCredenceKnownKeys.hh,
+	  classes/src/DwmCredenceKnownKeys.cc:
+	Added ability to reload keys.  To make threadsafe, Keys() now
+	returns a copy instead of a reference and we use a shared_mutex
+	to provide mutual exclusion.
+
 2024-08-16  Daniel McRobb  <dwm@toto.mcplex.net>
 
 	* tagged as libDwmCredence-0.1.33
