@@ -75,7 +75,8 @@ namespace Dwm {
     KnownKeys::KnownKeys(const KnownKeys & knownKeys)
         : _dirName(knownKeys._dirName), _keysMtx()
     {
-      LoadKeys();
+      std::shared_lock  lck(knownKeys._keysMtx);
+      _keys = knownKeys._keys;
     }
 
     //------------------------------------------------------------------------
