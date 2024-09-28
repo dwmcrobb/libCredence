@@ -1,3 +1,9 @@
+2024-09-28  Daniel McRobb  <dwm@thrip.mcplex.net>
+
+	* classes/include/DwmCredenceKnownKeys.hh,
+	  classes/src/DwmCredenceKnownKeys.cc:
+	Added copy assignment operator.
+
 2024-09-27  Daniel McRobb  <dwm@thrip.mcplex.net>
 
 	* tagged as libDwmCredence-0.1.36
