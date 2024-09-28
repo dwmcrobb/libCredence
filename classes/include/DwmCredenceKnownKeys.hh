@@ -66,8 +66,16 @@ namespace Dwm {
       //----------------------------------------------------------------------
       KnownKeys(const std::string & dirName = "~/.credence");
 
+      //----------------------------------------------------------------------
+      //!  Copy constructor
+      //----------------------------------------------------------------------
       KnownKeys(const KnownKeys & knownKeys);
 
+      //----------------------------------------------------------------------
+      //!  Copy assignment
+      //----------------------------------------------------------------------
+      KnownKeys & operator = (const KnownKeys & knownKeys);
+      
       //----------------------------------------------------------------------
       //!  Returns the public key for the given key owner @c id on success.
       //!  Returns an empty string if no key is found for @c id.

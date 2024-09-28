@@ -82,6 +82,20 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
+    KnownKeys & KnownKeys::operator = (const KnownKeys & knownKeys)
+    {
+      if (&knownKeys != this) {
+        std::shared_lock  lck(knownKeys._keysMtx);
+        std::unique_lock  mylck(_keysMtx);
+        _dirName = knownKeys._dirName;
+        _keys = knownKeys._keys;
+      }
+      return *this;
+    }
+    
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
     string KnownKeys::Find(const string & id) const
     {
       string  rc;
