@@ -1,5 +1,7 @@
 2024-09-30  Daniel McRobb  <dwm@thrip.mcplex.net>
 
+	* tagged as libDwmCredence-0.1.39
+
 	* classes/include/DwmCredencePeer.hh,
 	  classes/include/DwmCredenceXChaCha20Poly1305InBuffer.hh,
 	  classes/include/DwmCredenceXChaCha20Poly1305Istream.hh,
