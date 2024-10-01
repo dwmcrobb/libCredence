@@ -115,25 +115,6 @@ namespace Dwm {
       //----------------------------------------------------------------------
       //!  
       //----------------------------------------------------------------------
-      static bool ConnectionLost(std::istream & is)
-      {
-        bool  rc = false;
-        try {
-          boost::asio::ip::tcp::iostream & bais =
-            dynamic_cast<boost::asio::ip::tcp::iostream &>(is);
-          if ((bais.error() == boost::asio::error::eof)
-              || (bais.error() == boost::asio::error::connection_reset)) {
-            rc = true;
-          }
-        }
-        catch (...) {
-        }
-        return rc;
-      }
-      
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
       int InBuffer::Reload()
       {
         int  rc = -1;
@@ -165,7 +146,7 @@ namespace Dwm {
           }
         }
         else {
-          if (! ConnectionLost(_is)) {
+          if (! _is.eof()) {
             Syslog(LOG_ERR, "Failed to read message");
           }
           throw std::ios_base::failure("Failed to read message");
@@ -210,10 +191,7 @@ namespace Dwm {
           }
         }
         else {
-          if (ConnectionLost(_is)) {
-            Syslog(LOG_INFO, "Connection lost");
-          }
-          else {
+          if (! (_is.eof())) {
             Syslog(LOG_ERR, "Failed to read nonce");
           }
         }

@@ -240,34 +240,32 @@ namespace Dwm {
               if (Receive(theirResponse)) {
                 if (theirResponse.Verify(theirPubKey, ourChallenge)) {
                   rc = true;
-                  FSyslog(LOG_INFO, "Authenticated peer {} at {}",
+                  FSyslog(LOG_INFO, "Authenticated {} at {}",
                           theirId, EndPointString());
                 }
                 else {
-                  FSyslog(LOG_INFO, "Failed to authenticate peer {} at {}",
+                  FSyslog(LOG_INFO, "Failed to authenticate {} at {}",
                           theirId, EndPointString());
                 }
               }
               else {
                 FSyslog(LOG_ERR, "Failed to read challenge response from"
-                        " peer {} at {}",
-                       theirId, EndPointString());
+                        " {} at {}", theirId, EndPointString());
               }
             }
             else {
-              FSyslog(LOG_ERR, "Failed to send challenge response to peer"
-                      " {} at {}",
-                      theirId, EndPointString());
+              FSyslog(LOG_ERR, "Failed to send challenge response to"
+                      " {} at {}", theirId, EndPointString());
             }
           }
         }
         else {
-          FSyslog(LOG_ERR, "Failed to read challenge from peer {} at {}",
+          FSyslog(LOG_ERR, "Failed to read challenge from {} at {}",
                   theirId, EndPointString());
         }
       }
       else {
-        FSyslog(LOG_ERR, "Failed to send challenge to peer {} at {}",
+        FSyslog(LOG_ERR, "Failed to send challenge to {} at {}",
                 theirId, EndPointString());
       }
 
@@ -359,7 +357,6 @@ namespace Dwm {
     {
       return Utils::EndPointString(_endPoint);
     }
-
     
   }  // namespace Credence
 

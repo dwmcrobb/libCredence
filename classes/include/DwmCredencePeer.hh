@@ -185,8 +185,14 @@ namespace Dwm {
             rc = true;
           }
           else {
-            FSyslog(LOG_DEBUG, "Failed to receive message from {}",
-                    EndPointString());
+            if (_xis->Eof()) {
+              FSyslog(LOG_INFO, "EOF on read from {} at {}",
+                      Id(), EndPointString());
+            }
+            else {
+              FSyslog(LOG_ERR, "Failed to read message from {}",
+                      EndPointString());
+            }
           }
         }
         else {

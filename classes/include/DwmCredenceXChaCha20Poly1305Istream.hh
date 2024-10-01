@@ -77,7 +77,7 @@ namespace Dwm {
         Istream(std::istream & is, const std::string & key)
             : std::istream(new InBuffer(is, key))
         {}
-      
+
         //--------------------------------------------------------------------
         //!  Destructor.
         //--------------------------------------------------------------------
@@ -85,6 +85,12 @@ namespace Dwm {
         {
           delete rdbuf();
         }
+
+        //--------------------------------------------------------------------
+        //!  
+        //--------------------------------------------------------------------
+        bool Eof() const
+        { return (dynamic_cast<InBuffer *>(rdbuf()))->Eof(); }
       };
     
     }  // namespace XChaCha20Poly1305
