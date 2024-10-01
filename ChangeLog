@@ -1,5 +1,13 @@
 2024-09-30  Daniel McRobb  <dwm@thrip.mcplex.net>
 
+	* classes/include/DwmCredencePeer.hh,
+	  classes/include/DwmCredenceXChaCha20Poly1305InBuffer.hh,
+	  classes/include/DwmCredenceXChaCha20Poly1305Istream.hh,
+	  classes/src/DwmCredenceAuthenticator.cc,
+	  classes/src/DwmCredenceXChaCha20Poly1305InBuffer.cc:
+	More tweaks to syslogging, especially we see EOF from remote
+	endpoint.
+
 	* tagged as libDwmCredence-0.1.38
 
 	* classes/src/DwmCredenceXChaCha20Poly1305InBuffer.cc: Minor
