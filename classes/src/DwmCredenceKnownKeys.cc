@@ -42,6 +42,7 @@
 #include <fstream>
 #include <regex>
 
+#include "DwmStreamIO.hh"
 #include "DwmSysLogger.hh"
 #include "DwmCredenceKnownKeys.hh"
 #include "DwmCredenceUtils.hh"
@@ -123,6 +124,43 @@ namespace Dwm {
     {
       LoadKeys();
       return;
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    std::istream & KnownKeys::Read(std::istream & is)
+    {
+      if (is) {
+        std::unique_lock  lck(_keysMtx);
+        StreamIO::Read(is, _keys);
+      }
+      return is;
+    }
+    
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    std::ostream & KnownKeys::Write(std::ostream & os) const
+    {
+      if (os) {
+        std::shared_lock  lck(_keysMtx);
+        StreamIO::Write(os, _keys);
+      }
+      return os;
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    std::ostream &
+    operator << (std::ostream & os, const KnownKeys & knownKeys)
+    {
+        std::shared_lock  lck(knownKeys._keysMtx);
+      for (const auto & key : knownKeys._keys) {
+        os << key.first << " ed25519 " << key.second << '\n';
+      }
+      return os;
     }
     
     //------------------------------------------------------------------------

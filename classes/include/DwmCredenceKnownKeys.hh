@@ -91,6 +91,26 @@ namespace Dwm {
       //!  Returns a copy of the encapsulated keys.
       //----------------------------------------------------------------------
       std::map<std::string,std::string> Keys() const;
+
+      //----------------------------------------------------------------------
+      //!  Reads the keys from the given istream @c is, in machine-readable
+      //!  form (for use with StreamIO from libDwm).  Returns @c is.
+      //----------------------------------------------------------------------
+      std::istream & Read(std::istream & is);
+      
+      //----------------------------------------------------------------------
+      //!  Writes the keys to the given ostream @c os, in machine-readable
+      //!  form (for use with StreamIO from libDwm).  Returns @c os.
+      //----------------------------------------------------------------------
+      std::ostream & Write(std::ostream & os) const;
+
+      //----------------------------------------------------------------------
+      //!  Prints the keys in human-readable form (the same as the stored
+      //!  file 'known_keys' used by the constructor and Reload()) to the
+      //!  given ostream @c os.  Returns @c os.
+      //----------------------------------------------------------------------
+      friend std::ostream &
+      operator << (std::ostream & os, const KnownKeys & knownKeys);
       
     private:
       std::string                        _dirName;
