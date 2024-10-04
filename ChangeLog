@@ -1,3 +1,12 @@
+2024-10-03  Daniel McRobb  <dwm@thrip.mcplex.net>
+
+	* tagged as libDwmCredence-0.1.40
+
+	* classes/include/DwmCredenceKnownKeys.hh,
+	  classes/src/DwmCredenceKnownKeys.cc:
+	Added Read(istream &) and Write(ostream &) members.  Added ostream
+	output operator.
+
 2024-09-30  Daniel McRobb  <dwm@thrip.mcplex.net>
 
 	* tagged as libDwmCredence-0.1.39
