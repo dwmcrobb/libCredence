@@ -110,10 +110,10 @@ namespace Dwm {
 
       bool ExchangeIds(boost::asio::ip::tcp::iostream & s,
                        Ed25519KeyPair & myKeys,
-                       ShortString & theirId,
+                       ShortString<255> & theirId,
                        std::string & theirPubKey);
       bool ExchangeIds(boost::asio::local::stream_protocol::iostream & s,
-                       Ed25519KeyPair & myKeys, ShortString & theirId,
+                       Ed25519KeyPair & myKeys, ShortString<255> & theirId,
                        std::string & theirPubKey);
       bool ExchangeChallenges(const std::string & ourSecretKey,
                               const std::string & theirId,

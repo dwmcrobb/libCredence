@@ -4,9 +4,11 @@ LTLINK   = ${LIBTOOL} --tag=CXX --mode=link ${CXX}
 OBJFILES = TestChallenge.o \
            TestEd25519KeyPair.o \
            TestKeyStash.o \
+           TestKeyType.o \
            TestKnownKeys.o \
            TestKXKeyPair.o \
            TestPeer.o \
+           TestShortString.o \
            TestSigner.o \
            TestX25519KeyPair.o \
            TestXChaCha20Poly1305.o \

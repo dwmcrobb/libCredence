@@ -64,7 +64,8 @@ namespace Dwm {
       //!  Construct with the given storage directory @c dirName.  This is
       //!  the directory where the 'known_keys' file will be stored.
       //----------------------------------------------------------------------
-      KnownKeys(const std::string & dirName = "~/.credence");
+      KnownKeys(const std::string & dirName = "~/.credence",
+                const std::string & fileName = "known_keys");
 
       //----------------------------------------------------------------------
       //!  Copy constructor
@@ -111,15 +112,19 @@ namespace Dwm {
       //----------------------------------------------------------------------
       friend std::ostream &
       operator << (std::ostream & os, const KnownKeys & knownKeys);
+
+      //----------------------------------------------------------------------
+      //!  Clears the keys.
+      //----------------------------------------------------------------------
+      void ClearKeys();
       
     private:
       std::string                        _dirName;
+      std::string                        _fileName;
       mutable std::shared_mutex          _keysMtx;
       std::map<std::string,std::string>  _keys;
 
       bool LoadKeys();
-      static bool ReadKey(std::istream & is,
-                          std::pair<std::string,std::string> & key);
     };
     
     

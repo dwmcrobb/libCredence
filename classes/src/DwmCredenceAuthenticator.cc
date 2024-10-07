@@ -72,9 +72,9 @@ namespace Dwm {
           _xis = make_unique<XChaCha20Poly1305::Istream>(s, agreedKey);
           _xos = make_unique<XChaCha20Poly1305::Ostream>(s, agreedKey);
           if ((nullptr != _xis) && (nullptr != _xos)) {
-            Ed25519KeyPair  myKeys;
-            ShortString     theirIdShort;
-            string          theirPubKey;
+            Ed25519KeyPair    myKeys;
+            ShortString<255>  theirIdShort;
+            string            theirPubKey;
             if (ExchangeIds(s, myKeys, theirIdShort, theirPubKey)) {
               if (ExchangeChallenges(myKeys.SecretKey(), theirIdShort.Value(),
                                      theirPubKey)) {
@@ -106,9 +106,9 @@ namespace Dwm {
           _xis = make_unique<XChaCha20Poly1305::Istream>(s, agreedKey);
           _xos = make_unique<XChaCha20Poly1305::Ostream>(s, agreedKey);
           if ((nullptr != _xis) && (nullptr != _xos)) {
-            Ed25519KeyPair  myKeys;
-            ShortString     theirIdShort;
-            string          theirPubKey;
+            Ed25519KeyPair    myKeys;
+            ShortString<255>  theirIdShort;
+            string            theirPubKey;
             if (ExchangeIds(s, myKeys, theirIdShort, theirPubKey)) {
               if (ExchangeChallenges(myKeys.SecretKey(), theirIdShort.Value(),
                                      theirPubKey)) {
@@ -136,7 +136,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     bool Authenticator::ExchangeIds(boost::asio::ip::tcp::iostream & s,
                                     Ed25519KeyPair & myKeys,
-                                    ShortString & theirId,
+                                    ShortString<255> & theirId,
                                     string & theirPubKey)
     {
       bool  rc = false;
@@ -178,7 +178,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     bool Authenticator::
     ExchangeIds(boost::asio::local::stream_protocol::iostream & s,
-                Ed25519KeyPair & myKeys, ShortString & theirId,
+                Ed25519KeyPair & myKeys, ShortString<255> & theirId,
                 string & theirPubKey)
     {
       bool  rc = false;

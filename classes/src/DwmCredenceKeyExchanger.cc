@@ -96,7 +96,7 @@ namespace Dwm {
             if (Utils::WaitForBytesReady(s.socket(),
                                          kxKeys.PublicKeyMinimumStreamedLength(),
                                          timeout)) {
-              ShortString  theirPubKey;
+              ShortString<255>  theirPubKey;
               if (StreamIO::Read(s, theirPubKey)) {
                 agreedKey = kxKeys.SharedKey(theirPubKey.Value());
                 rc = true;
@@ -149,7 +149,7 @@ namespace Dwm {
             if (Utils::WaitForBytesReady(s.socket(),
                                          kxKeys.PublicKeyMinimumStreamedLength(),
                                          timeout)) {
-              ShortString  theirPubKey;
+              ShortString<255>  theirPubKey;
               if (StreamIO::Read(s, theirPubKey)) {
                 agreedKey = kxKeys.SharedKey(theirPubKey.Value());
                 rc = true;

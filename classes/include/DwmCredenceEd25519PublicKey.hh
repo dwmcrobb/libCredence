@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2024
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -34,13 +34,16 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceEd25519KeyPair.hh
+//!  \file DwmCredenceEd25519PublicKey.hh
 //!  \author Daniel W. McRobb
-//!  \brief Dwm::Credence::Ed25519KeyPair class declaration
+//!  \brief Dwm::Credence::Ed25519PublicKey class declaration
 //---------------------------------------------------------------------------
 
-#ifndef _DWMCREDENCEED25519KEYPAIR_HH_
-#define _DWMCREDENCEED25519KEYPAIR_HH_
+#ifndef _DWMCREDENCEED25519PUBLICKEY_HH_
+#define _DWMCREDENCEED25519PUBLICKEY_HH_
+
+#include <iostream>
+#include <string>
 
 #include "DwmCredenceShortString.hh"
 
@@ -49,93 +52,95 @@ namespace Dwm {
   namespace Credence {
 
     //------------------------------------------------------------------------
-    //!  Encapsulates an Ed25519 key pair.  The contained secret key is used
-    //!  to sign challenge responses during authentication.  The contained
-    //!  public key is used to validate signatures in challenge responses
-    //!  during authentication.
-    //!
-    //!  A ShortString is used to hold the ID of the owner of the keypair.
-    //!  This is to help avoid memory resource DoS attacks on a server,
-    //!  where a length-encoded version of the ID will be received from a
-    //!  client during authentication.  The keys themselves are never
-    //!  transmitted.
+    //!  Encapsulate a public key: an identifier and the public key content.
     //------------------------------------------------------------------------
-    class Ed25519KeyPair
+    class Ed25519PublicKey
     {
     public:
       //----------------------------------------------------------------------
-      //!  Default constructor.  Creates the contained public and secret keys
-      //!  using random data.  If @c id is empty, an ID consisting of the
-      //!  local user name and hostname will be used (e.g. 'dwm@host.org').
+      //!  Default constructor
       //----------------------------------------------------------------------
-      Ed25519KeyPair(const std::string & id = "");
+      Ed25519PublicKey() = default;
       
       //----------------------------------------------------------------------
-      //!  Copy constructor.
+      //!  Copy constructor
       //----------------------------------------------------------------------
-      Ed25519KeyPair(const Ed25519KeyPair &) = default;
+      Ed25519PublicKey(const Ed25519PublicKey &) = default;
+      
+      //----------------------------------------------------------------------
+      //!  Move constructor
+      //----------------------------------------------------------------------
+      Ed25519PublicKey(Ed25519PublicKey &&) = default;
+      
+      //----------------------------------------------------------------------
+      //!  Copy assignment
+      //----------------------------------------------------------------------
+      Ed25519PublicKey & operator = (const Ed25519PublicKey &) = default;
+      
+      //----------------------------------------------------------------------
+      //!  Move assignment
+      //----------------------------------------------------------------------
+      Ed25519PublicKey & operator = (Ed25519PublicKey &&) = default;
+      
+      //----------------------------------------------------------------------
+      //!  Construct from the given @c id and @c key.  Ntoe that @c key
+      //!  must be in the binary representation.
+      //----------------------------------------------------------------------
+      Ed25519PublicKey(const std::string & id, const std::string & key);
+      
+      //----------------------------------------------------------------------
+      //!  Returns the id.
+      //----------------------------------------------------------------------
+      const std::string & Id() const   { return _id.Value(); }
 
       //----------------------------------------------------------------------
-      //!  Destructor.  Clears the contents of the keys before deallocation.
+      //!  Returns the key content, in binary representation.
       //----------------------------------------------------------------------
-      ~Ed25519KeyPair();
-      
-      //----------------------------------------------------------------------
-      //!  Returns the owner of the keypair.
-      //----------------------------------------------------------------------
-      const ShortString<255> & Id() const;
-      
-      //----------------------------------------------------------------------
-      //!  Sets and returns the owner of the keypair.
-      //----------------------------------------------------------------------
-      const ShortString<255> & Id(const ShortString<255> & id);
-      
-      //----------------------------------------------------------------------
-      //!  Returns the public key.  This is used to verify signatures in
-      //!  challenge responses during authentication.
-      //----------------------------------------------------------------------
-      const std::string & PublicKey() const;
-      
-      //----------------------------------------------------------------------
-      //!  Sets and returns the public key.
-      //----------------------------------------------------------------------
-      const std::string & PublicKey(const std::string & publicKey);
-      
-      //----------------------------------------------------------------------
-      //!  Returns the secret key.  This is used to sign challenge responses
-      //!  during authentication.
-      //----------------------------------------------------------------------
-      const std::string & SecretKey() const;
-      
-      //----------------------------------------------------------------------
-      //!  Sets and returns the secret key.
-      //----------------------------------------------------------------------
-      const std::string & SecretKey(const std::string & secretKey);
+      const std::string & Key() const  { return _key.Value(); }
 
       //----------------------------------------------------------------------
-      //!  Returns true if they keypair is valid (i.e. can be used to sign
-      //!  messages).
+      //!  Reads the key from the given istream @c is.  Note that the key
+      //!  content must be in binary representation.  Returns @c is.
       //----------------------------------------------------------------------
-      bool IsValid() const;
+      std::istream & Read(std::istream & is);
+
+      //----------------------------------------------------------------------
+      //!  Writes the key to the given ostream @c os.  Note that the key
+      //!  content is written in its binary representation.  Returns @c os.
+      //----------------------------------------------------------------------
+      std::ostream & Write(std::ostream & os) const;
+
+      //----------------------------------------------------------------------
+      //!  Writes the key to the given ostream @c os, encoded in base64.
+      //----------------------------------------------------------------------
+      friend std::ostream &
+      operator << (std::ostream & os, const Ed25519PublicKey & pk);
+
+      //----------------------------------------------------------------------
+      //!  Reads the key from the given istream @c is, in human-readable form.
+      //!  This is the form used when storing the key in a file, with the key
+      //!  content represented in base64 encoding.
+      //----------------------------------------------------------------------
+      friend std::istream &
+      operator >> (std::istream & is, Ed25519PublicKey & pk);
+
+      //----------------------------------------------------------------------
+      //!  less-than operator
+      //----------------------------------------------------------------------
+      bool operator < (const Ed25519PublicKey &) const = default;
       
       //----------------------------------------------------------------------
-      //!  Clears the contents of the key pair.
+      //!  equality operator
       //----------------------------------------------------------------------
-      void Clear();
-      
-      //----------------------------------------------------------------------
-      //!  operator ==
-      //----------------------------------------------------------------------
-      bool operator == (const Ed25519KeyPair & keyPair) const;
+      bool operator == (const Ed25519PublicKey &) const = default;
       
     private:
       ShortString<255>  _id;
-      std::string       _publicKey;
-      std::string       _secretKey;
+      ShortString<255>  _key;
     };
     
   }  // namespace Credence
 
 }  // namespace Dwm
 
-#endif  // _DWMCREDENCEED25519KEYPAIR_HH_
+#endif  // _DWMCREDENCEED25519PUBLICKEY_HH_

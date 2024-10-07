@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2024
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -34,89 +34,91 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceKXKeyPair.cc
+//!  \file DwmCredenceEd25519PublicKey.cc
 //!  \author Daniel W. McRobb
-//!  \brief Dwm::Credence::KXKeyPair class implementation
+//!  \brief Dwm::Credence::Ed25519PublicKey class implementation
 //---------------------------------------------------------------------------
 
-extern "C" {
-  #include <sodium.h>
-}
-
-#include "DwmCredenceKXKeyPair.hh"
-#include "DwmCredenceGenericHash.hh"
+#include "DwmStreamIO.hh"
+#include "DwmCredenceEd25519PublicKey.hh"
+#include "DwmCredenceShortString.hh"
+#include "DwmCredenceKeyType.hh"
 #include "DwmCredenceUtils.hh"
 
 namespace Dwm {
 
   namespace Credence {
 
-    using namespace std;
+    //------------------------------------------------------------------------
+    Ed25519PublicKey::Ed25519PublicKey(const std::string & id,
+                                       const std::string & key)
+        : _id(id), _key(key)
+    {}
     
     //------------------------------------------------------------------------
-    //!  
-    //------------------------------------------------------------------------
-    KXKeyPair::KXKeyPair()
+    std::istream & Ed25519PublicKey::Read(std::istream & is)
     {
-      uint8_t  pkbuf[crypto_box_PUBLICKEYBYTES];
-      uint8_t  skbuf[crypto_box_SECRETKEYBYTES];
-      randombytes_buf(skbuf, sizeof(skbuf));
-      crypto_scalarmult_base(pkbuf, skbuf);
-      _publicKey = string((const char *)pkbuf, crypto_box_PUBLICKEYBYTES);
-      _secretKey = string((const char *)skbuf, crypto_box_SECRETKEYBYTES);
+      _id.Clear();
+      _key.Clear();
+      ShortString<255>  id, key;
+      if (StreamIO::Read(is, id)) {
+        if (StreamIO::Read(is, key)) {
+          _id = id;
+          _key = key;
+        }
+      }
+      return is;
     }
-      
-    //------------------------------------------------------------------------
-    //!  
-    //------------------------------------------------------------------------
-    KXKeyPair::~KXKeyPair()
-    {
-      _publicKey.Clear();
-      _secretKey.Clear();
-    }
-    
-    //------------------------------------------------------------------------
-    //!  
-    //------------------------------------------------------------------------
-    const ShortString<255> & KXKeyPair::PublicKey() const
-    { return _publicKey; }
-    
-    //------------------------------------------------------------------------
-    //!  
-    //------------------------------------------------------------------------
-    const ShortString<255> & KXKeyPair::SecretKey() const
-    { return _secretKey; }
 
     //------------------------------------------------------------------------
-    //!  
-    //------------------------------------------------------------------------
-    size_t KXKeyPair::PublicKeyMinimumStreamedLength() const
-    { return (crypto_box_PUBLICKEYBYTES + 1); }
-    
-    //------------------------------------------------------------------------
-    //!  
-    //------------------------------------------------------------------------
-    string KXKeyPair::SharedKey(const string & theirPublicKey) const
+    std::ostream & Ed25519PublicKey::Write(std::ostream & os) const
     {
-      string   rc;
-      string   scalarmult_q;
-      if (Utils::ScalarMult(_secretKey.Value(), theirPublicKey,
-                            scalarmult_q)) {
-        GenericHash<crypto_generichash_BYTES>  h;
-        h.Update(scalarmult_q);
-        if (_publicKey.Value() < theirPublicKey) {
-          h.Update(_publicKey.Value());
-          h.Update(theirPublicKey);
+      if (StreamIO::Write(os, _id)) {
+        StreamIO::Write(os, _key);
+      }
+      return os;
+    }
+
+    //------------------------------------------------------------------------
+    std::ostream &
+    operator << (std::ostream & os, const Ed25519PublicKey & pk)
+    {
+      os << pk._id << " ed25519 " << Utils::Bin2Base64(pk._key.Value());
+      return os;
+    }
+                                     
+    //------------------------------------------------------------------------
+    std::istream & operator >> (std::istream & is, Ed25519PublicKey & pk)
+    {
+      pk._id.Clear();
+      pk._key.Clear();
+      if (is) {
+        ShortString<255>                     id;
+        ShortString<MaxKeyTypeNameLength()>  keyType;
+        ShortString<MaxKeyStringLength()>    key;
+        try {
+          is >> id >> keyType >> key;
+        }
+        catch (std::logic_error & ex) {
+          is.setstate(std::ios_base::failbit);
+          return is;
+        }
+        
+        if ((! id.Value().empty())
+            && (keyType.Value() == "ed25519")
+            && (! key.Value().empty())) {
+          pk._id = id.Value();
+          pk._key = Utils::Base642Bin(key.Value());
         }
         else {
-          h.Update(theirPublicKey);
-          h.Update(_publicKey.Value());
+          is.setstate(std::ios_base::failbit);
+          pk._id.Clear();
+          pk._key.Clear();
         }
-        rc = h.Final();
       }
-      return rc;
+      return is;
     }
-
+    
   }  // namespace Credence
 
 }  // namespace Dwm

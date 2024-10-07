@@ -213,7 +213,7 @@ namespace Dwm {
         string  id, keyType, encodedKey;
         is >> id >> keyType >> encodedKey;
         is.close();
-        if ((ShortString(id) == edkp.Id())
+        if ((ShortString<255>(id) == edkp.Id())
             && (keyType == "ed25519")
             && (! encodedKey.empty())) {
           string  keyString = Utils::Base642Bin(encodedKey);

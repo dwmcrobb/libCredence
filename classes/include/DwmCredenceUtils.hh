@@ -113,6 +113,7 @@ namespace Dwm {
       //----------------------------------------------------------------------
       //!  
       //----------------------------------------------------------------------
+#if 0
       static ssize_t
       ReadLengthRestrictedString(boost::asio::ip::tcp::socket & sck,
                                  std::string & s, uint64_t maxLen);
@@ -138,7 +139,8 @@ namespace Dwm {
       ReadLengthRestrictedString(boost::asio::local::stream_protocol::socket & sck,
                                  std::string & s, uint64_t maxLen,
                                  TimePoint endTime);
-
+#endif
+      
       //----------------------------------------------------------------------
       //!  Returns the base64 representation of the given binary string @c s.
       //----------------------------------------------------------------------

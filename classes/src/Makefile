@@ -15,9 +15,10 @@ OBJFILESNP   = DwmCredenceAuthenticator.o \
                DwmCredenceKnownKeys.o \
                DwmCredenceKXKeyPair.o \
                DwmCredencePeer.o \
+               DwmCredenceEd25519PublicKey.o \
+               DwmCredencePubKeys.o \
                DwmCredenceServerConfigLex.o \
                DwmCredenceServerConfigParse.o \
-               DwmCredenceShortString.o \
                DwmCredenceSigner.o \
                DwmCredenceUtils.o \
                DwmCredenceVersion.o \
@@ -25,6 +26,7 @@ OBJFILESNP   = DwmCredenceAuthenticator.o \
                DwmCredenceXChaCha20Poly1305.o \
                DwmCredenceXChaCha20Poly1305InBuffer.o \
                DwmCredenceXChaCha20Poly1305OutBuffer.o
+#               DwmCredenceShortString.o
 ifeq ($(MAKECMDGOALS),tarprep)
 OBJFILESNP   += DwmCredenceVersion.o
 endif

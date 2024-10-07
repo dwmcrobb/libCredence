@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2024
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -34,15 +34,16 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file TestKnownKeys.cc
+//!  \file TestKeyType.cc
 //!  \author Daniel W. McRobb
-//!  \brief Dwm::Credence::KnownKeys unit tests
+//!  \brief Unit tests for functionality in DwmCredenceKeyType.hh
 //---------------------------------------------------------------------------
+
 
 #include <sstream>
 
 #include "DwmUnitAssert.hh"
-#include "DwmCredenceKnownKeys.hh"
+#include "DwmCredenceKeyType.hh"
 #include "DwmCredenceUtils.hh"
 
 using namespace std;
@@ -51,75 +52,33 @@ using namespace Dwm;
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
-static void TestAdminKeys()
+static void TestMiscellany()
 {
-  Credence::KnownKeys  knownKeys("./inputs", "admin_keys");
-  UnitAssert(knownKeys.Keys().size() == 2);
-  string   key = knownKeys.Find("test@mcplex.net");
-  UnitAssert(! key.empty());
-  key = knownKeys.Find("foo@somedomain.com");
-  UnitAssert(! key.empty());
-  return;
-}
+  UnitAssert(Credence::MaxKeyTypeNameLength() == string("ed25519").size());
+  UnitAssert(Credence::MaxKeyStringLength() == 255);
+  UnitAssert(Credence::MaxKeyStringLength(Credence::KeyTypeEnum::e_keyTypeEd25519) == 255);
+  UnitAssert(Credence::MaxKeyStringLength(Credence::KeyTypeEnum::e_keyTypeNone)
+             == 0);
 
-//----------------------------------------------------------------------------
-//!  
-//----------------------------------------------------------------------------
-static void TestBadKeys()
-{
-  Credence::KnownKeys  knownKeys("./inputs", "bad_keys");
-  UnitAssert(knownKeys.Keys().size() == 2);
-  return;
-}
+  UnitAssert(Credence::KeyType("ed25519")
+             == Credence::KeyTypeEnum::e_keyTypeEd25519);
+  UnitAssert(Credence::KeyType("FoObAr")
+             == Credence::KeyTypeEnum::e_keyTypeNone);
 
-//----------------------------------------------------------------------------
-//!  
-//----------------------------------------------------------------------------
-static bool KnownKeysOK(const Credence::KnownKeys & knownKeys)
-{
-  bool  rc = true;
-  rc &= UnitAssert(knownKeys.Keys().size() == 3);
-  string   key = knownKeys.Find("test@mcplex.net");
-  rc &= UnitAssert(! key.empty());
-  key = knownKeys.Find("foo@somedomain.com");
-  rc &= UnitAssert(! key.empty());
-  key = knownKeys.Find("bar@anotherdomain.com");
-  rc &= UnitAssert(! key.empty());
-
-  return rc;
-}
-
-//----------------------------------------------------------------------------
-//!  
-//----------------------------------------------------------------------------
-static void WriteReadKeys(Credence::KnownKeys & knownKeys)
-{
-  std::stringstream  ss;
-  if (UnitAssert(knownKeys.Write(ss))) {
-    knownKeys.ClearKeys();
-    UnitAssert(knownKeys.Keys().empty());
-    UnitAssert(knownKeys.Read(ss));
-  }
-  return;
-}
+  UnitAssert(Credence::IsValidKeyType("ed25519"));
+  UnitAssert(! Credence::IsValidKeyType("none"));
+  UnitAssert(Credence::IsValidKeyType(Credence::KeyTypeEnum::e_keyTypeEd25519));
+  UnitAssert(! Credence::IsValidKeyType(Credence::KeyTypeEnum::e_keyTypeNone));
   
+  return;
+}
+
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-  TestAdminKeys();
-
-  Credence::KnownKeys  knownKeys("./inputs");
-  UnitAssert(KnownKeysOK(knownKeys));
-
-  knownKeys.Reload();
-  UnitAssert(KnownKeysOK(knownKeys));
-
-  WriteReadKeys(knownKeys);
-  UnitAssert(KnownKeysOK(knownKeys));
-
-  TestBadKeys();
+  TestMiscellany();
   
   if (Assertions::Total().Failed()) {
     Assertions::Print(cerr, true);

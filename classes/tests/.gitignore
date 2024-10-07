@@ -1,9 +1,11 @@
 TestChallenge
 TestEd25519KeyPair
 TestKeyStash
+TestKeyType
 TestKnownKeys
 TestKXKeyPair
 TestPeer
+TestShortString
 TestSigner
 TestX25519KeyPair
 TestXChaCha20Poly1305

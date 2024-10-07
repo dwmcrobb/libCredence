@@ -45,6 +45,7 @@
 #include "DwmStreamIO.hh"
 #include "DwmSysLogger.hh"
 #include "DwmCredenceKnownKeys.hh"
+#include "DwmCredenceEd25519PublicKey.hh"
 #include "DwmCredenceUtils.hh"
 
 namespace Dwm {
@@ -56,8 +57,8 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    KnownKeys::KnownKeys(const string & dirName)
-        : _dirName(dirName), _keysMtx()
+    KnownKeys::KnownKeys(const string & dirName, const string & fileName)
+        : _dirName(dirName), _fileName(fileName), _keysMtx()
     {
       static const regex  rgx("^~\\/.*");
       if (regex_match(_dirName, rgx)) {
@@ -156,11 +157,21 @@ namespace Dwm {
     std::ostream &
     operator << (std::ostream & os, const KnownKeys & knownKeys)
     {
-        std::shared_lock  lck(knownKeys._keysMtx);
+      std::shared_lock  lck(knownKeys._keysMtx);
       for (const auto & key : knownKeys._keys) {
         os << key.first << " ed25519 " << key.second << '\n';
       }
       return os;
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    void KnownKeys::ClearKeys()
+    {
+      std::unique_lock  lck(_keysMtx);
+      _keys.clear();
+      return;
     }
     
     //------------------------------------------------------------------------
@@ -170,38 +181,30 @@ namespace Dwm {
     {
       std::unique_lock  lck(_keysMtx);
       _keys.clear();
-      ifstream  is(_dirName + "/known_keys");
-      pair<string,string>  key;
-      while (ReadKey(is, key)) {
-        _keys[key.first] = key.second;
+      ifstream  is(_dirName + '/' + _fileName);
+      if (is) {
+        while (is) {
+          Ed25519PublicKey  pk;
+          if (is >> pk) {
+            _keys[pk.Id()] = pk.Key();
+          }
+          else if (is.eof() || is.bad()) {
+            break;
+          }
+          else if (is.fail()) {
+            is.clear();
+            is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+          }
+        }
+        FSyslog(LOG_INFO, "Loaded {} keys from {}/{}",
+                _keys.size(), _dirName, _fileName);
       }
-      FSyslog(LOG_INFO, "Loaded {} keys from {}/known_keys",
-              _keys.size(), _dirName);
+      else {
+        FSyslog(LOG_ERR, "Failed to open {}/{}", _dirName, _fileName);
+      }
       return (! _keys.empty());
     }
 
-    //------------------------------------------------------------------------
-    //!  
-    //------------------------------------------------------------------------
-    bool KnownKeys::ReadKey(istream & is, pair<string,string> & key)
-    {
-      bool  rc = false;
-      if (is) {
-        string  id, keyType, keystr;
-        if (is >> id >> keyType >> keystr) {
-          if ((keyType == "ed25519") && (! keystr.empty())) {
-            key.first = id;
-            key.second = Utils::Base642Bin(keystr);
-            if (! key.second.empty()) {
-              rc = true;
-            }
-          }
-        }
-      }
-      return rc;
-    }
-    
-    
   }  // namespace Credence
 
 }  // namespace Dwm

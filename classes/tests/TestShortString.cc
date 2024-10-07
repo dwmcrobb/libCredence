@@ -42,7 +42,7 @@
 #include <sstream>
 
 #include "DwmUnitAssert.hh"
-#include "DwmCredenceKnownKeys.hh"
+#include "DwmCredenceShortString.hh"
 #include "DwmCredenceUtils.hh"
 
 using namespace std;
@@ -51,75 +51,80 @@ using namespace Dwm;
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
-static void TestAdminKeys()
+static void TestAssign()
 {
-  Credence::KnownKeys  knownKeys("./inputs", "admin_keys");
-  UnitAssert(knownKeys.Keys().size() == 2);
-  string   key = knownKeys.Find("test@mcplex.net");
-  UnitAssert(! key.empty());
-  key = knownKeys.Find("foo@somedomain.com");
-  UnitAssert(! key.empty());
+  Credence::ShortString<5>  ss5;
+  ss5 = "Hello";
+  UnitAssert(ss5.Value() == "Hello");
+
+  bool gotLogicException = false;
+  try {
+    ss5 = "1234567890";
+  }
+  catch (std::logic_error & ex) {
+    gotLogicException = true;
+  }
+  UnitAssert(gotLogicException);
+
+  Credence::ShortString<5>  ss5_2 = ss5;
+  UnitAssert(ss5_2.Value() == ss5.Value());
+
+  Credence::ShortString<8>  ss8;
+  ss8.Assign(ss5);
+  UnitAssert(ss8.Value() == ss5.Value());
+  
   return;
 }
 
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
-static void TestBadKeys()
+static void TestStreamIO()
 {
-  Credence::KnownKeys  knownKeys("./inputs", "bad_keys");
-  UnitAssert(knownKeys.Keys().size() == 2);
-  return;
-}
-
-//----------------------------------------------------------------------------
-//!  
-//----------------------------------------------------------------------------
-static bool KnownKeysOK(const Credence::KnownKeys & knownKeys)
-{
-  bool  rc = true;
-  rc &= UnitAssert(knownKeys.Keys().size() == 3);
-  string   key = knownKeys.Find("test@mcplex.net");
-  rc &= UnitAssert(! key.empty());
-  key = knownKeys.Find("foo@somedomain.com");
-  rc &= UnitAssert(! key.empty());
-  key = knownKeys.Find("bar@anotherdomain.com");
-  rc &= UnitAssert(! key.empty());
-
-  return rc;
-}
-
-//----------------------------------------------------------------------------
-//!  
-//----------------------------------------------------------------------------
-static void WriteReadKeys(Credence::KnownKeys & knownKeys)
-{
+  Credence::ShortString<255> shortString =
+    "0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=";
   std::stringstream  ss;
-  if (UnitAssert(knownKeys.Write(ss))) {
-    knownKeys.ClearKeys();
-    UnitAssert(knownKeys.Keys().empty());
-    UnitAssert(knownKeys.Read(ss));
+  if (UnitAssert(shortString.Write(ss))) {
+    Credence::ShortString<255>  shortString_2;
+    if (UnitAssert(shortString_2.Read(ss))) {
+      UnitAssert(shortString_2 == shortString);
+    }
+  }
+
+  Credence::ShortString<65535>  shortString16 =
+    "0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfV"
+    "sOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ"
+    "5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY"
+    "93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPq"
+    "edfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpR"
+    "UVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUF"
+    "qfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vs"
+    "WGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8"
+    "uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq2"
+    "1UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhb"
+    "d2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=";
+  ss.str("");
+  if (UnitAssert(shortString16.Write(ss))) {
+    Credence::ShortString<65535>  shortString16_2;
+    if (UnitAssert(shortString16_2.Read(ss))) {
+      UnitAssert(shortString16_2 == shortString16);
+    }
+  }
+
+  ss.str("");
+  if (UnitAssert(shortString.Write(ss))) {
+    UnitAssert(! shortString16.Read(ss));
   }
   return;
 }
-  
+
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-  TestAdminKeys();
-
-  Credence::KnownKeys  knownKeys("./inputs");
-  UnitAssert(KnownKeysOK(knownKeys));
-
-  knownKeys.Reload();
-  UnitAssert(KnownKeysOK(knownKeys));
-
-  WriteReadKeys(knownKeys);
-  UnitAssert(KnownKeysOK(knownKeys));
-
-  TestBadKeys();
+  TestAssign();
+  TestStreamIO();
   
   if (Assertions::Total().Failed()) {
     Assertions::Print(cerr, true);

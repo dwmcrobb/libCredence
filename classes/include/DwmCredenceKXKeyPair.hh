@@ -67,12 +67,12 @@ namespace Dwm {
       //----------------------------------------------------------------------
       //!  Returns a const reference to the public key.
       //----------------------------------------------------------------------
-      const ShortString & PublicKey() const;
+      const ShortString<255> & PublicKey() const;
       
       //----------------------------------------------------------------------
       //!  Returns a const reference to the secret key.
       //----------------------------------------------------------------------
-      const ShortString & SecretKey() const;
+      const ShortString<255> & SecretKey() const;
 
       //----------------------------------------------------------------------
       //!  Returns the minimum number of bytes to represent the public key
@@ -87,8 +87,8 @@ namespace Dwm {
       std::string SharedKey(const std::string & theirPublicKey) const;
 
     private:
-      ShortString  _publicKey;
-      ShortString  _secretKey;
+      ShortString<255>  _publicKey;
+      ShortString<255>  _secretKey;
 
     };
     

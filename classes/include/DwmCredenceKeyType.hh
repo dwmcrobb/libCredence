@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2024
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -34,89 +34,117 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceKXKeyPair.cc
+//!  \file DwmCredenceKeyType.hh
 //!  \author Daniel W. McRobb
-//!  \brief Dwm::Credence::KXKeyPair class implementation
+//!  \brief NOT YET DOCUMENTED
 //---------------------------------------------------------------------------
 
-extern "C" {
-  #include <sodium.h>
-}
+#ifndef _DWMCREDENCEKEYTYPE_HH_
+#define _DWMCREDENCEKEYTYPE_HH_
 
-#include "DwmCredenceKXKeyPair.hh"
-#include "DwmCredenceGenericHash.hh"
-#include "DwmCredenceUtils.hh"
+#include <algorithm>
+#include <array>
+#include <string>
+#include <vector>
 
 namespace Dwm {
 
   namespace Credence {
 
-    using namespace std;
-    
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    KXKeyPair::KXKeyPair()
-    {
-      uint8_t  pkbuf[crypto_box_PUBLICKEYBYTES];
-      uint8_t  skbuf[crypto_box_SECRETKEYBYTES];
-      randombytes_buf(skbuf, sizeof(skbuf));
-      crypto_scalarmult_base(pkbuf, skbuf);
-      _publicKey = string((const char *)pkbuf, crypto_box_PUBLICKEYBYTES);
-      _secretKey = string((const char *)skbuf, crypto_box_SECRETKEYBYTES);
-    }
-      
-    //------------------------------------------------------------------------
-    //!  
-    //------------------------------------------------------------------------
-    KXKeyPair::~KXKeyPair()
-    {
-      _publicKey.Clear();
-      _secretKey.Clear();
-    }
-    
-    //------------------------------------------------------------------------
-    //!  
-    //------------------------------------------------------------------------
-    const ShortString<255> & KXKeyPair::PublicKey() const
-    { return _publicKey; }
-    
-    //------------------------------------------------------------------------
-    //!  
-    //------------------------------------------------------------------------
-    const ShortString<255> & KXKeyPair::SecretKey() const
-    { return _secretKey; }
+    enum class KeyTypeEnum {
+      e_keyTypeNone    = 0,
+      e_keyTypeEd25519 = 1
+    };
 
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    size_t KXKeyPair::PublicKeyMinimumStreamedLength() const
-    { return (crypto_box_PUBLICKEYBYTES + 1); }
+    typedef struct {
+      const std::string  name;
+      const KeyTypeEnum  type;
+      const size_t       maxKeyStringLen;
+    } KeyTypeInfo;
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    constexpr std::array<KeyTypeInfo,1>  sg__keyTypes__ {
+      { std::string{"ed25519"}, KeyTypeEnum::e_keyTypeEd25519, 255 }
+    };
     
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    string KXKeyPair::SharedKey(const string & theirPublicKey) const
+    consteval size_t MaxKeyTypeNameLength()
     {
-      string   rc;
-      string   scalarmult_q;
-      if (Utils::ScalarMult(_secretKey.Value(), theirPublicKey,
-                            scalarmult_q)) {
-        GenericHash<crypto_generichash_BYTES>  h;
-        h.Update(scalarmult_q);
-        if (_publicKey.Value() < theirPublicKey) {
-          h.Update(_publicKey.Value());
-          h.Update(theirPublicKey);
-        }
-        else {
-          h.Update(theirPublicKey);
-          h.Update(_publicKey.Value());
-        }
-        rc = h.Final();
-      }
-      return rc;
+      constexpr auto it =
+        std::max_element(std::cbegin(sg__keyTypes__),
+                         std::cend(sg__keyTypes__),
+                         [] (const auto & a, const auto & b)
+                         { return a.name.size() < b.name.size(); });
+      return it->name.size();
     }
 
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    consteval size_t MaxKeyStringLength()
+    {
+      constexpr auto it =
+        std::max_element(std::cbegin(sg__keyTypes__),
+                         std::cend(sg__keyTypes__),
+                         [] (const auto & a, const auto & b)
+                         { return a.maxKeyStringLen < b.maxKeyStringLen; });
+      return it->maxKeyStringLen;
+    }
+    
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    KeyTypeEnum KeyType(const std::string & name)
+    {
+      auto it =
+        std::find_if(std::cbegin(sg__keyTypes__), std::cend(sg__keyTypes__),
+                     [&] (const auto & e) { return (e.name == name); });
+      return (it != std::cend(sg__keyTypes__)
+              ? it->type : KeyTypeEnum::e_keyTypeNone);
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool IsValidKeyType(const std::string & name)
+    {
+      return (KeyType(name) != KeyTypeEnum::e_keyTypeNone);
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    constexpr bool IsValidKeyType(KeyTypeEnum kte)
+    {
+      return (std::find_if(std::cbegin(sg__keyTypes__),
+                           std::cend(sg__keyTypes__),
+                           [=] (const auto & e) { return (e.type == kte); })
+              != std::cend(sg__keyTypes__));
+    }
+    
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    size_t MaxKeyStringLength(KeyTypeEnum kte)
+    {
+      auto it =
+        std::find_if(std::cbegin(sg__keyTypes__), std::cend(sg__keyTypes__),
+                     [=] (const auto & e) { return (e.type == kte); });
+      return (it != std::cend(sg__keyTypes__) ? it->maxKeyStringLen : 0);
+    }
+    
   }  // namespace Credence
 
 }  // namespace Dwm
+
+#endif  // _DWMCREDENCEKEYTYPE_HH_

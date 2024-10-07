@@ -78,7 +78,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    const ShortString & Ed25519KeyPair::Id() const
+    const ShortString<255> & Ed25519KeyPair::Id() const
     {
       return _id;
     }
@@ -86,7 +86,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    const ShortString & Ed25519KeyPair::Id(const ShortString & id)
+    const ShortString<255> & Ed25519KeyPair::Id(const ShortString<255> & id)
     {
       _id = id;
       return _id;

@@ -94,7 +94,7 @@ namespace Dwm {
       std::ostream & Write(std::ostream & os) const;
       
     private:
-      ShortString  _challenge;
+      ShortString<255>  _challenge;
     };
     
   }  // namespace Credence
