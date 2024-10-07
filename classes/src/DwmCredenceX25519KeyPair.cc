@@ -74,7 +74,7 @@ namespace Dwm {
     X25519KeyPair::X25519KeyPair(const Ed25519KeyPair & edkp)
     {
       uint8_t         x25519_pk[crypto_scalarmult_curve25519_BYTES];
-      const uint8_t  *edkp_pk = (const uint8_t *)edkp.PublicKey().data();
+      const uint8_t  *edkp_pk = (const uint8_t *)edkp.PublicKey().Key().data();
       if (crypto_sign_ed25519_pk_to_curve25519(x25519_pk, edkp_pk) == 0) {
         _publicKey.assign((const char *)x25519_pk,
                           crypto_scalarmult_curve25519_BYTES);

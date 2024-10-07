@@ -134,7 +134,7 @@ namespace Dwm {
       string    savePath = _dirName + "/id_ed25519.pub";
       ofstream  os(savePath);
       if (os) {
-        os << edkp.Id() << " ed25519 " << Utils::Bin2Base64(edkp.PublicKey());
+        os << edkp.PublicKey();
         os.close();
         fs::perms  p =
           fs::perms::owner_read
@@ -161,7 +161,8 @@ namespace Dwm {
       string    savePath = _dirName + "/id_ed25519";
       ofstream  os(savePath);
       if (os) {
-        os << edkp.Id() << " ed25519 " << Utils::Bin2Base64(edkp.SecretKey());
+        os << edkp.PublicKey().Id() << " ed25519 "
+           << Utils::Bin2Base64(edkp.SecretKey());
         os.close();
         fs::perms  p = fs::perms::owner_read | fs::perms::owner_write;
         error_code  ec;
@@ -181,22 +182,10 @@ namespace Dwm {
       bool      rc = false;
       ifstream  is(_dirName + "/id_ed25519.pub");
       if (is) {
-        string  id, keyType, encodedKey;
-        is >> id >> keyType >> encodedKey;
-        if ((! id.empty())
-            && (! encodedKey.empty())
-            && (keyType == "ed25519")) {
-          unsigned char  binaryKey[crypto_sign_ed25519_PUBLICKEYBYTES];
-          if (sodium_base642bin(binaryKey, crypto_sign_ed25519_PUBLICKEYBYTES,
-                                encodedKey.data(), encodedKey.size(),
-                                nullptr, 0, nullptr,
-                                sodium_base64_VARIANT_ORIGINAL) == 0) {
-            edkp.Id(id);
-            string  keyString((const char *)binaryKey,
-                              crypto_sign_ed25519_PUBLICKEYBYTES);
-            edkp.PublicKey(keyString);
-            rc = true;
-          }
+        Ed25519PublicKey  pk;
+        if (is >> pk) {
+          edkp.PublicKey(pk);
+          rc = true;
         }
       }
       return rc;
@@ -213,7 +202,7 @@ namespace Dwm {
         string  id, keyType, encodedKey;
         is >> id >> keyType >> encodedKey;
         is.close();
-        if ((ShortString<255>(id) == edkp.Id())
+        if ((ShortString<255>(id) == edkp.PublicKey().Id())
             && (keyType == "ed25519")
             && (! encodedKey.empty())) {
           string  keyString = Utils::Base642Bin(encodedKey);

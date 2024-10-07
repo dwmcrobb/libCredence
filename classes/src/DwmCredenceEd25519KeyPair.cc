@@ -57,13 +57,13 @@ namespace Dwm {
     //!  
     //------------------------------------------------------------------------
     Ed25519KeyPair::Ed25519KeyPair(const string & id)
-        : _id(id), _publicKey(crypto_sign_ed25519_PUBLICKEYBYTES, '\0'),
+        : _publicKey(id, std::string(crypto_sign_ed25519_PUBLICKEYBYTES, '\0')),
           _secretKey(crypto_sign_ed25519_SECRETKEYBYTES, '\0')
     {
-      if (_id.Value().empty()) {
-        _id = Utils::UserName() + '@' + Utils::HostName();
+      if (_publicKey.Id().empty()) {
+        _publicKey.Id(Utils::UserName() + '@' + Utils::HostName());
       }
-      crypto_sign_ed25519_keypair((uint8_t *)_publicKey.data(),
+      crypto_sign_ed25519_keypair((uint8_t *)_publicKey.Key().data(),
                                   (uint8_t *)_secretKey.data());
     }
 
@@ -74,13 +74,14 @@ namespace Dwm {
     {
       Clear();
     }
-    
+
+#if 0
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
     const ShortString<255> & Ed25519KeyPair::Id() const
     {
-      return _id;
+      return _publicKey.Id();
     }
 
     //------------------------------------------------------------------------
@@ -88,14 +89,14 @@ namespace Dwm {
     //------------------------------------------------------------------------
     const ShortString<255> & Ed25519KeyPair::Id(const ShortString<255> & id)
     {
-      _id = id;
-      return _id;
+      return _publicKey.Id(id);
     }
+#endif
     
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    const string & Ed25519KeyPair::PublicKey() const
+    const Ed25519PublicKey & Ed25519KeyPair::PublicKey() const
     {
       return _publicKey;
     }
@@ -103,7 +104,8 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    const string & Ed25519KeyPair::PublicKey(const string & publicKey)
+    const Ed25519PublicKey &
+    Ed25519KeyPair::PublicKey(const Ed25519PublicKey & publicKey)
     {
       _publicKey = publicKey;
       return _publicKey;
@@ -132,13 +134,13 @@ namespace Dwm {
     bool Ed25519KeyPair::IsValid() const
     {
       bool  rc = false;
-      if ((! _publicKey.empty()) && (! _secretKey.empty())) {
+      if ((! _publicKey.Key().empty()) && (! _secretKey.empty())) {
         string  origMessage(32, '\0');
         randombytes_buf((void *)origMessage.data(), 32);
         string  signedMessage;
         if (Signer::Sign(origMessage, _secretKey, signedMessage)) {
           string  openedMessage;
-          if (Signer::Open(signedMessage, _publicKey, openedMessage)) {
+          if (Signer::Open(signedMessage, _publicKey.Key(), openedMessage)) {
             rc = (openedMessage == origMessage);
           }
         }
@@ -151,10 +153,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     void Ed25519KeyPair::Clear()
     {
-      // _id.assign(_id.size(), '\0');
-      // _id.clear();
-      _publicKey.assign(_publicKey.size(), '\0');
-      _publicKey.clear();
+      _publicKey.Clear();
       _secretKey.assign(_secretKey.size(), '\0');
       _secretKey.clear();
       return;
@@ -165,8 +164,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     bool Ed25519KeyPair::operator == (const Ed25519KeyPair & keyPair) const
     {
-      return ((_id.Value() == keyPair._id.Value())
-              && (_publicKey == keyPair._publicKey)
+      return ((_publicKey == keyPair._publicKey)
               && (_secretKey == keyPair._secretKey));
     }
     

@@ -95,12 +95,12 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    bool ChallengeResponse::Verify(const string & publicKey,
+    bool ChallengeResponse::Verify(const Ed25519PublicKey & publicKey,
                                    const string & challengeString) const
     {
       bool    rc = false;
       string  signedContent;
-      if (Signer::Open(_response, publicKey, signedContent)) {
+      if (Signer::Open(_response, publicKey.Key(), signedContent)) {
         if (challengeString == signedContent) {
           rc = true;
         }
@@ -112,7 +112,7 @@ namespace Dwm {
       }
       else {
         FSyslog(LOG_ERR, "ChallengeResponse::Verify({},{}) failed",
-                Utils::Bin2Base64(publicKey),
+                Utils::Bin2Base64(publicKey.Key()),
                 Utils::Bin2Base64(challengeString));
       }
       return rc;

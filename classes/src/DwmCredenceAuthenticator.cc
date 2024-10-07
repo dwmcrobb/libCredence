@@ -73,12 +73,10 @@ namespace Dwm {
           _xos = make_unique<XChaCha20Poly1305::Ostream>(s, agreedKey);
           if ((nullptr != _xis) && (nullptr != _xos)) {
             Ed25519KeyPair    myKeys;
-            ShortString<255>  theirIdShort;
-            string            theirPubKey;
-            if (ExchangeIds(s, myKeys, theirIdShort, theirPubKey)) {
-              if (ExchangeChallenges(myKeys.SecretKey(), theirIdShort.Value(),
-                                     theirPubKey)) {
-                theirId = theirIdShort.Value();
+            Ed25519PublicKey  theirPubKey;
+            if (ExchangeIds(s, myKeys, theirPubKey)) {
+              if (ExchangeChallenges(myKeys.SecretKey(), theirPubKey)) {
+                theirId = theirPubKey.Id();
                 rc = true;
               }
             }
@@ -107,12 +105,10 @@ namespace Dwm {
           _xos = make_unique<XChaCha20Poly1305::Ostream>(s, agreedKey);
           if ((nullptr != _xis) && (nullptr != _xos)) {
             Ed25519KeyPair    myKeys;
-            ShortString<255>  theirIdShort;
-            string            theirPubKey;
-            if (ExchangeIds(s, myKeys, theirIdShort, theirPubKey)) {
-              if (ExchangeChallenges(myKeys.SecretKey(), theirIdShort.Value(),
-                                     theirPubKey)) {
-                theirId = theirIdShort.Value();
+            Ed25519PublicKey  theirPubKey;
+            if (ExchangeIds(s, myKeys, theirPubKey)) {
+              if (ExchangeChallenges(myKeys.SecretKey(), theirPubKey)) {
+                theirId = theirPubKey.Id();
                 rc = true;
               }
             }
@@ -136,19 +132,25 @@ namespace Dwm {
     //------------------------------------------------------------------------
     bool Authenticator::ExchangeIds(boost::asio::ip::tcp::iostream & s,
                                     Ed25519KeyPair & myKeys,
-                                    ShortString<255> & theirId,
-                                    string & theirPubKey)
+                                    Ed25519PublicKey & theirPubKey)
     {
       bool  rc = false;
       if (_keyStash.Get(myKeys)) {
-        if (Send(myKeys.Id())) {
+        ShortString<255>  myId(myKeys.PublicKey().Id());
+        if (Send(myId)) {
           uint32_t  minBytes = crypto_secretbox_NONCEBYTES
             + crypto_aead_xchacha20poly1305_ietf_ABYTES + 1;
           if (Utils::WaitForBytesReady(s.socket(), minBytes, _timeout)) {
+            ShortString<255> theirId;
+            string           theirPubKeyStr;
             if (Receive(theirId)) {
-              theirPubKey = _knownKeys.Find(theirId.Value());
-              rc = (! theirPubKey.empty());
-              if (! rc) {
+              theirPubKeyStr = _knownKeys.Find(theirId.Value());
+              if (! theirPubKeyStr.empty()) {
+                theirPubKey =
+                  Ed25519PublicKey(theirId.Value(), theirPubKeyStr);
+                rc = true;
+              }
+              else {
                 FSyslog(LOG_ERR, "Unknown ID {} from peer at {}",
                         theirId.Value(), EndPointString());
               }
@@ -178,19 +180,25 @@ namespace Dwm {
     //------------------------------------------------------------------------
     bool Authenticator::
     ExchangeIds(boost::asio::local::stream_protocol::iostream & s,
-                Ed25519KeyPair & myKeys, ShortString<255> & theirId,
-                string & theirPubKey)
+                Ed25519KeyPair & myKeys, Ed25519PublicKey & theirPubKey)
     {
       bool  rc = false;
       if (_keyStash.Get(myKeys)) {
-        if (Send(myKeys.Id())) {
+        ShortString<255>  myId(myKeys.PublicKey().Id());
+        if (Send(myId)) {
           uint32_t  minBytes = crypto_secretbox_NONCEBYTES
             + crypto_aead_xchacha20poly1305_ietf_ABYTES + 1;
           if (Utils::WaitForBytesReady(s.socket(), minBytes, _timeout)) {
+            ShortString<255> theirId;
+            string           theirPubKeyStr;                                   
             if (Receive(theirId)) {
-              theirPubKey = _knownKeys.Find(theirId.Value());
-              rc = (! theirPubKey.empty());
-              if (! rc) {
+              theirPubKeyStr = _knownKeys.Find(theirId.Value());
+              if (! theirPubKeyStr.empty()) {
+                theirPubKey =
+                  Ed25519PublicKey(theirId.Value(), theirPubKeyStr);
+                rc = true;
+              }
+              else {
                 FSyslog(LOG_ERR, "Unknown ID {} from peer at {}",
                         theirId.Value(), EndPointString());
               }
@@ -221,8 +229,7 @@ namespace Dwm {
     //!  
     //------------------------------------------------------------------------
     bool Authenticator::ExchangeChallenges(const string & ourSecretKey,
-                                           const string & theirId,
-                                           const string & theirPubKey)
+                                           const Ed25519PublicKey & theirPubKey)
     {
       bool  rc = false;
       //  Send our challenge
@@ -241,32 +248,32 @@ namespace Dwm {
                 if (theirResponse.Verify(theirPubKey, ourChallenge)) {
                   rc = true;
                   FSyslog(LOG_INFO, "Authenticated {} at {}",
-                          theirId, EndPointString());
+                          theirPubKey.Id(), EndPointString());
                 }
                 else {
                   FSyslog(LOG_INFO, "Failed to authenticate {} at {}",
-                          theirId, EndPointString());
+                          theirPubKey.Id(), EndPointString());
                 }
               }
               else {
                 FSyslog(LOG_ERR, "Failed to read challenge response from"
-                        " {} at {}", theirId, EndPointString());
+                        " {} at {}", theirPubKey.Id(), EndPointString());
               }
             }
             else {
               FSyslog(LOG_ERR, "Failed to send challenge response to"
-                      " {} at {}", theirId, EndPointString());
+                      " {} at {}", theirPubKey.Id(), EndPointString());
             }
           }
         }
         else {
           FSyslog(LOG_ERR, "Failed to read challenge from {} at {}",
-                  theirId, EndPointString());
+                  theirPubKey.Id(), EndPointString());
         }
       }
       else {
         FSyslog(LOG_ERR, "Failed to send challenge to {} at {}",
-                theirId, EndPointString());
+                theirPubKey.Id(), EndPointString());
       }
 
       return rc;

@@ -86,7 +86,16 @@ namespace Dwm {
       os << pk._id << " ed25519 " << Utils::Bin2Base64(pk._key.Value());
       return os;
     }
-                                     
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    void Ed25519PublicKey::Clear()
+    {
+      _id.Clear();
+      _key.Clear();
+    }
+    
     //------------------------------------------------------------------------
     std::istream & operator >> (std::istream & is, Ed25519PublicKey & pk)
     {
@@ -118,7 +127,21 @@ namespace Dwm {
       }
       return is;
     }
-    
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    bool Ed25519PublicKey::operator < (const Ed25519PublicKey & pk) const
+    {
+      if (_id < pk._id) {
+        return true;
+      }
+      else if ((_id == pk._id) && (_key < pk._key)) {
+        return true;
+      }
+      return false;
+    }
+
   }  // namespace Credence
 
 }  // namespace Dwm

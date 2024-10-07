@@ -68,7 +68,8 @@ static void InitKeyGenArgs(KeyGenArgType & args)
 {
   args.SetValueName<'i'>("identity");
   Dwm::Credence::Ed25519KeyPair  kp;
-  args.SetHelp<'i'>("Use the given identity (defaults to " + kp.Id().Value() + ")");
+  args.SetHelp<'i'>("Use the given identity (defaults to "
+                    + kp.PublicKey().Id() + ")");
   args.SetValueName<'d'>("directory");
   args.SetHelp<'d'>("directory in which to store keys (defaults to ~/.credence)");
   args.Set<'d'>("~/.credence");

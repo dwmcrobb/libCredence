@@ -45,6 +45,7 @@
 #include <string>
 
 #include "DwmCredenceChallenge.hh"
+#include "DwmCredenceEd25519PublicKey.hh"
 
 namespace Dwm {
 
@@ -94,7 +95,7 @@ namespace Dwm {
       //!  response contents matches the given @c challengeString.  Returns
       //!  true if the response is correct, else returns false.
       //----------------------------------------------------------------------
-      bool Verify(const std::string & publicKey,
+      bool Verify(const Ed25519PublicKey & publicKey,
                   const std::string & challengeString) const;
       
     private:

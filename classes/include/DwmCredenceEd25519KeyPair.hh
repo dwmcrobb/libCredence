@@ -42,7 +42,7 @@
 #ifndef _DWMCREDENCEED25519KEYPAIR_HH_
 #define _DWMCREDENCEED25519KEYPAIR_HH_
 
-#include "DwmCredenceShortString.hh"
+#include "DwmCredenceEd25519PublicKey.hh"
 
 namespace Dwm {
 
@@ -79,27 +79,29 @@ namespace Dwm {
       //!  Destructor.  Clears the contents of the keys before deallocation.
       //----------------------------------------------------------------------
       ~Ed25519KeyPair();
-      
+
+#if 0
       //----------------------------------------------------------------------
       //!  Returns the owner of the keypair.
       //----------------------------------------------------------------------
       const ShortString<255> & Id() const;
-      
+
       //----------------------------------------------------------------------
       //!  Sets and returns the owner of the keypair.
       //----------------------------------------------------------------------
       const ShortString<255> & Id(const ShortString<255> & id);
+#endif
       
       //----------------------------------------------------------------------
       //!  Returns the public key.  This is used to verify signatures in
       //!  challenge responses during authentication.
       //----------------------------------------------------------------------
-      const std::string & PublicKey() const;
+      const Ed25519PublicKey & PublicKey() const;
       
       //----------------------------------------------------------------------
       //!  Sets and returns the public key.
       //----------------------------------------------------------------------
-      const std::string & PublicKey(const std::string & publicKey);
+      const Ed25519PublicKey & PublicKey(const Ed25519PublicKey & publicKey);
       
       //----------------------------------------------------------------------
       //!  Returns the secret key.  This is used to sign challenge responses
@@ -129,8 +131,7 @@ namespace Dwm {
       bool operator == (const Ed25519KeyPair & keyPair) const;
       
     private:
-      ShortString<255>  _id;
-      std::string       _publicKey;
+      Ed25519PublicKey  _publicKey;
       std::string       _secretKey;
     };
     

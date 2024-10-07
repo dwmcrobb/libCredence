@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
   if (UnitAssert(Credence::Signer::Sign(unsignedMsg, keyPair.SecretKey(),
                                         signedMsg))) {
     string  openedMsg;
-    if (UnitAssert(Credence::Signer::Open(signedMsg, keyPair.PublicKey(),
+    if (UnitAssert(Credence::Signer::Open(signedMsg, keyPair.PublicKey().Key(),
                                           openedMsg))) {
       UnitAssert(openedMsg == unsignedMsg);
     }

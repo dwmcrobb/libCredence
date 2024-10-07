@@ -94,6 +94,12 @@ namespace Dwm {
       const std::string & Id() const   { return _id.Value(); }
 
       //----------------------------------------------------------------------
+      //!  Sets and returns the id.
+      //----------------------------------------------------------------------
+      const std::string & Id(const std::string & id)
+      { _id = id;  return _id.Value(); }
+      
+      //----------------------------------------------------------------------
       //!  Returns the key content, in binary representation.
       //----------------------------------------------------------------------
       const std::string & Key() const  { return _key.Value(); }
@@ -111,6 +117,11 @@ namespace Dwm {
       std::ostream & Write(std::ostream & os) const;
 
       //----------------------------------------------------------------------
+      //!  Clears the contents of the key (id and key content).
+      //----------------------------------------------------------------------
+      void Clear();
+      
+      //----------------------------------------------------------------------
       //!  Writes the key to the given ostream @c os, encoded in base64.
       //----------------------------------------------------------------------
       friend std::ostream &
@@ -127,7 +138,7 @@ namespace Dwm {
       //----------------------------------------------------------------------
       //!  less-than operator
       //----------------------------------------------------------------------
-      bool operator < (const Ed25519PublicKey &) const = default;
+      bool operator < (const Ed25519PublicKey &) const;
       
       //----------------------------------------------------------------------
       //!  equality operator
