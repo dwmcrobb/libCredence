@@ -34,9 +34,9 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceEd25519PublicKey.hh
+//!  \file DwmCredenceEd25519Key.hh
 //!  \author Daniel W. McRobb
-//!  \brief Dwm::Credence::Ed25519PublicKey class declaration
+//!  \brief Dwm::Credence::Ed25519Key class declaration
 //---------------------------------------------------------------------------
 
 #ifndef _DWMCREDENCEED25519PUBLICKEY_HH_
@@ -52,41 +52,43 @@ namespace Dwm {
   namespace Credence {
 
     //------------------------------------------------------------------------
-    //!  Encapsulate a public key: an identifier and the public key content.
+    //!  Encapsulate an Ed25519 key: an identifier and the key content.  This
+    //!  key is half of a key pair, and is used to represent a public key or
+    //!  a private key.
     //------------------------------------------------------------------------
-    class Ed25519PublicKey
+    class Ed25519Key
     {
     public:
       //----------------------------------------------------------------------
       //!  Default constructor
       //----------------------------------------------------------------------
-      Ed25519PublicKey() = default;
+      Ed25519Key() = default;
       
       //----------------------------------------------------------------------
       //!  Copy constructor
       //----------------------------------------------------------------------
-      Ed25519PublicKey(const Ed25519PublicKey &) = default;
+      Ed25519Key(const Ed25519Key &) = default;
       
       //----------------------------------------------------------------------
       //!  Move constructor
       //----------------------------------------------------------------------
-      Ed25519PublicKey(Ed25519PublicKey &&) = default;
+      Ed25519Key(Ed25519Key &&) = default;
       
       //----------------------------------------------------------------------
       //!  Copy assignment
       //----------------------------------------------------------------------
-      Ed25519PublicKey & operator = (const Ed25519PublicKey &) = default;
+      Ed25519Key & operator = (const Ed25519Key &) = default;
       
       //----------------------------------------------------------------------
       //!  Move assignment
       //----------------------------------------------------------------------
-      Ed25519PublicKey & operator = (Ed25519PublicKey &&) = default;
+      Ed25519Key & operator = (Ed25519Key &&) = default;
       
       //----------------------------------------------------------------------
       //!  Construct from the given @c id and @c key.  Ntoe that @c key
       //!  must be in the binary representation.
       //----------------------------------------------------------------------
-      Ed25519PublicKey(const std::string & id, const std::string & key);
+      Ed25519Key(const std::string & id, const std::string & key);
       
       //----------------------------------------------------------------------
       //!  Returns the id.
@@ -125,7 +127,7 @@ namespace Dwm {
       //!  Writes the key to the given ostream @c os, encoded in base64.
       //----------------------------------------------------------------------
       friend std::ostream &
-      operator << (std::ostream & os, const Ed25519PublicKey & pk);
+      operator << (std::ostream & os, const Ed25519Key & pk);
 
       //----------------------------------------------------------------------
       //!  Reads the key from the given istream @c is, in human-readable form.
@@ -133,17 +135,17 @@ namespace Dwm {
       //!  content represented in base64 encoding.
       //----------------------------------------------------------------------
       friend std::istream &
-      operator >> (std::istream & is, Ed25519PublicKey & pk);
+      operator >> (std::istream & is, Ed25519Key & pk);
 
       //----------------------------------------------------------------------
       //!  less-than operator
       //----------------------------------------------------------------------
-      bool operator < (const Ed25519PublicKey &) const;
+      bool operator < (const Ed25519Key &) const;
       
       //----------------------------------------------------------------------
       //!  equality operator
       //----------------------------------------------------------------------
-      bool operator == (const Ed25519PublicKey &) const = default;
+      bool operator == (const Ed25519Key &) const = default;
       
     private:
       ShortString<255>  _id;

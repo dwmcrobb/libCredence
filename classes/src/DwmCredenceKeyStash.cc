@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2022, 2024
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -161,8 +161,8 @@ namespace Dwm {
       string    savePath = _dirName + "/id_ed25519";
       ofstream  os(savePath);
       if (os) {
-        os << edkp.PublicKey().Id() << " ed25519 "
-           << Utils::Bin2Base64(edkp.SecretKey());
+        os << edkp.SecretKey().Id() << " ed25519 "
+           << Utils::Bin2Base64(edkp.SecretKey().Key());
         os.close();
         fs::perms  p = fs::perms::owner_read | fs::perms::owner_write;
         error_code  ec;
@@ -182,11 +182,18 @@ namespace Dwm {
       bool      rc = false;
       ifstream  is(_dirName + "/id_ed25519.pub");
       if (is) {
-        Ed25519PublicKey  pk;
+        Ed25519Key  pk;
         if (is >> pk) {
           edkp.PublicKey(pk);
           rc = true;
         }
+        else {
+          FSyslog(LOG_ERR, "Failed to load key from {}",
+                  _dirName + "/id_ed25519.pub");
+        }
+      }
+      else {
+        FSyslog(LOG_ERR, "Failed to open {}", _dirName + "/id_ed25519.pub");
       }
       return rc;
     }
@@ -199,18 +206,22 @@ namespace Dwm {
       bool  rc = false;
       ifstream  is(_dirName + "/id_ed25519");
       if (is) {
-        string  id, keyType, encodedKey;
-        is >> id >> keyType >> encodedKey;
-        is.close();
-        if ((ShortString<255>(id) == edkp.PublicKey().Id())
-            && (keyType == "ed25519")
-            && (! encodedKey.empty())) {
-          string  keyString = Utils::Base642Bin(encodedKey);
-          if (! keyString.empty()) {
-            edkp.SecretKey(keyString);
+        Ed25519Key  pk;
+        if (is >> pk) {
+          if ((pk.Id() == edkp.PublicKey().Id())
+              && (! pk.Key().empty())) {
+            edkp.SecretKey(pk);
             rc = true;
           }
+          else {
+            FSyslog(LOG_ERR, "Failed to load secret key from {}",
+                    _dirName + "/id_ed25519");
+          }
         }
+        is.close();
+      }
+      else {
+        FSyslog(LOG_ERR, "Failed to open {}", _dirName + "/id_ed25519");
       }
       return rc;
     }

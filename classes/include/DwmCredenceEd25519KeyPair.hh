@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2022, 2024
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@
 #ifndef _DWMCREDENCEED25519KEYPAIR_HH_
 #define _DWMCREDENCEED25519KEYPAIR_HH_
 
-#include "DwmCredenceEd25519PublicKey.hh"
+#include "DwmCredenceEd25519Key.hh"
 
 namespace Dwm {
 
@@ -53,12 +53,6 @@ namespace Dwm {
     //!  to sign challenge responses during authentication.  The contained
     //!  public key is used to validate signatures in challenge responses
     //!  during authentication.
-    //!
-    //!  A ShortString is used to hold the ID of the owner of the keypair.
-    //!  This is to help avoid memory resource DoS attacks on a server,
-    //!  where a length-encoded version of the ID will be received from a
-    //!  client during authentication.  The keys themselves are never
-    //!  transmitted.
     //------------------------------------------------------------------------
     class Ed25519KeyPair
     {
@@ -80,39 +74,27 @@ namespace Dwm {
       //----------------------------------------------------------------------
       ~Ed25519KeyPair();
 
-#if 0
-      //----------------------------------------------------------------------
-      //!  Returns the owner of the keypair.
-      //----------------------------------------------------------------------
-      const ShortString<255> & Id() const;
-
-      //----------------------------------------------------------------------
-      //!  Sets and returns the owner of the keypair.
-      //----------------------------------------------------------------------
-      const ShortString<255> & Id(const ShortString<255> & id);
-#endif
-      
       //----------------------------------------------------------------------
       //!  Returns the public key.  This is used to verify signatures in
       //!  challenge responses during authentication.
       //----------------------------------------------------------------------
-      const Ed25519PublicKey & PublicKey() const;
+      const Ed25519Key & PublicKey() const;
       
       //----------------------------------------------------------------------
       //!  Sets and returns the public key.
       //----------------------------------------------------------------------
-      const Ed25519PublicKey & PublicKey(const Ed25519PublicKey & publicKey);
+      const Ed25519Key & PublicKey(const Ed25519Key & publicKey);
       
       //----------------------------------------------------------------------
       //!  Returns the secret key.  This is used to sign challenge responses
       //!  during authentication.
       //----------------------------------------------------------------------
-      const std::string & SecretKey() const;
+      const Ed25519Key & SecretKey() const;
       
       //----------------------------------------------------------------------
       //!  Sets and returns the secret key.
       //----------------------------------------------------------------------
-      const std::string & SecretKey(const std::string & secretKey);
+      const Ed25519Key & SecretKey(const Ed25519Key & secretKey);
 
       //----------------------------------------------------------------------
       //!  Returns true if they keypair is valid (i.e. can be used to sign
@@ -131,8 +113,8 @@ namespace Dwm {
       bool operator == (const Ed25519KeyPair & keyPair) const;
       
     private:
-      Ed25519PublicKey  _publicKey;
-      std::string       _secretKey;
+      Ed25519Key  _publicKey;
+      Ed25519Key  _secretKey;
     };
     
   }  // namespace Credence

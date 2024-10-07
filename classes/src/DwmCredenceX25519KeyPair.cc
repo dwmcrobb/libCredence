@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2022, 2024
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -81,7 +81,7 @@ namespace Dwm {
       }
       
       uint8_t         x25519_sk[crypto_scalarmult_curve25519_BYTES];
-      const uint8_t  *edkp_sk = (const uint8_t *)edkp.SecretKey().data();
+      const uint8_t  *edkp_sk = (const uint8_t *)edkp.SecretKey().Key().data();
       if (crypto_sign_ed25519_sk_to_curve25519(x25519_sk, edkp_sk) == 0) {
         _secretKey.assign((const char *)x25519_sk,
                           crypto_scalarmult_curve25519_BYTES);

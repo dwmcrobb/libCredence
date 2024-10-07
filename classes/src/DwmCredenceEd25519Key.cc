@@ -34,13 +34,13 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file DwmCredenceEd25519PublicKey.cc
+//!  \file DwmCredenceEd25519Key.cc
 //!  \author Daniel W. McRobb
-//!  \brief Dwm::Credence::Ed25519PublicKey class implementation
+//!  \brief Dwm::Credence::Ed25519Key class implementation
 //---------------------------------------------------------------------------
 
 #include "DwmStreamIO.hh"
-#include "DwmCredenceEd25519PublicKey.hh"
+#include "DwmCredenceEd25519Key.hh"
 #include "DwmCredenceShortString.hh"
 #include "DwmCredenceKeyType.hh"
 #include "DwmCredenceUtils.hh"
@@ -50,13 +50,13 @@ namespace Dwm {
   namespace Credence {
 
     //------------------------------------------------------------------------
-    Ed25519PublicKey::Ed25519PublicKey(const std::string & id,
-                                       const std::string & key)
+    Ed25519Key::Ed25519Key(const std::string & id,
+                           const std::string & key)
         : _id(id), _key(key)
     {}
     
     //------------------------------------------------------------------------
-    std::istream & Ed25519PublicKey::Read(std::istream & is)
+    std::istream & Ed25519Key::Read(std::istream & is)
     {
       _id.Clear();
       _key.Clear();
@@ -71,7 +71,7 @@ namespace Dwm {
     }
 
     //------------------------------------------------------------------------
-    std::ostream & Ed25519PublicKey::Write(std::ostream & os) const
+    std::ostream & Ed25519Key::Write(std::ostream & os) const
     {
       if (StreamIO::Write(os, _id)) {
         StreamIO::Write(os, _key);
@@ -81,7 +81,7 @@ namespace Dwm {
 
     //------------------------------------------------------------------------
     std::ostream &
-    operator << (std::ostream & os, const Ed25519PublicKey & pk)
+    operator << (std::ostream & os, const Ed25519Key & pk)
     {
       os << pk._id << " ed25519 " << Utils::Bin2Base64(pk._key.Value());
       return os;
@@ -90,14 +90,14 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    void Ed25519PublicKey::Clear()
+    void Ed25519Key::Clear()
     {
       _id.Clear();
       _key.Clear();
     }
     
     //------------------------------------------------------------------------
-    std::istream & operator >> (std::istream & is, Ed25519PublicKey & pk)
+    std::istream & operator >> (std::istream & is, Ed25519Key & pk)
     {
       pk._id.Clear();
       pk._key.Clear();
@@ -131,12 +131,12 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    bool Ed25519PublicKey::operator < (const Ed25519PublicKey & pk) const
+    bool Ed25519Key::operator < (const Ed25519Key & k) const
     {
-      if (_id < pk._id) {
+      if (_id < k._id) {
         return true;
       }
-      else if ((_id == pk._id) && (_key < pk._key)) {
+      else if ((_id == k._id) && (_key < k._key)) {
         return true;
       }
       return false;

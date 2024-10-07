@@ -82,7 +82,8 @@ int main(int argc, char *argv[])
   string                    signedMessage("hello");
   
   if (UnitAssert(Credence::Signer::Sign(challenge,
-                                        keyPair.SecretKey(), signedMessage))) {
+                                        keyPair.SecretKey().Key(),
+                                        signedMessage))) {
     Credence::ChallengeResponse  response;
     UnitAssert(response.Create(keyPair.SecretKey(), challenge));
     UnitAssert(response.Verify(keyPair.PublicKey(), challenge));

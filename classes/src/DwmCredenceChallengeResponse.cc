@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2022, 2024
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -54,13 +54,13 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    bool ChallengeResponse::Create(const string & signingKey,
+    bool ChallengeResponse::Create(const Ed25519Key & signingKey,
                                    const Challenge & challenge)
     {
       bool  rc = false;
-      if (! signingKey.empty()) {
+      if (! signingKey.Key().empty()) {
         if (! ((string)challenge).empty()) {
-          rc = Signer::Sign(challenge, signingKey, _response);
+          rc = Signer::Sign(challenge, signingKey.Key(), _response);
         }
       }
       return rc;
@@ -95,7 +95,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    bool ChallengeResponse::Verify(const Ed25519PublicKey & publicKey,
+    bool ChallengeResponse::Verify(const Ed25519Key & publicKey,
                                    const string & challengeString) const
     {
       bool    rc = false;

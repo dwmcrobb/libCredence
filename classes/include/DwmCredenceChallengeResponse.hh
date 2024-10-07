@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2022, 2024
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@
 #include <string>
 
 #include "DwmCredenceChallenge.hh"
-#include "DwmCredenceEd25519PublicKey.hh"
+#include "DwmCredenceEd25519Key.hh"
 
 namespace Dwm {
 
@@ -72,7 +72,7 @@ namespace Dwm {
       //!  Given a @c challenge, creates the response using the given
       //!  @c signingKey.  Returns true on success, false on failure.
       //----------------------------------------------------------------------
-      bool Create(const std::string & signingKey,
+      bool Create(const Ed25519Key & signingKey,
                   const Challenge & challenge);
       
       //----------------------------------------------------------------------
@@ -95,7 +95,7 @@ namespace Dwm {
       //!  response contents matches the given @c challengeString.  Returns
       //!  true if the response is correct, else returns false.
       //----------------------------------------------------------------------
-      bool Verify(const Ed25519PublicKey & publicKey,
+      bool Verify(const Ed25519Key & publicKey,
                   const std::string & challengeString) const;
       
     private:

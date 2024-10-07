@@ -56,10 +56,12 @@ int main(int argc, char *argv[])
 
   string  unsignedMsg("Unsigned message for Signer unit test.");
   string  signedMsg;
-  if (UnitAssert(Credence::Signer::Sign(unsignedMsg, keyPair.SecretKey(),
+  if (UnitAssert(Credence::Signer::Sign(unsignedMsg,
+                                        keyPair.SecretKey().Key(),
                                         signedMsg))) {
     string  openedMsg;
-    if (UnitAssert(Credence::Signer::Open(signedMsg, keyPair.PublicKey().Key(),
+    if (UnitAssert(Credence::Signer::Open(signedMsg,
+                                          keyPair.PublicKey().Key(),
                                           openedMsg))) {
       UnitAssert(openedMsg == unsignedMsg);
     }

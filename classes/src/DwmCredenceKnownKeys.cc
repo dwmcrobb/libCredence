@@ -45,7 +45,7 @@
 #include "DwmStreamIO.hh"
 #include "DwmSysLogger.hh"
 #include "DwmCredenceKnownKeys.hh"
-#include "DwmCredenceEd25519PublicKey.hh"
+#include "DwmCredenceEd25519Key.hh"
 #include "DwmCredenceUtils.hh"
 
 namespace Dwm {
@@ -184,7 +184,7 @@ namespace Dwm {
       ifstream  is(_dirName + '/' + _fileName);
       if (is) {
         while (is) {
-          Ed25519PublicKey  pk;
+          Ed25519Key  pk;
           if (is >> pk) {
             _keys[pk.Id()] = pk.Key();
           }

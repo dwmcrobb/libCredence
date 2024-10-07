@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2022, 2024
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -72,8 +72,8 @@ namespace Dwm {
           _xis = make_unique<XChaCha20Poly1305::Istream>(s, agreedKey);
           _xos = make_unique<XChaCha20Poly1305::Ostream>(s, agreedKey);
           if ((nullptr != _xis) && (nullptr != _xos)) {
-            Ed25519KeyPair    myKeys;
-            Ed25519PublicKey  theirPubKey;
+            Ed25519KeyPair  myKeys;
+            Ed25519Key      theirPubKey;
             if (ExchangeIds(s, myKeys, theirPubKey)) {
               if (ExchangeChallenges(myKeys.SecretKey(), theirPubKey)) {
                 theirId = theirPubKey.Id();
@@ -104,8 +104,8 @@ namespace Dwm {
           _xis = make_unique<XChaCha20Poly1305::Istream>(s, agreedKey);
           _xos = make_unique<XChaCha20Poly1305::Ostream>(s, agreedKey);
           if ((nullptr != _xis) && (nullptr != _xos)) {
-            Ed25519KeyPair    myKeys;
-            Ed25519PublicKey  theirPubKey;
+            Ed25519KeyPair  myKeys;
+            Ed25519Key      theirPubKey;
             if (ExchangeIds(s, myKeys, theirPubKey)) {
               if (ExchangeChallenges(myKeys.SecretKey(), theirPubKey)) {
                 theirId = theirPubKey.Id();
@@ -132,7 +132,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     bool Authenticator::ExchangeIds(boost::asio::ip::tcp::iostream & s,
                                     Ed25519KeyPair & myKeys,
-                                    Ed25519PublicKey & theirPubKey)
+                                    Ed25519Key & theirPubKey)
     {
       bool  rc = false;
       if (_keyStash.Get(myKeys)) {
@@ -146,8 +146,7 @@ namespace Dwm {
             if (Receive(theirId)) {
               theirPubKeyStr = _knownKeys.Find(theirId.Value());
               if (! theirPubKeyStr.empty()) {
-                theirPubKey =
-                  Ed25519PublicKey(theirId.Value(), theirPubKeyStr);
+                theirPubKey = Ed25519Key(theirId.Value(), theirPubKeyStr);
                 rc = true;
               }
               else {
@@ -180,7 +179,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     bool Authenticator::
     ExchangeIds(boost::asio::local::stream_protocol::iostream & s,
-                Ed25519KeyPair & myKeys, Ed25519PublicKey & theirPubKey)
+                Ed25519KeyPair & myKeys, Ed25519Key & theirPubKey)
     {
       bool  rc = false;
       if (_keyStash.Get(myKeys)) {
@@ -194,8 +193,7 @@ namespace Dwm {
             if (Receive(theirId)) {
               theirPubKeyStr = _knownKeys.Find(theirId.Value());
               if (! theirPubKeyStr.empty()) {
-                theirPubKey =
-                  Ed25519PublicKey(theirId.Value(), theirPubKeyStr);
+                theirPubKey = Ed25519Key(theirId.Value(), theirPubKeyStr);
                 rc = true;
               }
               else {
@@ -228,8 +226,8 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    bool Authenticator::ExchangeChallenges(const string & ourSecretKey,
-                                           const Ed25519PublicKey & theirPubKey)
+    bool Authenticator::ExchangeChallenges(const Ed25519Key & ourSecretKey,
+                                           const Ed25519Key & theirPubKey)
     {
       bool  rc = false;
       //  Send our challenge

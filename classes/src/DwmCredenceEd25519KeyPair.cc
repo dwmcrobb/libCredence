@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2022, 2024
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -58,13 +58,16 @@ namespace Dwm {
     //------------------------------------------------------------------------
     Ed25519KeyPair::Ed25519KeyPair(const string & id)
         : _publicKey(id, std::string(crypto_sign_ed25519_PUBLICKEYBYTES, '\0')),
-          _secretKey(crypto_sign_ed25519_SECRETKEYBYTES, '\0')
+          _secretKey(id, std::string(crypto_sign_ed25519_SECRETKEYBYTES, '\0'))
     {
       if (_publicKey.Id().empty()) {
         _publicKey.Id(Utils::UserName() + '@' + Utils::HostName());
       }
+      if (_secretKey.Id().empty()) {
+        _secretKey.Id(Utils::UserName() + '@' + Utils::HostName());
+      }
       crypto_sign_ed25519_keypair((uint8_t *)_publicKey.Key().data(),
-                                  (uint8_t *)_secretKey.data());
+                                  (uint8_t *)_secretKey.Key().data());
     }
 
     //------------------------------------------------------------------------
@@ -75,28 +78,10 @@ namespace Dwm {
       Clear();
     }
 
-#if 0
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    const ShortString<255> & Ed25519KeyPair::Id() const
-    {
-      return _publicKey.Id();
-    }
-
-    //------------------------------------------------------------------------
-    //!  
-    //------------------------------------------------------------------------
-    const ShortString<255> & Ed25519KeyPair::Id(const ShortString<255> & id)
-    {
-      return _publicKey.Id(id);
-    }
-#endif
-    
-    //------------------------------------------------------------------------
-    //!  
-    //------------------------------------------------------------------------
-    const Ed25519PublicKey & Ed25519KeyPair::PublicKey() const
+    const Ed25519Key & Ed25519KeyPair::PublicKey() const
     {
       return _publicKey;
     }
@@ -104,8 +89,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    const Ed25519PublicKey &
-    Ed25519KeyPair::PublicKey(const Ed25519PublicKey & publicKey)
+    const Ed25519Key & Ed25519KeyPair::PublicKey(const Ed25519Key & publicKey)
     {
       _publicKey = publicKey;
       return _publicKey;
@@ -114,7 +98,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    const string & Ed25519KeyPair::SecretKey() const
+    const Ed25519Key & Ed25519KeyPair::SecretKey() const
     {
       return _secretKey;
     }
@@ -122,7 +106,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     //!  
     //------------------------------------------------------------------------
-    const string & Ed25519KeyPair::SecretKey(const string & secretKey)
+    const Ed25519Key & Ed25519KeyPair::SecretKey(const Ed25519Key & secretKey)
     {
       _secretKey = secretKey;
       return _secretKey;
@@ -134,11 +118,11 @@ namespace Dwm {
     bool Ed25519KeyPair::IsValid() const
     {
       bool  rc = false;
-      if ((! _publicKey.Key().empty()) && (! _secretKey.empty())) {
+      if ((! _publicKey.Key().empty()) && (! _secretKey.Key().empty())) {
         string  origMessage(32, '\0');
         randombytes_buf((void *)origMessage.data(), 32);
         string  signedMessage;
-        if (Signer::Sign(origMessage, _secretKey, signedMessage)) {
+        if (Signer::Sign(origMessage, _secretKey.Key(), signedMessage)) {
           string  openedMessage;
           if (Signer::Open(signedMessage, _publicKey.Key(), openedMessage)) {
             rc = (openedMessage == origMessage);
@@ -154,8 +138,7 @@ namespace Dwm {
     void Ed25519KeyPair::Clear()
     {
       _publicKey.Clear();
-      _secretKey.assign(_secretKey.size(), '\0');
-      _secretKey.clear();
+      _secretKey.Clear();
       return;
     }
 

@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022, 2023
+//  Copyright (c) Daniel W. McRobb 2022, 2023, 2024
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -110,12 +110,12 @@ namespace Dwm {
 
       bool ExchangeIds(boost::asio::ip::tcp::iostream & s,
                        Ed25519KeyPair & myKeys,
-                       Ed25519PublicKey & theirPubKey);
+                       Ed25519Key & theirPubKey);
       bool ExchangeIds(boost::asio::local::stream_protocol::iostream & s,
                        Ed25519KeyPair & myKeys,
-                       Ed25519PublicKey & theirPubKey);
-      bool ExchangeChallenges(const std::string & ourSecretKey,
-                              const Ed25519PublicKey & theirPubKey);
+                       Ed25519Key & theirPubKey);
+      bool ExchangeChallenges(const Ed25519Key & ourSecretKey,
+                              const Ed25519Key & theirPubKey);
       bool Send(const std::string & msg);
       bool Send(const HasStreamWrite auto & msg);
       bool Receive(std::string & msg);

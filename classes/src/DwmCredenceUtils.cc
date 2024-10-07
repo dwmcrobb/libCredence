@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022, 2023
+//  Copyright (c) Daniel W. McRobb 2022, 2023, 2024
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -307,48 +307,6 @@ namespace Dwm {
               + std::to_string(endPoint.port()));
     }
 
-#if 0
-    //------------------------------------------------------------------------
-    //!  
-    //------------------------------------------------------------------------
-    std::istream & Utils::ReadLengthRestrictedString(std::istream & is,
-                                                     std::string & s,
-                                                     uint64_t maxLen) 
-    {
-      s.clear();
-      if (is) {
-        uint64_t  len;
-        if (StreamIO::Read(is, len)) {
-          if (len > 0) {
-            if (len <= maxLen) {
-              try {
-                s.resize(len);
-                if (! is.read(s.data(), len)) {
-                  Syslog(LOG_ERR, "Failed to read string data");
-                  s.clear();
-                }
-              }
-              catch (...) {
-                Syslog(LOG_ERR, "Exception reading string data");
-              }
-            }
-            else {
-              FSyslog(LOG_ERR, "String length {} exceeds max of {}",
-                      len, maxLen);
-            }
-          }
-        }
-        else {
-          Syslog(LOG_ERR, "Failed to read string length");
-        }
-      }
-      else {
-        Syslog(LOG_ERR, "Invalid istream");
-      }
-      return is;
-    }
-#endif
-    
   }  // namespace Credence
 
 }  // namespace Dwm

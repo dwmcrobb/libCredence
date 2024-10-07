@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022, 2023
+//  Copyright (c) Daniel W. McRobb 2022, 2023, 2024
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -110,37 +110,6 @@ namespace Dwm {
       static bool WaitForBytesReady(BoostUnixSocket & sck, uint32_t numBytes,
                                     std::chrono::milliseconds timeout);
 
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-#if 0
-      static ssize_t
-      ReadLengthRestrictedString(boost::asio::ip::tcp::socket & sck,
-                                 std::string & s, uint64_t maxLen);
-      static ssize_t
-      ReadLengthRestrictedString(boost::asio::local::stream_protocol::socket & sck,
-                                 std::string & s, uint64_t maxLen);
-      
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      static std::istream & ReadLengthRestrictedString(std::istream & is,
-                                                       std::string & s,
-                                                       uint64_t maxLen);
-
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      static ssize_t
-      ReadLengthRestrictedString(boost::asio::ip::tcp::socket & sck,
-                                 std::string & s, uint64_t maxLen,
-                                 TimePoint endTime);
-      static ssize_t
-      ReadLengthRestrictedString(boost::asio::local::stream_protocol::socket & sck,
-                                 std::string & s, uint64_t maxLen,
-                                 TimePoint endTime);
-#endif
-      
       //----------------------------------------------------------------------
       //!  Returns the base64 representation of the given binary string @c s.
       //----------------------------------------------------------------------
