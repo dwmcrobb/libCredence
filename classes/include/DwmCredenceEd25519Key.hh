@@ -85,7 +85,7 @@ namespace Dwm {
       Ed25519Key & operator = (Ed25519Key &&) = default;
       
       //----------------------------------------------------------------------
-      //!  Construct from the given @c id and @c key.  Ntoe that @c key
+      //!  Construct from the given @c id and @c key.  Note that @c key
       //!  must be in the binary representation.
       //----------------------------------------------------------------------
       Ed25519Key(const std::string & id, const std::string & key);
