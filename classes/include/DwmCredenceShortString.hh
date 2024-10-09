@@ -42,7 +42,10 @@
 #ifndef _DWMCREDENCESHORTSTRING_HH_
 #define _DWMCREDENCESHORTSTRING_HH_
 
+#include <cstring>       // for strlen()
+#include <iomanip>       // for setw()
 #include <string>
+// #include <type_traits>   // for remove_reference_t<>
 
 #include "DwmStreamIO.hh"
 #include "DwmSysLogger.hh"
@@ -53,15 +56,11 @@ namespace Dwm {
 
     //------------------------------------------------------------------------
     //!  Encapsulates a string that is restricted to LEN bytes or less.
-    //!  We use this to prevent a couple of memory resource DoS attacks on
-    //!  a server during session initialization.
     //------------------------------------------------------------------------
     template <size_t LEN>
     class ShortString
     {
     public:
-      static constexpr size_t _size = LEN;
-
       //----------------------------------------------------------------------
       //!  Default constructor.
       //----------------------------------------------------------------------
@@ -82,7 +81,7 @@ namespace Dwm {
       //----------------------------------------------------------------------
       template <size_t T>
       void Assign(const ShortString<T> & ss)
-        requires (ShortString<T>::_size <= LEN)
+        requires (ShortString<T>::Size() <= LEN)
       {
         _s = ss.Value();
         return;
@@ -106,26 +105,17 @@ namespace Dwm {
       //!  
       //----------------------------------------------------------------------
       ShortString(const char *s)
-          : ShortString(std::string(s))
-      { }
-
-#if 0
-      //----------------------------------------------------------------------
-      //!  Assign from the given string @c s.  Throws an exception if
-      //!  s.size() is greater than LEN bytes.
-      //----------------------------------------------------------------------
-      ShortString & operator = (const std::string & s)
       {
-        if (s.size() <= LEN) {
-          _s = s;
+        if (nullptr == s) {
+          throw std::logic_error("ShortString can't be constructed"
+                                 " from nullptr");
         }
-        else {
+        if (std::strlen(s) > LEN) {
           throw std::logic_error("Initializing string too long");
         }
-        return *this;
+        _s.assign(s);
       }
-#endif
-      
+
       //----------------------------------------------------------------------
       //!  Destructor.
       //----------------------------------------------------------------------
@@ -139,19 +129,8 @@ namespace Dwm {
       //----------------------------------------------------------------------
       //!  Returns a copy of the contained string value.
       //----------------------------------------------------------------------
-      explicit operator std::string () const
-      { return _s; }
+      explicit operator std::string () const  { return _s; }
 
-      template <typename T> struct SizeType { using type = T; };
-      template <size_t n> static constexpr auto TypeForSizeFn()
-      {
-        if constexpr (0xff >= n)        { return SizeType<uint8_t>{};  }
-        else if constexpr (0xffff <= n) { return SizeType<uint16_t>{}; }
-        else                            { return SizeType<uint32_t>{}; }
-      }
-      template <size_t N>
-      using TypeFromSize = typename decltype(TypeForSizeFn<N>())::type;
-      
       //----------------------------------------------------------------------
       //!  Reads the short string from the given istream @c is.  Returns
       //!  @c is.
@@ -207,19 +186,27 @@ namespace Dwm {
       //!  istream operator >>
       //!
       //!  Throws an exception if the string is longer than LEN characters.
-      //!  Note that the string can not include whitespace.
+      //!  Note that whitespace is used as the delimiter, which mimics the
+      //!  behavior of istream & operator >> (stream &, string &).
       //----------------------------------------------------------------------
       friend std::istream & operator >> (std::istream & is,
                                          ShortString & shortString)
       {
         shortString._s.clear();
         std::string  s;
-        if (is >> s) {
-          if (s.size() <= LEN) {
-            shortString._s = s;
+        constexpr size_t  maxChars =
+          std::remove_reference_t<decltype(shortString)>::Size() + 1;
+        if (is >> std::setw(maxChars) >> s) {
+          if (! s.empty()) {
+            if (s.size() < maxChars) {
+              shortString._s = s;
+            }
+            else {
+              throw std::logic_error("input too long");
+            }
           }
           else {
-            throw std::logic_error("String too long");
+            throw std::logic_error("String empty");
           }
         }
         return is;
@@ -250,9 +237,32 @@ namespace Dwm {
         _s.clear();
         return;
       }
+
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
+      static consteval size_t Size()  { return _size; }
       
     private:
+      static constexpr const size_t _size = LEN;
+
       std::string             _s;
+
+      //----------------------------------------------------------------------
+      //!  Support templates so our length encoding during binary I/O can
+      //!  use the minimum size type to hold the length.
+      //----------------------------------------------------------------------
+      template <typename T> struct SizeType { using type = T; };
+      template <size_t n> static constexpr auto TypeForSizeFn()
+      {
+        static_assert(0xffffffff >= n,
+                      "ShortString not appropriate for lengths > 0xFFFFFFFF");
+        if constexpr (0xff >= n)        { return SizeType<uint8_t>{};  }
+        else if constexpr (0xffff >= n) { return SizeType<uint16_t>{}; }
+        else                            { return SizeType<uint32_t>{}; }
+      }
+      template <size_t N>
+      using TypeFromSize = typename decltype(TypeForSizeFn<N>())::type;
     };
     
   }  // namespace Credence

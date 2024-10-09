@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2024
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -34,12 +34,13 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file TestKnownKeys.cc
+//!  \file TestShortString.cc
 //!  \author Daniel W. McRobb
-//!  \brief Dwm::Credence::KnownKeys unit tests
+//!  \brief Dwm::Credence::ShortString unit tests
 //---------------------------------------------------------------------------
 
 #include <sstream>
+#include <stdexcept>
 
 #include "DwmUnitAssert.hh"
 #include "DwmCredenceShortString.hh"
@@ -54,6 +55,7 @@ using namespace Dwm;
 static void TestAssign()
 {
   Credence::ShortString<5>  ss5;
+  UnitAssert(decltype(ss5)::Size() == 5);
   ss5 = "Hello";
   UnitAssert(ss5.Value() == "Hello");
 
@@ -62,6 +64,7 @@ static void TestAssign()
     ss5 = "1234567890";
   }
   catch (std::logic_error & ex) {
+    UnitAssert(ex.what() == std::string("Initializing string too long"));
     gotLogicException = true;
   }
   UnitAssert(gotLogicException);
@@ -70,8 +73,45 @@ static void TestAssign()
   UnitAssert(ss5_2.Value() == ss5.Value());
 
   Credence::ShortString<8>  ss8;
+  UnitAssert(decltype(ss8)::Size() == 8);
   ss8.Assign(ss5);
   UnitAssert(ss8.Value() == ss5.Value());
+  
+  return;
+}
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+static void TestIstreamOperator()
+{
+  std::stringstream  ss;
+  const std::string  s30("123456789012345678901234567890");
+  ss.write(s30.data(), s30.size());
+
+  bool  gotException = false;
+  Credence::ShortString<29>  ss29;
+  UnitAssert(decltype(ss29)::Size() == 29);
+  try {
+    ss >> ss29;
+  }
+  catch (std::logic_error & ex) {
+    UnitAssert(ex.what() == std::string("input too long"));
+    gotException = true;
+  }
+  UnitAssert(true == gotException);
+  gotException = false;
+  ss.seekg(0);
+
+  Credence::ShortString<30>  ss30;
+  UnitAssert(decltype(ss30)::Size() == 30);
+  try {
+    ss >> ss30;
+  }
+  catch (std::logic_error & ex) {
+    gotException = true;
+  }
+  UnitAssert(false == gotException);
   
   return;
 }
@@ -83,6 +123,7 @@ static void TestStreamIO()
 {
   Credence::ShortString<255> shortString =
     "0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=";
+  UnitAssert(decltype(shortString)::Size() == 255);
   std::stringstream  ss;
   if (UnitAssert(shortString.Write(ss))) {
     Credence::ShortString<255>  shortString_2;
@@ -103,6 +144,7 @@ static void TestStreamIO()
     "uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq2"
     "1UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhb"
     "d2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=";
+  UnitAssert(decltype(shortString16)::Size() == 65535);
   ss.str("");
   if (UnitAssert(shortString16.Write(ss))) {
     Credence::ShortString<65535>  shortString16_2;
@@ -125,6 +167,7 @@ int main(int argc, char *argv[])
 {
   TestAssign();
   TestStreamIO();
+  TestIstreamOperator();
   
   if (Assertions::Total().Failed()) {
     Assertions::Print(cerr, true);

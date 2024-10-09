@@ -107,6 +107,25 @@ namespace Dwm {
       const std::string & Key() const  { return _key.Value(); }
 
       //----------------------------------------------------------------------
+      //!  Sets and returns the key content, in binary representation.
+      //!  @c key must be in the binary representation.
+      //----------------------------------------------------------------------
+      const std::string & Key(const std::string & key)
+      { _key = key; return _key.Value(); }
+
+      //----------------------------------------------------------------------
+      //!  Returns the key content as a base64-encoded string.
+      //----------------------------------------------------------------------
+      std::string KeyBase64() const;
+
+      //----------------------------------------------------------------------
+      //!  Sets the key content from the base64-encoded string @c keyBase64.
+      //!  Returns the key content as a base64-encoded string (which should
+      //!  be the same as @c keyBase64).
+      //----------------------------------------------------------------------
+      std::string KeyBase64(const std::string & keyBase64);
+      
+      //----------------------------------------------------------------------
       //!  Reads the key from the given istream @c is.  Note that the key
       //!  content must be in binary representation.  Returns @c is.
       //----------------------------------------------------------------------
@@ -148,8 +167,8 @@ namespace Dwm {
       bool operator == (const Ed25519Key &) const = default;
       
     private:
-      ShortString<255>  _id;
-      ShortString<255>  _key;
+      ShortString<64>  _id;
+      ShortString<64>  _key;
     };
     
   }  // namespace Credence

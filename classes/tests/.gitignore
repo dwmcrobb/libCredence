@@ -1,4 +1,5 @@
 TestChallenge
+TestEd25519Key
 TestEd25519KeyPair
 TestKeyStash
 TestKeyType

@@ -2,6 +2,7 @@ include ../../Makefile.vars
 
 LTLINK   = ${LIBTOOL} --tag=CXX --mode=link ${CXX}
 OBJFILES = TestChallenge.o \
+           TestEd25519Key.o \
            TestEd25519KeyPair.o \
            TestKeyStash.o \
            TestKeyType.o \

@@ -53,16 +53,18 @@ namespace Dwm {
 
     //------------------------------------------------------------------------
     //!  Encapsulates the storage of a set of known public keys.  These
-    //!  keys are stored in a 'known_keys' file in a directory given as an
-    //!  argument to the constructor.  By default, this directory is
-    //!  .credence in the user's home directory.
+    //!  keys are stored in a file in a directory given as an argument to
+    //!  the constructor.  By default, this directory is .credence in the
+    //!  user's home directory and the file within that directory is named
+    //!  known_keys.
     //------------------------------------------------------------------------
     class KnownKeys
     {
     public:
       //----------------------------------------------------------------------
-      //!  Construct with the given storage directory @c dirName.  This is
-      //!  the directory where the 'known_keys' file will be stored.
+      //!  Construct with the given storage directory @c dirName and file
+      //!  name @c fileName within the storage directory.  i.e. the file at
+      //!  path @c dirName/fileName will hold the public keys.
       //----------------------------------------------------------------------
       KnownKeys(const std::string & dirName = "~/.credence",
                 const std::string & fileName = "known_keys");
@@ -84,7 +86,7 @@ namespace Dwm {
       std::string Find(const std::string & id) const;
 
       //----------------------------------------------------------------------
-      //!  
+      //!  Reloads the keys from persistent storage.
       //----------------------------------------------------------------------
       void Reload();
       
@@ -95,20 +97,25 @@ namespace Dwm {
 
       //----------------------------------------------------------------------
       //!  Reads the keys from the given istream @c is, in machine-readable
-      //!  form (for use with StreamIO from libDwm).  Returns @c is.
+      //!  form (for use with StreamIO from libDwm).  Returns @c is.  Note
+      //!  that the key content is expected to be in binary form, not base64
+      //!  encoded.
       //----------------------------------------------------------------------
       std::istream & Read(std::istream & is);
       
       //----------------------------------------------------------------------
       //!  Writes the keys to the given ostream @c os, in machine-readable
-      //!  form (for use with StreamIO from libDwm).  Returns @c os.
+      //!  form (for use with StreamIO from libDwm).  Returns @c os.  Note
+      //!  that key content is emitted in binary form, and is hence not
+      //!  terminal or human friendly.
       //----------------------------------------------------------------------
       std::ostream & Write(std::ostream & os) const;
 
       //----------------------------------------------------------------------
-      //!  Prints the keys in human-readable form (the same as the stored
-      //!  file 'known_keys' used by the constructor and Reload()) to the
-      //!  given ostream @c os.  Returns @c os.
+      //!  Prints the keys in printable form (the same as the stored
+      //!  file used by the constructor and Reload()) to the given ostream
+      //!  @c os.  Returns @c os.  Note that key content is base64-encoded
+      //!  when output to @c os.
       //----------------------------------------------------------------------
       friend std::ostream &
       operator << (std::ostream & os, const KnownKeys & knownKeys);

@@ -53,15 +53,33 @@ namespace Dwm {
     Ed25519Key::Ed25519Key(const std::string & id,
                            const std::string & key)
         : _id(id), _key(key)
-    {}
+    { }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    std::string Ed25519Key::KeyBase64() const
+    {
+      return Utils::Bin2Base64(_key.Value());
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    std::string Ed25519Key::KeyBase64(const std::string & keyBase64)
+    {
+      _key = Utils::Base642Bin(keyBase64);
+      return KeyBase64();
+    }
     
     //------------------------------------------------------------------------
     std::istream & Ed25519Key::Read(std::istream & is)
     {
       _id.Clear();
       _key.Clear();
-      ShortString<255>  id, key;
+      ShortString<decltype(_id)::Size()>  id;
       if (StreamIO::Read(is, id)) {
+        ShortString<decltype(_key)::Size()>  key;
         if (StreamIO::Read(is, key)) {
           _id = id;
           _key = key;
@@ -80,15 +98,12 @@ namespace Dwm {
     }
 
     //------------------------------------------------------------------------
-    std::ostream &
-    operator << (std::ostream & os, const Ed25519Key & pk)
+    std::ostream & operator << (std::ostream & os, const Ed25519Key & pk)
     {
-      os << pk._id << " ed25519 " << Utils::Bin2Base64(pk._key.Value());
+      os << pk._id << " ed25519 " << pk.KeyBase64();
       return os;
     }
 
-    //------------------------------------------------------------------------
-    //!  
     //------------------------------------------------------------------------
     void Ed25519Key::Clear()
     {
@@ -102,9 +117,9 @@ namespace Dwm {
       pk._id.Clear();
       pk._key.Clear();
       if (is) {
-        ShortString<255>                     id;
-        ShortString<MaxKeyTypeNameLength()>  keyType;
-        ShortString<MaxKeyStringLength()>    key;
+        ShortString<decltype(pk._id)::Size()>                  id;
+        ShortString<MaxKeyTypeNameLength()>                    keyType;
+        ShortString<((decltype(pk._id)::Size() * 4) / 3) + 3>  key;
         try {
           is >> id >> keyType >> key;
         }
@@ -117,7 +132,7 @@ namespace Dwm {
             && (keyType.Value() == "ed25519")
             && (! key.Value().empty())) {
           pk._id = id.Value();
-          pk._key = Utils::Base642Bin(key.Value());
+          pk.KeyBase64(key.Value());
         }
         else {
           is.setstate(std::ios_base::failbit);
@@ -133,12 +148,8 @@ namespace Dwm {
     //------------------------------------------------------------------------
     bool Ed25519Key::operator < (const Ed25519Key & k) const
     {
-      if (_id < k._id) {
-        return true;
-      }
-      else if ((_id == k._id) && (_key < k._key)) {
-        return true;
-      }
+      if (_id < k._id)                             { return true; }
+      else if ((_id == k._id) && (_key < k._key))  { return true; }
       return false;
     }
 

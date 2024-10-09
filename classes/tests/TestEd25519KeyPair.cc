@@ -53,7 +53,16 @@ int main(int argc, char *argv[])
 {
   Credence::Ed25519KeyPair  edKeyPair("dwm");
   UnitAssert(edKeyPair.IsValid());
+  UnitAssert(edKeyPair.PublicKey().Id() == "dwm");
+  UnitAssert(edKeyPair.SecretKey().Id() == "dwm");
 
+  edKeyPair.Clear();
+  UnitAssert(! edKeyPair.IsValid());
+  UnitAssert(edKeyPair.PublicKey().Id().empty());
+  UnitAssert(edKeyPair.SecretKey().Id().empty());
+  UnitAssert(edKeyPair.PublicKey().Key().empty());
+  UnitAssert(edKeyPair.SecretKey().Key().empty());
+  
   if (Assertions::Total().Failed()) {
     Assertions::Print(cerr, true);
     return 1;
