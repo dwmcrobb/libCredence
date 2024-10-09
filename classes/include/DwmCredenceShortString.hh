@@ -45,7 +45,6 @@
 #include <cstring>       // for strlen()
 #include <iomanip>       // for setw()
 #include <string>
-// #include <type_traits>   // for remove_reference_t<>
 
 #include "DwmStreamIO.hh"
 #include "DwmSysLogger.hh"
@@ -77,7 +76,7 @@ namespace Dwm {
       ShortString & operator = (const ShortString & ss) = default;
 
       //----------------------------------------------------------------------
-      //!  
+      //!  Assigns the contents of *this from the the contents of @c ss.
       //----------------------------------------------------------------------
       template <size_t T>
       void Assign(const ShortString<T> & ss)
@@ -102,7 +101,9 @@ namespace Dwm {
       }
 
       //----------------------------------------------------------------------
-      //!  
+      //!  Construct from a C-style string @c s.  @c s must be non-null and
+      //!  of length less than or equal to LEN, else a logic_error exception
+      //!  will be thrown.
       //----------------------------------------------------------------------
       ShortString(const char *s)
       {
@@ -110,7 +111,7 @@ namespace Dwm {
           throw std::logic_error("ShortString can't be constructed"
                                  " from nullptr");
         }
-        if (std::strlen(s) > LEN) {
+        if (LEN < std::strlen(s)) {
           throw std::logic_error("Initializing string too long");
         }
         _s.assign(s);
@@ -197,16 +198,11 @@ namespace Dwm {
         constexpr size_t  maxChars =
           std::remove_reference_t<decltype(shortString)>::Size() + 1;
         if (is >> std::setw(maxChars) >> s) {
-          if (! s.empty()) {
-            if (s.size() < maxChars) {
-              shortString._s = s;
-            }
-            else {
-              throw std::logic_error("input too long");
-            }
+          if (s.size() < maxChars) {
+            shortString._s = s;
           }
           else {
-            throw std::logic_error("String empty");
+            throw std::logic_error("input too long");
           }
         }
         return is;
@@ -239,7 +235,8 @@ namespace Dwm {
       }
 
       //----------------------------------------------------------------------
-      //!  
+      //!  Returns the maximum number of characters that the ShortString can
+      //!  hold.  This is the same as the LEN template parameter.
       //----------------------------------------------------------------------
       static consteval size_t Size()  { return _size; }
       
@@ -253,14 +250,16 @@ namespace Dwm {
       //!  use the minimum size type to hold the length.
       //----------------------------------------------------------------------
       template <typename T> struct SizeType { using type = T; };
+      
       template <size_t n> static constexpr auto TypeForSizeFn()
       {
-        static_assert(0xffffffff >= n,
+        static_assert(0xffffffffu >= n,
                       "ShortString not appropriate for lengths > 0xFFFFFFFF");
-        if constexpr (0xff >= n)        { return SizeType<uint8_t>{};  }
-        else if constexpr (0xffff >= n) { return SizeType<uint16_t>{}; }
-        else                            { return SizeType<uint32_t>{}; }
+        if constexpr (0xffu >= n)        { return SizeType<uint8_t>{};  }
+        else if constexpr (0xffffu >= n) { return SizeType<uint16_t>{}; }
+        else                             { return SizeType<uint32_t>{}; }
       }
+
       template <size_t N>
       using TypeFromSize = typename decltype(TypeForSizeFn<N>())::type;
     };
