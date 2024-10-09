@@ -1,3 +1,13 @@
+2024-10-09  Daniel W. McRobb  <dwm@spark.mcplex.net>
+
+	* tagged as libDwmCredence-0.2.0
+
+	* Done with refactoring to use new ShortString class template
+	and Ed25519Key class.  Changes trickled through other classes,
+	unit tests all pass.  Primary interfaces (Peer, KnownKeys
+	and KeyStash) unchanged, so code using the library will
+	compile without changes.
+
 2024-10-06  Daniel McRobb  <dwm@thrip.mcplex.net>
 
 	* classes: ShortString is now a class template (with length as
