@@ -39,7 +39,7 @@
 //!  \brief Dwm::Credence::ChallengeResponse class implementation
 //---------------------------------------------------------------------------
 
-#include "DwmIO.hh"
+#include "DwmStreamIO.hh"
 #include "DwmSysLogger.hh"
 #include "DwmCredenceChallengeResponse.hh"
 #include "DwmCredenceSigner.hh"
@@ -73,7 +73,7 @@ namespace Dwm {
     {
       _response.clear();
       if (is) {
-        IO::Read(is, _response);
+        StreamIO::Read(is, _response);
       }
       if (! is) {
         Syslog(LOG_ERR, "ChallengeResponse::Read() failed");
@@ -87,7 +87,9 @@ namespace Dwm {
     ostream & ChallengeResponse::Write(ostream & os) const
     {
       if (os) {
-        IO::Write(os, _response);
+        if (! StreamIO::Write(os, _response)) {
+          Syslog(LOG_ERR, "ChallengeResponse::Write() failed");
+        }
       }
       return os;
     }
