@@ -43,7 +43,7 @@ extern "C" {
   #include <sodium.h>
 }
 
-#include "DwmIO.hh"
+#include "DwmStreamIO.hh"
 #include "DwmCredenceSigner.hh"
 #include "DwmCredenceChallenge.hh"
 
@@ -80,7 +80,7 @@ namespace Dwm {
     std::istream & Challenge::Read(std::istream & is)
     {
       if (is) {
-        IO::Read(is, _challenge);
+        StreamIO::Read(is, _challenge);
       }
       return is;
     }
@@ -91,7 +91,7 @@ namespace Dwm {
     std::ostream & Challenge::Write(std::ostream & os) const
     {
       if (os) {
-        IO::Write(os, _challenge);
+        StreamIO::Write(os, _challenge);
       }
       return os;
     }
