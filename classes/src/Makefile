@@ -45,7 +45,7 @@ deps/%_deps: %.cc
 	@echo "making dependencies for $<"
 	@set -e; \
 	${CXX} -MM ${CXXFLAGS} ${ALLINC} -c $< | \
-	 sed 's/\($*\)\.o[ :]*/\1.o $(@D)\/$(@F) : /g' > $@ ; [ -s $@ ] || \
+	 sed 's/\($*\)\.o[ :]*/..\/obj\/\1.o ..\/obj\/\1.lo $(@D)\/$(@F) : /g' > $@ ; [ -s $@ ] || \
 	 rm -f $@
 
 #  only include dependency makefiles if target is not 'clean' or 'distclean'
