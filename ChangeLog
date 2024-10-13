@@ -1,5 +1,7 @@
 2024-10-13  Daniel W. McRobb  <dwm@spark.mcplex.net>
 
+	* classes/tests/Makefile: Reduce noise during build.
+
 	* classes/src/DwmCredenceServerConfigParse.y: I don't need to
 	explicitly allow an empty AllowedClients, and it causes shift/reduce
 	conflicts.  Note this code is unused and mostly serves as a sample
