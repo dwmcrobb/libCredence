@@ -39,7 +39,7 @@
 //!  \brief Dwm::Credence::Authenticator class implementation
 //---------------------------------------------------------------------------
 
-#include "DwmIO.hh"
+#include "DwmStreamIO.hh"
 #include "DwmSysLogger.hh"
 #include "DwmCredenceAuthenticator.hh"
 #include "DwmCredenceChallengeResponse.hh"
@@ -284,7 +284,7 @@ namespace Dwm {
     {
       bool  rc = false;
       if (_xos) {
-        if (IO::Write(*_xos, msg)) {
+        if (StreamIO::Write(*_xos, msg)) {
           if (_xos->flush()) {
             rc = true;
           }
@@ -328,7 +328,7 @@ namespace Dwm {
     {
       bool  rc = false;
       if (_xis) {
-        if (IO::Read(*_xis, msg)) {
+        if (StreamIO::Read(*_xis, msg)) {
           rc = true;
         }
         else {

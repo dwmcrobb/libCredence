@@ -3,6 +3,15 @@
 	* classes/src/Makefile: Fix dependency generation; target .o
 	and .lo files are in ../obj directory.
 
+2024-10-10  dwm  <dwm@nomnom.mcplex.net>
+
+	* tagged as libDwmCredence-0.2.1
+
+	* classes/src/DwmCredenceChallenge.cc,
+	  classes/src/DwmCredenceAuthenticator.cc,
+	  classes/src/DwmCredenceChallengeResponse.cc:
+	DwmIO.hh is deprecated,	use DwmStreamIO.hh
+
 2024-10-09  Daniel W. McRobb  <dwm@spark.mcplex.net>
 
 	* tagged as libDwmCredence-0.2.0
