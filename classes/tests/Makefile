@@ -1,6 +1,6 @@
 include ../../Makefile.vars
 
-LTLINK   = ${LIBTOOL} --tag=CXX --mode=link ${CXX}
+LTLINK   = ${LIBTOOL} --quiet --tag=CXX --mode=link ${CXX}
 OBJFILES = TestChallenge.o \
            TestEd25519Key.o \
            TestEd25519KeyPair.o \
@@ -21,6 +21,29 @@ LDFLAGS  += -g -Wl,-rpath,${DWMDIR}/lib
 ALLINC   = -I../include -I.
 ALLINC   += ${DWMINCS}
 ALLLIBS  = ${DWMLIBS} ${SODIUMLIB}
+
+#-----------------------------------------------------------------------------
+define Compile
+ @echo compiling $(1) ; \
+ cxx_cmd="${CXX} ${CXXFLAGS} ${PTHREADCXXFLAGS} ${ALLINC} -c $(1)"; \
+ cxx_cmd_out=`$${cxx_cmd} 2>&1`; \
+ if [ $$? -ne 0 ]; then \
+   printf "%s\n%s\n" "$${cxx_cmd}" "$${cxx_cmd_out}"; \
+   exit 1; \
+ fi
+endef
+
+define Link
+ @echo linking $(2) ; \
+ link_cmd="${LTLINK} ${LDFLAGS} -o $(2) $(1) ../lib/libDwmCredence.la ${ALLLIBS}"; \
+ link_cmd_out=`$${link_cmd} 2>&1`; \
+ if [ $$? -ne 0 ]; then \
+   printf "%s\n%s\n" "$${link_cmd}" "$${link_cmd_out}"; \
+   exit 1; \
+ fi
+endef
+
+#-----------------------------------------------------------------------------
 
 all: ${TESTS}
 
@@ -51,16 +74,16 @@ endif
 endif
 
 %.o: %.cc deps/%_deps
-	${CXX} ${CXXFLAGS} ${PTHREADCXXFLAGS} ${ALLINC} -c $<
+	$(call Compile,$<)
 
 Test%: Test%.o ../lib/libDwmCredence.la
-	${LTLINK} ${LDFLAGS} -o $@ $^ ${ALLLIBS}
+	$(call Link,$<,$@)
 
 ../lib/libDwmCredence.la::
-	${MAKE} -C ../src
+	${MAKE} -s -C ../src
 
-clean:
-	${LIBTOOL} --mode=clean rm -f ${TESTS} ${OBJFILES}
+clean::
+	@${LIBTOOL} --quiet --mode=clean rm -f ${TESTS} ${OBJFILES}
 
 distclean:: clean
-	rm -f deps/*_deps
+	@rm -f deps/*_deps
