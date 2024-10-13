@@ -1,5 +1,10 @@
 2024-10-13  Daniel W. McRobb  <dwm@spark.mcplex.net>
 
+	* classes/src/DwmCredenceServerConfigParse.y: I don't need to
+	explicitly allow an empty AllowedClients, and it causes shift/reduce
+	conflicts.  Note this code is unused and mostly serves as a sample
+	of parsing code for a portion of a server configuration file.
+
 	* classes/src/Makefile: Fix dependency generation; target .o
 	and .lo files are in ../obj directory.
 
