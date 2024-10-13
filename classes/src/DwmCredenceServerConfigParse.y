@@ -246,9 +246,7 @@ AllowedClients: ALLOWEDCLIENTS '=' '[' VectorOfString ']' ';'
     }
   }
   delete $4;
-}
-|
-{};
+};
 
 TCP4Port: INTEGER
 {
