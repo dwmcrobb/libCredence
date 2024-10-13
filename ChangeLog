@@ -1,3 +1,8 @@
+2024-10-13  Daniel W. McRobb  <dwm@spark.mcplex.net>
+
+	* classes/src/Makefile: Fix dependency generation; target .o
+	and .lo files are in ../obj directory.
+
 2024-10-09  Daniel W. McRobb  <dwm@spark.mcplex.net>
 
 	* tagged as libDwmCredence-0.2.0
