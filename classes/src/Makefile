@@ -1,5 +1,7 @@
 include ../../Makefile.vars
 
+Unique = $(if $1,$(firstword $1) $(call Unique,$(filter-out $(firstword $1),$1)))
+
 ALLINC      := -I../include ${DWMINCS}
 DEPSDIR     := deps
 LTCLEAN     := ${LIBTOOL} --quiet --mode=clean rm -f
@@ -8,33 +10,11 @@ LTINSTALL   := ${LIBTOOL} --mode=install ../../install-sh
 LTLINK      := ${LIBTOOL} --quiet --tag=CXX --mode=link ${CXX}
 LTUNINSTALL := ${LIBTOOL} --quiet --mode=uninstall rm -f
 OBJDIR      := ../obj
-OBJFILESNP   = DwmCredenceAuthenticator.o \
-               DwmCredenceChallenge.o \
-               DwmCredenceChallengeResponse.o \
-               DwmCredenceEd25519KeyPair.o \
-               DwmCredenceKeyExchanger.o \
-               DwmCredenceKeyStash.o \
-               DwmCredenceKnownKeys.o \
-               DwmCredenceKXKeyPair.o \
-               DwmCredencePeer.o \
-               DwmCredenceEd25519Key.o \
-               DwmCredencePubKeys.o \
-               DwmCredenceServerConfigLex.o \
-               DwmCredenceServerConfigParse.o \
-               DwmCredenceSigner.o \
-               DwmCredenceUtils.o \
-               DwmCredenceVersion.o \
-               DwmCredenceX25519KeyPair.o \
-               DwmCredenceXChaCha20Poly1305.o \
-               DwmCredenceXChaCha20Poly1305InBuffer.o \
-               DwmCredenceXChaCha20Poly1305OutBuffer.o
-ifeq ($(MAKECMDGOALS),tarprep)
-OBJFILESNP   += DwmCredenceVersion.o
-endif
-OBJFILES        = $(OBJFILESNP:%=${OBJDIR}/%)
-SHARED_OBJFILES = $(OBJFILES:%.o=%.lo)
-OBJDEPS         = $(OBJFILESNP:%.o=${DEPSDIR}/%_deps)
-shlib_version   = $(shell ../../getvers.sh -s)
+OBJFILESNP  := $(call Unique,$(addsuffix .o,$(basename $(shell ls *.cc *.lex *.y))))
+OBJFILES        := $(OBJFILESNP:%=${OBJDIR}/%)
+SHARED_OBJFILES := $(OBJFILES:%.o=%.lo)
+OBJDEPS         := $(OBJFILESNP:%.o=${DEPSDIR}/%_deps)
+shlib_version   := $(shell ../../getvers.sh -s)
 
 #-----------------------------------------------------------------------------
 define MakeDep
@@ -61,8 +41,7 @@ define Compile
  if [ $$? -ne 0 ]; then \
    printf "%s\n%s\n" "$${cxx_cmd}" "$${cxx_cmd_out}"; \
    exit 1; \
- fi ; \
- echo done compiling $(1)
+ fi
 endef
 
 #-----------------------------------------------------------------------------
@@ -109,7 +88,7 @@ clean:: clean-tarprep
 	  DwmCredenceServerConfigParse.cc DwmCredenceServerConfigLex.cc
 
 distclean:: clean
-	rm -f ${DEPSDIR}/*_deps
+	@rm -f ${DEPSDIR}/*_deps
 
 clean-tarprep::
 	@${LTUNINSTALL} ${TARDIR}/lib/libDwmCredence.la

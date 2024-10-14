@@ -1,19 +1,7 @@
 include ../../Makefile.vars
 
 LTLINK   = ${LIBTOOL} --quiet --tag=CXX --mode=link ${CXX}
-OBJFILES = TestChallenge.o \
-           TestEd25519Key.o \
-           TestEd25519KeyPair.o \
-           TestKeyStash.o \
-           TestKeyType.o \
-           TestKnownKeys.o \
-           TestKXKeyPair.o \
-           TestPeer.o \
-           TestShortString.o \
-           TestSigner.o \
-           TestX25519KeyPair.o \
-           TestXChaCha20Poly1305.o \
-           TestXChaCha20Streams.o
+OBJFILES = $(addsuffix .o,$(basename $(shell ls *.cc)))
 OBJDEPS	 = $(OBJFILES:%.o=deps/%_deps)
 TESTS	 = $(OBJFILES:%.o=%)
 CXXFLAGS += -g
@@ -33,6 +21,7 @@ define Compile
  fi
 endef
 
+#-----------------------------------------------------------------------------
 define Link
  @echo linking $(2) ; \
  link_cmd="${LTLINK} ${LDFLAGS} -o $(2) $(1) ../lib/libDwmCredence.la ${ALLLIBS}"; \
