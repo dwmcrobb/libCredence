@@ -1,5 +1,8 @@
 2024-10-13  Daniel W. McRobb  <dwm@spark.mcplex.net>
 
+	* Deleted classes/src/DwmCredenceServerConfig.cc and
+	classes/src/DwmCredenceShortString.cc, which were unused.
+
 	* classes/tests/Makefile: Reduce noise during build.
 
 	* classes/src/DwmCredenceServerConfigParse.y: I don't need to
