@@ -9,10 +9,47 @@ DWMLIBS          = @DWMLIBS@
 DWMLIBSONLY      = @DWMLIBSONLY@
 HTMLMAN          = @htmlman@
 INSTALLPREFIX    = @prefix@
-LIBTOOL          = @LIBTOOL@
-MANDOC		 = @MANDOC@
+LIBTOOL         := @LIBTOOL@
+LTCLEAN          = ${LIBTOOL} --quiet --mode=clean rm -f
+LTCOMPILE        = ${LIBTOOL} --quiet --mode=compile --tag=CXX ${CXX}
+LTLINK           = ${LIBTOOL} --quiet --tag=CXX --mode=link ${CXX}
+MANDOC           = @MANDOC@
 OSNAME           = @OSNAME@
 PTHREADCXXFLAGS  = @PTHREADCXXFLAGS@
 SODIUMLIB        = -lsodium
-TARDIR		 = @TARDIR@@prefix@
-VERSION		 = @DWM_VERSION@
+TARDIR           = @TARDIR@@prefix@
+VERSION          = @DWM_VERSION@
+
+#-----------------------------------------------------------------------------
+#  Function to remove duplicates from a list
+#-----------------------------------------------------------------------------
+Unique = $(if $1,$(firstword $1) $(call Unique,$(filter-out $(firstword $1),$1)))
+
+#-----------------------------------------------------------------------------
+define MakeDep
+${DEPSDIR}/%_deps: %.cc
+	@echo "making dependencies for $$<"
+	@set -e; \
+	${CXX} -MM ${CXXFLAGS} ${ALLINC} -c $$< | \
+	 sed 's/\($$*\)\.o[ :]*/$(subst /,\/,$(1))\/\1.o $(subst /,\/,$(1))\/\1.lo $$(@D)\/$$(@F) : /g' > $$@ ; \
+	 [ -s $$@ ] || rm -f $$@
+
+#  only include dependency makefiles if target is not 'clean' or 'distclean'
+ifneq ($(MAKECMDGOALS),clean)
+  ifneq ($(MAKECMDGOALS),distclean)
+    -include ${OBJDEPS}
+  endif
+endif
+endef
+
+#-----------------------------------------------------------------------------
+define Compile
+ @echo compiling $(1) ; \
+ cxx_cmd="${COMPILE} ${CXXFLAGS} ${ALLINC} -c $(1) -o $(2)"; \
+ cxx_cmd_out=`$${cxx_cmd} 2>&1`; \
+ if [ $$? -ne 0 ]; then \
+   printf "%s\n%s\n" "$${cxx_cmd}" "$${cxx_cmd_out}"; \
+   exit 1; \
+ fi
+endef
+
