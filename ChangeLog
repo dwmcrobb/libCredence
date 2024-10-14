@@ -1,5 +1,8 @@
 2024-10-13  Daniel W. McRobb  <dwm@spark.mcplex.net>
 
+	* Makefile: Reduce noise during build and correct the
+	libDwmCredence.a dependency to libDwmCredence.la
+
 	* Makefile.vars.in: Add some common callables.
 
 	* apps/credence/Makefile: Reduce noise during build.
