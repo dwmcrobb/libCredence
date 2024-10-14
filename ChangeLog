@@ -1,5 +1,9 @@
 2024-10-13  Daniel W. McRobb  <dwm@spark.mcplex.net>
 
+	* classes/src/Makefile, classes/tests/Makefile: Reduce noise
+	during build, and create targets from listing of source files in
+	filesystem.
+
 	* Deleted classes/src/DwmCredenceServerConfig.cc and
 	classes/src/DwmCredenceShortString.cc, which were unused.
 
