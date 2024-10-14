@@ -1,9 +1,12 @@
 include ../../Makefile.vars
 
+COMPILE  = ${CXX}
+DEPSDIR  := deps
 LDFLAGS  = -Wl,-rpath ${DWMDIR}/lib
 LTLINK   = ${LIBTOOL} --tag=CXX --mode=link ${CXX}
+OBJDIR   := .
 OBJFILES = credence.o
-OBJDEPS	 = $(OBJFILES:%.o=deps/%_deps)
+OBJDEPS	 = $(OBJFILES:%.o=${DEPSDIR}/%_deps)
 ALLINC   = ${DWMINCS}
 ALLINC   += -I../../classes/include -I.
 ALLLIBS  = ${DWMLIBS} ${SODIUMLIB}
@@ -12,17 +15,6 @@ ifeq ("${MANDOC}", "mandoc")
 MANHTML = ${MANDOC} -Thtml -Ostyle=../mcplexman.css,man=../html%S/%N.%S.html
 TARTARGETS += ${TARDIR}/${HTMLMAN}/html1/credence.1.html
 endif
-
-#-----------------------------------------------------------------------------
-define Compile
- @echo compiling $(1) ; \
- cxx_cmd="${CXX} ${CXXFLAGS} ${PTHREADCXXFLAGS} ${ALLINC} -c $(1)"; \
- cxx_cmd_out=`$${cxx_cmd} 2>&1`; \
- if [ $$? -ne 0 ]; then \
-   printf "%s\n%s\n" "$${cxx_cmd}" "$${cxx_cmd_out}"; \
-   exit 1; \
- fi
-endef
 
 #-----------------------------------------------------------------------------
 define Link
@@ -39,26 +31,14 @@ endef
 
 all: credence
 
-credence: credence.o ../../classes/lib/libDwmCredence.la
+credence: ./credence.o ../../classes/lib/libDwmCredence.la
 	$(call Link,$<,$@)
 
-#  dependency rule
-deps/%_deps: %.cc 
-	@echo "making dependencies for $<"
-	@set -e; \
-	${CXX} -MM ${CXXFLAGS} ${ALLINC} -c $< | \
-	 sed 's/\($*\)\.o[ :]*/\1.o $(@D)\/$(@F) : /g' > $@ ; [ -s $@ ] || \
-	 rm -f $@
+#  dependencies
+$(eval $(call MakeDep,${OBJDIR}))
 
-#  only include dependency makefiles if target is not 'clean' or 'distclean'
-ifneq ($(MAKECMDGOALS),clean)
-ifneq ($(MAKECMDGOALS),distclean)
--include ${OBJDEPS}
-endif
-endif
-
-%.o: %.cc deps/%_deps
-	$(call Compile,$<)
+${OBJDIR}/%.o: %.cc ${DEPSDIR}/%_deps
+	$(call Compile,$<,$@)
 
 ../../classes/lib/libDwmCredence.la::
 	${MAKE} -s -C ../../classes/src
