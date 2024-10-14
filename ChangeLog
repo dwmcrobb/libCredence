@@ -1,5 +1,7 @@
 2024-10-14  Daniel W. McRobb  <dwm@spark.mcplex.net>
 
+	* classes/tests/Makefile: Use common callables from Makefile.vars
+
 	* classes/src/Makefile: Use common callables from Makefile.vars
 
 	* apps/credence/Makefile: Use common callables from Makefile.vars
