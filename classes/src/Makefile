@@ -1,13 +1,9 @@
 include ../../Makefile.vars
 
-Unique = $(if $1,$(firstword $1) $(call Unique,$(filter-out $(firstword $1),$1)))
-
 ALLINC      := -I../include ${DWMINCS}
+COMPILE     := ${LTCOMPILE}
 DEPSDIR     := deps
-LTCLEAN     := ${LIBTOOL} --quiet --mode=clean rm -f
-LTCOMPILE   := ${LIBTOOL} --quiet --mode=compile --tag=CXX ${CXX}
 LTINSTALL   := ${LIBTOOL} --mode=install ../../install-sh
-LTLINK      := ${LIBTOOL} --quiet --tag=CXX --mode=link ${CXX}
 LTUNINSTALL := ${LIBTOOL} --quiet --mode=uninstall rm -f
 OBJDIR      := ../obj
 OBJFILESNP  := $(call Unique,$(addsuffix .o,$(basename $(shell ls *.cc *.lex *.y))))
@@ -17,43 +13,15 @@ OBJDEPS         := $(OBJFILESNP:%.o=${DEPSDIR}/%_deps)
 shlib_version   := $(shell ../../getvers.sh -s)
 
 #-----------------------------------------------------------------------------
-define MakeDep
-${DEPSDIR}/%_deps: %.cc
-	@echo "making dependencies for $$<"
-	@set -e; \
-	${CXX} -MM ${CXXFLAGS} ${ALLINC} -c $$< | \
-	 sed 's/\($$*\)\.o[ :]*/$(subst /,\/,$(1))\/\1.o $(subst /,\/,$(1))\/\1.lo $$(@D)\/$$(@F) : /g' > $$@ ; [ -s $$@ ] || \
-	 rm -f $$@
-
-#  only include dependency makefiles if target is not 'clean' or 'distclean'
-ifneq ($(MAKECMDGOALS),clean)
-  ifneq ($(MAKECMDGOALS),distclean)
-    -include ${OBJDEPS}
-  endif
-endif
-endef
-
-#-----------------------------------------------------------------------------
-define Compile
- @echo compiling $(1) ; \
- cxx_cmd="${LTCOMPILE} ${CXXFLAGS} ${ALLINC} -c $(1) -o $(2)"; \
- cxx_cmd_out=`$${cxx_cmd} 2>&1`; \
- if [ $$? -ne 0 ]; then \
-   printf "%s\n%s\n" "$${cxx_cmd}" "$${cxx_cmd_out}"; \
-   exit 1; \
- fi
-endef
-
-#-----------------------------------------------------------------------------
 define LinkLibraries
- @printf "creating %s ..." $(1)
+ @printf "creating %s ..." $(notdir $(1))
  @link_cmd="${LTLINK} -o $(1) ${SHARED_OBJFILES} -rpath ${INSTALLPREFIX}/lib -version-info ${shlib_version} ${LDFLAGS} ${DWMLIBSONLY} ${SODIUMLIB}"; \
  link_cmd_out=`$${link_cmd} 2>&1`; \
  if [ $$? -ne 0 ]; then \
    printf "%s\n%s\n" "$${link_cmd}" "$${link_cmd_out}"; \
    exit 1; \
- fi
- @printf " done\n"
+ fi ; \
+ printf " done\n"
 endef
 
 #-----------------------------------------------------------------------------
