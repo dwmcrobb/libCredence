@@ -13,10 +13,34 @@ MANHTML = ${MANDOC} -Thtml -Ostyle=../mcplexman.css,man=../html%S/%N.%S.html
 TARTARGETS += ${TARDIR}/${HTMLMAN}/html1/credence.1.html
 endif
 
+#-----------------------------------------------------------------------------
+define Compile
+ @echo compiling $(1) ; \
+ cxx_cmd="${CXX} ${CXXFLAGS} ${PTHREADCXXFLAGS} ${ALLINC} -c $(1)"; \
+ cxx_cmd_out=`$${cxx_cmd} 2>&1`; \
+ if [ $$? -ne 0 ]; then \
+   printf "%s\n%s\n" "$${cxx_cmd}" "$${cxx_cmd_out}"; \
+   exit 1; \
+ fi
+endef
+
+#-----------------------------------------------------------------------------
+define Link
+ @echo linking $(2) ; \
+ link_cmd="${LTLINK} ${LDFLAGS} -o $(2) $(1) ../../classes/lib/libDwmCredence.la ${ALLLIBS}"; \
+ link_cmd_out=`$${link_cmd} 2>&1`; \
+ if [ $$? -ne 0 ]; then \
+   printf "%s\n%s\n" "$${link_cmd}" "$${link_cmd_out}"; \
+   exit 1; \
+ fi
+endef
+
+#-----------------------------------------------------------------------------
+
 all: credence
 
 credence: credence.o ../../classes/lib/libDwmCredence.la
-	${LTLINK} ${LDFLAGS} -o $@ $^ -rpath ${INSTALLPREFIX}/lib ${ALLLIBS}
+	$(call Link,$<,$@)
 
 #  dependency rule
 deps/%_deps: %.cc 
@@ -34,10 +58,10 @@ endif
 endif
 
 %.o: %.cc deps/%_deps
-	${CXX} ${CXXFLAGS} ${PTHREADCXXFLAGS} ${ALLINC} -c $<
+	$(call Compile,$<)
 
 ../../classes/lib/libDwmCredence.la::
-	${MAKE} -C ../../classes/src
+	${MAKE} -s -C ../../classes/src
 
 tarprep: ${TARTARGETS}
 
@@ -53,10 +77,10 @@ ${TARDIR}/${HTMLMAN}/html1/credence.1.html: credence.1
 	rm $<.html
 
 distclean:: clean
-	rm -f ${OBJDEPS}
+	@rm -f ${OBJDEPS}
 
 clean: clean-tarprep
-	${LIBTOOL} --mode=clean rm -f credence ${OBJFILES}
+	@${LIBTOOL} --quiet --mode=clean rm -f credence ${OBJFILES}
 
 clean-tarprep::
-	${LIBTOOL} --mode=uninstall rm -f ${TARTARGETS}
+	@${LIBTOOL} --quiet --mode=uninstall rm -f ${TARTARGETS}
