@@ -1,14 +1,14 @@
 include Makefile.vars
 
-all:: classes/lib/libDwmCredence.a apps
+all:: classes/lib/libDwmCredence.la apps
 
-classes/lib/libDwmCredence.a::
+classes/lib/libDwmCredence.la::
 	${MAKE} -C classes
 
-apps::
+apps: classes/lib/libDwmCredence.la
 	${MAKE} -C apps
 
-tarprep:: classes/lib/libDwmCredence.a apps
+tarprep:: classes/lib/libDwmCredence.la apps
 	${MAKE} -C classes $@
 	${MAKE} -C apps $@
 ifeq ("${BUILD_DOCS}", "yes")
@@ -32,15 +32,15 @@ linux-pkg: tarprep
 	dpkg-name -o staging.deb
 
 clean::
-	${MAKE} -C apps $@
-	${MAKE} -C classes $@
+	${MAKE} -s -C apps $@
+	${MAKE} -s -C classes $@
 
 distclean:: clean
-	${MAKE} -C apps $@
-	${MAKE} -C classes $@
-	${MAKE} -C doc $@
-	${MAKE} -C packaging $@
-	rm -Rf autom4te.cache staging
-	rm -f config.log config.status Makefile.vars
-	rm -f libDwmCredence_*.deb
+	${MAKE} -s -C apps $@
+	${MAKE} -s -C classes $@
+	${MAKE} -s -C doc $@
+	${MAKE} -s -C packaging $@
+	@rm -Rf autom4te.cache staging
+	@rm -f config.log config.status Makefile.vars
+	@rm -f libDwmCredence_*.deb
 
