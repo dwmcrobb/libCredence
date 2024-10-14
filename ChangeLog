@@ -1,5 +1,7 @@
 2024-10-13  Daniel W. McRobb  <dwm@spark.mcplex.net>
 
+	* Makefile.vars.in: Add some common callables.
+
 	* apps/credence/Makefile: Reduce noise during build.
 
 	* classes/src/Makefile, classes/tests/Makefile:
