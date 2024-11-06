@@ -1,3 +1,8 @@
+2024-11-06  Daniel W. McRobb  <dwm@spark.mcplex.net>
+
+	* First pass at migrating to non-recursive build, using latest
+	dwmgmk.
+
 2024-10-14  Daniel W. McRobb  <dwm@spark.mcplex.net>
 
 	* classes/tests/Makefile: Use common callables from Makefile.vars
