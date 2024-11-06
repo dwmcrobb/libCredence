@@ -49,6 +49,22 @@
 using namespace std;
 using namespace Dwm;
 
+static string  g_myDir;
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+static void SetMyDir(const char *argv0)
+{
+  namespace  fs = std::filesystem;
+  
+  g_myDir = fs::path(argv0).parent_path();
+  if (fs::path(g_myDir).filename() == ".libs") {
+    g_myDir = fs::path(g_myDir).parent_path();
+  }
+  return;
+}
+
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
@@ -80,7 +96,7 @@ static void TestIstream()
 {
   {
     Credence::Ed25519Key  key;
-    ifstream  is("inputs/id_ed25519.pub");
+    ifstream  is(g_myDir + "/inputs/id_ed25519.pub");
     if (UnitAssert(is)) {
       if (UnitAssert(is >> key)) {
         UnitAssert(key.Id() == "test@mcplex.net");
@@ -93,7 +109,7 @@ static void TestIstream()
 
   {
     Credence::Ed25519Key  key;
-    ifstream  is("inputs/id_ed25519");
+    ifstream  is(g_myDir + "/inputs/id_ed25519");
     if (UnitAssert(is)) {
       if (UnitAssert(is >> key)) {
         UnitAssert(key.Id() == "test@mcplex.net");
@@ -113,7 +129,7 @@ static void TestIstream()
 static void TestBadIstreams()
 {
   {
-    ifstream  is("inputs/bad_key_key_too_long");
+    ifstream  is(g_myDir + "/inputs/bad_key_key_too_long");
     if (UnitAssert(is)) {
       Credence::Ed25519Key  key;
       UnitAssert(! (is >> key));
@@ -123,7 +139,7 @@ static void TestBadIstreams()
   }
 
   {
-    ifstream  is("inputs/bad_key_id_too_long");
+    ifstream  is(g_myDir + "/inputs/bad_key_id_too_long");
     if (UnitAssert(is)) {
       Credence::Ed25519Key  key;
       UnitAssert(! (is >> key));
@@ -211,6 +227,8 @@ static void TestBadAssign()
 //----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
+  SetMyDir(argv[0]);
+  
   TestAssign();
   TestIstream();
   TestBadAssign();

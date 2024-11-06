@@ -1,58 +1,64 @@
-include ../../Makefile.vars
+load $(shell pkg-config --variable=libdir dwmgmk)/dwm_gmk.so(dwm_gmk_setup)
+testsMkFile := $(abspath $(lastword $(MAKEFILE_LIST)))
+$(dwm_aliasfn my,dwm_my)
+$(dwm_myns tests)
+$(my mydir := $(abspath $(dir $(testsMkFile))))
 
-COMPILE  = ${CXX}
-DEPSDIR  = deps
-OBJDIR   = .
-OBJFILES = $(addsuffix .o,$(basename $(shell ls *.cc)))
-OBJDEPS	 = $(OBJFILES:%.o=${DEPSDIR}/%_deps)
-TESTS	 = $(OBJFILES:%.o=%)
-CXXFLAGS += -g
-LDFLAGS  += -g -Wl,-rpath,${DWMDIR}/lib
-ALLINC   = -I../include -I. ${DWMINCS}
-ALLLIBS  = ${DWMLIBS} ${SODIUMLIB}
+$(dwm_include_once $(abspath $(my mydir)/../src/Makefile))
+
+$(my CxxFlags   := ${CXXFLAGS} ${CLASSINC} ${DWMINCS})
+$(my Libs       := ${DWWLIBS} ${SODIUMLIB})
+$(my Compile    := ${LTCOMPILE} $(my CxxFlags))
+$(my Link       := ${LTLINK})
+$(my LdFlags    := ${LDFLAGS} -g -Wl,-rpath,${DWMDIR}/lib)
+$(my Srcs       := $(dwm_files $(my mydir),Test.*\.cc))
+$(my ObjNames   := $(subst .cc,.o,$(my Srcs)))
+$(my ObjDir     := $(my mydir))
+$(my DepsDir    := $(my mydir)/deps)
+$(my Objs       := $(patsubst %,$(my ObjDir)/%,$(my ObjNames)))
+$(my ObjDeps    := $(patsubst %.o,$(my DepsDir)/%_deps,$(my ObjNames)))
+$(my Exes       := $(patsubst %.o,%,$(my Objs)))
+$(my Clean      := $(my Exes))
+$(my Clean      += $(patsubst %.o,$(my ObjDir)/.libs/%,$(my ObjNames)))
+
+$(eval TARGETS          $(dwm_ifcwd :=,+=) $(my tests.Exes))
+$(eval DEPSTARGETS      $(dwm_ifcwd :=,+=) $(my tests.ObjDeps))
+$(eval CLEANTARGETS     $(dwm_ifcwd :=,+=) $(my tests.Clean,tests.Objs))
+$(eval DISTCLEANTARGETS $(dwm_ifcwd :=,+=) $(my tests.ObjDeps))
+
+$(dwm_include $(abspath $(my mydir)/../../Makefile.rules))
 
 #-----------------------------------------------------------------------------
-define Link
- @echo linking $(2) ; \
- link_cmd="${LTLINK} ${LDFLAGS} -o $(2) $(1) ../lib/libDwmCredence.la ${ALLLIBS}"; \
- link_cmd_out=`$${link_cmd} 2>&1`; \
- if [ $$? -ne 0 ]; then \
-   printf "%s\n%s\n" "$${link_cmd}" "$${link_cmd_out}"; \
-   exit 1; \
- fi
-endef
+.SECONDARY: $(my tests.Objs)
 
-#-----------------------------------------------------------------------------
-
-all: ${TESTS}
-
-runtests: all
-	@ for tp in ${TESTS} ; do \
-		printf "%-36s " $$tp ; \
-		out=`./$$tp` ; \
+runtests: $(my Exes)
+	@ for tp in $(my tests.Exes) ; do \
+		printf "%-36s " `basename $$tp` ; \
+		out=`$$tp 2>&1` ; \
 		if [ $$? -eq 0 ]; then \
 		  printf "%25s\n" "$$out" ; \
 		else \
-		  printf "\n%s" "$$out" ; \
+		  printf "\n%s\n" "$$out" ; \
 		fi ; \
 	done
 
-#  dependencies
-$(eval $(call MakeDep,${OBJDIR}))
+#  generate dependency rule
+$(eval $(dwm_cppdeps $(my tests.mydir)/deps,(my tests.mydir),\
+$(my tests.mydir)/%.cc,${CXX} -MM $(my tests.CxxFlags) -c $<))
 
-#  object files
-${OBJDIR}/%.o: %.cc ${DEPSDIR}/%_deps
-	$(call Compile,$<,$@)
+#  only include dependency makefiles if target is not a 'clean' target
+ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(MAKECMDGOALS),distclean)
+ifneq ($(MAKECMDGOALS),clean-tests)
+$(dwm_include $(my tests.ObjDeps))
+endif
+endif
+endif
 
-#  executables
-Test%: ${OBJDIR}/Test%.o ../lib/libDwmCredence.la
-	$(call Link,$<,$@)
+$(my mydir)/Test%.o: $(my mydir)/Test%.cc $(my DepsDir)/Test%_deps
+	@dwmgmk_quiet "compiling $(dwm_relpwd $<)" \
+	 ${CXX} $(my tests.CxxFlags) -c $< -o $@
 
-../lib/libDwmCredence.la::
-	${MAKE} -s -C ../src
-
-clean::
-	@${LTCLEAN} ${TESTS} ${OBJFILES}
-
-distclean:: clean
-	@rm -f deps/*_deps
+$(my mydir)/Test%: $(my mydir)/Test%.o ${CLASSLIB}
+	@dwmgmk_quiet "linking $(dwm_relpwd $@)" \
+	 $(my tests.Link) $(my tests.LdFlags) -o $@ $^ $(my tests.Libs)

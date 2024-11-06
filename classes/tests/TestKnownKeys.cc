@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2022, 2024
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@
 //!  \brief Dwm::Credence::KnownKeys unit tests
 //---------------------------------------------------------------------------
 
+#include <filesystem>
 #include <sstream>
 
 #include "DwmUnitAssert.hh"
@@ -48,12 +49,28 @@
 using namespace std;
 using namespace Dwm;
 
+static string  g_myDir;
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+static void SetMyDir(const char *argv0)
+{
+  namespace  fs = std::filesystem;
+  
+  g_myDir = fs::path(argv0).parent_path();
+  if (fs::path(g_myDir).filename() == ".libs") {
+    g_myDir = fs::path(g_myDir).parent_path();
+  }
+  return;
+}
+
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
 static void TestAdminKeys()
 {
-  Credence::KnownKeys  knownKeys("./inputs", "admin_keys");
+  Credence::KnownKeys  knownKeys(g_myDir + "/inputs", "admin_keys");
   UnitAssert(knownKeys.Keys().size() == 2);
   string   key = knownKeys.Find("test@mcplex.net");
   UnitAssert(! key.empty());
@@ -67,7 +84,7 @@ static void TestAdminKeys()
 //----------------------------------------------------------------------------
 static void TestBadKeys()
 {
-  Credence::KnownKeys  knownKeys("./inputs", "bad_keys");
+  Credence::KnownKeys  knownKeys(g_myDir + "/inputs", "bad_keys");
   UnitAssert(knownKeys.Keys().size() == 2);
   return;
 }
@@ -108,9 +125,11 @@ static void WriteReadKeys(Credence::KnownKeys & knownKeys)
 //----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
+  SetMyDir(argv[0]);
+  
   TestAdminKeys();
 
-  Credence::KnownKeys  knownKeys("./inputs");
+  Credence::KnownKeys  knownKeys(g_myDir + "/inputs");
   UnitAssert(KnownKeysOK(knownKeys));
 
   knownKeys.Reload();

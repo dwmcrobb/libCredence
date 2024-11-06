@@ -1,20 +1,16 @@
-include Makefile.vars
+load $(shell pkg-config --variable=libdir dwmgmk)/dwm_gmk.so(dwm_gmk_setup)
 
-all:: classes/lib/libDwmCredence.la apps
+$(dwm_include Makefile.vars)
+$(dwm_include classes/Makefile)
+$(dwm_include apps/Makefile)
 
-classes/lib/libDwmCredence.la::
-	${MAKE} -C classes
+tarprep: otherTarpreps
 
-apps: classes/lib/libDwmCredence.la
-	${MAKE} -C apps
-
-tarprep:: classes/lib/libDwmCredence.la apps
-	${MAKE} -C classes $@
-	${MAKE} -C apps $@
+otherTarpreps::
 ifeq ("${BUILD_DOCS}", "yes")
-	${MAKE} -C doc $@
+	${MAKE} -C doc tarprep
 endif
-	${MAKE} -C packaging $@
+	${MAKE} -C packaging tarprep
 
 package: ${OSNAME}-pkg
 
@@ -31,15 +27,11 @@ linux-pkg: tarprep
 	dpkg-deb -b --root-owner-group staging
 	dpkg-name -o staging.deb
 
-clean::
-	${MAKE} -s -C apps $@
-	${MAKE} -s -C classes $@
+distclean:: otherDistclean
 
-distclean:: clean
-	${MAKE} -s -C apps $@
-	${MAKE} -s -C classes $@
-	${MAKE} -s -C doc $@
-	${MAKE} -s -C packaging $@
+otherDistclean::
+	${MAKE} -s -C doc distclean
+	${MAKE} -s -C packaging distclean
 	@rm -Rf autom4te.cache staging
 	@rm -f config.log config.status Makefile.vars
 	@rm -f libDwmCredence_*.deb

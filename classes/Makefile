@@ -1,14 +1,5 @@
-all::
-	${MAKE} -C tests
+load $(shell pkg-config --variable=libdir dwmgmk)/dwm_gmk.so(dwm_gmk_setup)
+classesDir := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
-tarprep::
-	${MAKE} -C src $@
-	${MAKE} -C include $@
-
-clean::
-	${MAKE} -C tests $@
-	${MAKE} -C src $@
-
-distclean::
-	${MAKE} -C tests $@
-	${MAKE} -C src $@
+$(dwm_include $(classesDir)/tests/Makefile)
+$(dwm_include $(classesDir)/include/Makefile)

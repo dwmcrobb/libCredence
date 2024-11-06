@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022, 2023
+//  Copyright (c) Daniel W. McRobb 2022, 2023, 2024
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@ extern "C" {
   #include <unistd.h>
 }
 
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 #include <thread>
@@ -54,6 +55,22 @@ extern "C" {
 
 using namespace std;
 using namespace Dwm;
+
+static string  g_myDir;
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+static void SetMyDir(const char *argv0)
+{
+  namespace  fs = std::filesystem;
+  
+  g_myDir = fs::path(argv0).parent_path();
+  if (fs::path(g_myDir).filename() == ".libs") {
+    g_myDir = fs::path(g_myDir).parent_path();
+  }
+  return;
+}
 
 //----------------------------------------------------------------------------
 //!  
@@ -86,8 +103,8 @@ void ServerThread(const std::string & plaintext,
     sock.native_non_blocking(false, ec);
     Credence::Peer       peer;
     if (UnitAssert(peer.Accept(std::move(sock)))) {
-      Credence::KeyStash   keyStash("./inputs");
-      Credence::KnownKeys  knownKeys("./inputs");
+      Credence::KeyStash   keyStash(g_myDir + "/inputs");
+      Credence::KnownKeys  knownKeys(g_myDir + "/inputs");
       if (UnitAssert(peer.Authenticate(keyStash, knownKeys))) {
         UnitAssert(peer.Id() == "test@mcplex.net");
         string  receivedtext;
@@ -114,7 +131,7 @@ void UnixServerThread(const std::string & plaintext,
 
   io_context                 ioContext;
   boost::system::error_code  ec;
-  local::stream_protocol::endpoint  endPoint("./TestPeer.sock");
+  local::stream_protocol::endpoint  endPoint(g_myDir + "/TestPeer.sock");
   local::stream_protocol::acceptor  acc(ioContext, endPoint);
   acc.non_blocking(true, ec);
 
@@ -131,8 +148,8 @@ void UnixServerThread(const std::string & plaintext,
     sock.native_non_blocking(false, ec);
     Credence::Peer       peer;
     if (UnitAssert(peer.Accept(std::move(sock)))) {
-      Credence::KeyStash   keyStash("./inputs");
-      Credence::KnownKeys  knownKeys("./inputs");
+      Credence::KeyStash   keyStash(g_myDir + "/inputs");
+      Credence::KnownKeys  knownKeys(g_myDir + "/inputs");
       if (UnitAssert(peer.Authenticate(keyStash, knownKeys))) {
         UnitAssert(peer.Id() == "test@mcplex.net");
         string  receivedtext;
@@ -195,7 +212,7 @@ void UnixServerThread2(const std::string & plaintext,
 
   io_context                        ioContext;
   boost::system::error_code         ec;
-  local::stream_protocol::endpoint  endPoint("./TestPeer.sock");
+  local::stream_protocol::endpoint  endPoint(g_myDir + "/TestPeer.sock");
   local::stream_protocol::acceptor  acc(ioContext, endPoint);
   acc.non_blocking(true, ec);
 
@@ -229,7 +246,7 @@ void TestServer()
 bool GetFileContents(string & fileContents)
 {
   bool  rc = false;
-  ifstream  is("TestPeer.cc", ios::in | ios::binary);
+  ifstream  is(g_myDir + "/TestPeer.cc", ios::in | ios::binary);
   if (UnitAssert(is)) {
     is.seekg(0, ios::end);
     fileContents.resize(is.tellg());
@@ -256,9 +273,9 @@ void TestUnixSocket()
                               std::ref(serverIsRunning));
     while (! serverIsRunning) { }
     Credence::Peer  peer;
-    if (UnitAssert(peer.Connect("./TestPeer.sock"))) {
-      Credence::KeyStash   keyStash("./inputs");
-      Credence::KnownKeys  knownKeys("./inputs");
+    if (UnitAssert(peer.Connect(g_myDir + "/TestPeer.sock"))) {
+      Credence::KeyStash   keyStash(g_myDir + "/inputs");
+      Credence::KnownKeys  knownKeys(g_myDir + "/inputs");
       if (UnitAssert(peer.Authenticate(keyStash, knownKeys))) {
         if (UnitAssert(peer.Id() == "test@mcplex.net")) {
           if (UnitAssert(peer.Send(fileContents))) {
@@ -274,7 +291,7 @@ void TestUnixSocket()
     }
     serverShouldRun = false;
     serverThread.join();
-    unlink("./TestPeer.sock");
+    unlink((g_myDir + "/TestPeer.sock").c_str());
     
     serverShouldRun = true;
     serverIsRunning = false;
@@ -282,15 +299,15 @@ void TestUnixSocket()
                                std::ref(serverShouldRun),
                                std::ref(serverIsRunning));
     while (! serverIsRunning) { }
-    if (UnitAssert(peer.Connect("./TestPeer.sock"))) {
+    if (UnitAssert(peer.Connect(g_myDir + "/TestPeer.sock"))) {
       peer.Disconnect();
-      Credence::KeyStash   keyStash("./inputs");
-      Credence::KnownKeys  knownKeys("./inputs");
+      Credence::KeyStash   keyStash(g_myDir + "/inputs");
+      Credence::KnownKeys  knownKeys(g_myDir + "/inputs");
       UnitAssert(! peer.Authenticate(keyStash, knownKeys));
     }
     serverShouldRun = false;
     serverThread2.join();
-    unlink("./TestPeer.sock");
+    unlink((g_myDir + "/TestPeer.sock").c_str());
   }
   return;
 }
@@ -302,6 +319,8 @@ int main(int argc, char *argv[])
 {
   using namespace boost::asio;
 
+  SetMyDir(argv[0]);
+  
   int  optChar;
   while ((optChar = getopt(argc, argv, "d")) != -1) {
     switch (optChar) {
@@ -325,8 +344,8 @@ int main(int argc, char *argv[])
     while (! serverIsRunning) { }
     Credence::Peer  peer;
     if (UnitAssert(peer.Connect("127.0.0.1", 7789))) {
-      Credence::KeyStash   keyStash("./inputs");
-      Credence::KnownKeys  knownKeys("./inputs");
+      Credence::KeyStash   keyStash(g_myDir + "/inputs");
+      Credence::KnownKeys  knownKeys(g_myDir + "/inputs");
       if (UnitAssert(peer.Authenticate(keyStash, knownKeys))) {
         if (UnitAssert(peer.Id() == "test@mcplex.net")) {
           if (UnitAssert(peer.Send(fileContents))) {
@@ -351,8 +370,8 @@ int main(int argc, char *argv[])
     while (! serverIsRunning) { }
     if (UnitAssert(peer.Connect("127.0.0.1", 7789))) {
       peer.Disconnect();
-      Credence::KeyStash   keyStash("./inputs");
-      Credence::KnownKeys  knownKeys("./inputs");
+      Credence::KeyStash   keyStash(g_myDir + "/inputs");
+      Credence::KnownKeys  knownKeys(g_myDir + "/inputs");
       UnitAssert(! peer.Authenticate(keyStash, knownKeys));
     }
     serverShouldRun = false;

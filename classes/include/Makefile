@@ -1,31 +1,16 @@
-include ../../Makefile.vars
+load $(shell pkg-config --variable=libdir dwmgmk)/dwm_gmk.so(dwm_gmk_setup)
+libIncDir := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
-HEADERS		= $(shell ls *.hh)
-TARPREPHEADERS	= $(HEADERS:%=${TARDIR}/include/libDwmCredence/%)
-INSTALLHEADERS	= $(HEADERS:%=${INSTALLPREFIX}/include/libDwmCredence/%)
+$(dwm_include $(abspath $(libIncDir)/../../Makefile.vars))
 
-all::
-	@echo "Nothing to be done for 'all'"
+libIncHdrNames    := $(dwm_files $(libIncDir),.+\.hh)
+libIncHdrs        := $(libIncHdrNames:%.hh=$(libIncDir)/%.hh)
+libIncTarPrepHdrs := $(libIncHdrNames:%=${TARDIR}/include/libDwmCredence/%)
 
-tarprep: ${TARPREPHEADERS}
+$(eval TARTARGETS       $(dwm_ifcwd :=,+=) $(libIncTarPrepHdrs))
+$(eval DISTCLEANTARGETS $(dwm_ifcwd :=,+=) $(libIncTarPrepHdrs))
 
-${TARDIR}/include/libDwmCredence/%.hh: %.hh
-	../../install-sh -c -m 444 $< $@
+${TARDIR}/include/libDwmCredence/%.hh: $(libIncDir)/%.hh
+	${INSTALL} -c -m 444 $< $@
 
-install: ${INSTALLHEADERS}
-
-${INSTALLPREFIX}/include/libDwmCredence/%.hh: %.hh
-	../../install-sh -c -m 444 $< $@
-
-uninstall: clean-install
-
-clean: clean-tarprep
-
-clean-install::
-	rm -f ${INSTALLHEADERS}
-
-clean-tarprep::
-	rm -f ${TARPREPHEADERS}
-
-distclean: clean
-	rm -f DwmCredenceVersion.hh
+$(dwm_include $(abspath $(libIncDir)/../../Makefile.rules))

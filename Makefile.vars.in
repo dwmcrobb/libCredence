@@ -1,24 +1,29 @@
-BUILD_DOCS       = @BUILD_DOCS@
-BZINC            = @BZ2INC@
-BZLIB            = @BZ2LIB@
-CXX              = @CXX@
-CXXFLAGS         = @CXXFLAGS@
-DWMDIR           = @DWMDIR@
-DWMINCS          = @DWMINCS@
-DWMLIBS          = @DWMLIBS@
-DWMLIBSONLY      = @DWMLIBSONLY@
-HTMLMAN          = @htmlman@
-INSTALLPREFIX    = @prefix@
-LIBTOOL         := @LIBTOOL@
-LTCLEAN          = ${LIBTOOL} --quiet --mode=clean rm -f
-LTCOMPILE        = ${LIBTOOL} --quiet --mode=compile --tag=CXX ${CXX}
-LTLINK           = ${LIBTOOL} --quiet --tag=CXX --mode=link ${CXX}
-MANDOC           = @MANDOC@
-OSNAME           = @OSNAME@
-PTHREADCXXFLAGS  = @PTHREADCXXFLAGS@
-SODIUMLIB        = -lsodium
-TARDIR           = @TARDIR@@prefix@
-VERSION          = @DWM_VERSION@
+TOP              := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+BUILD_DOCS       := @BUILD_DOCS@
+BZINC            := @BZ2INC@
+BZLIB            := @BZ2LIB@
+CLASSINC         := -I${TOP}/classes/include
+CLASSLIB         := ${TOP}/classes/lib/libDwmCredence.la
+CXX              := @CXX@
+CXXFLAGS         := @CXXFLAGS@
+DWMDIR           := @DWMDIR@
+DWMINCS          := @DWMINCS@
+DWMLIBS          := $(dwm_uniqright @DWMLIBS@)
+DWMLIBSONLY      := $(dwm_uniqright @DWMLIBSONLY@)
+HTMLMAN          := @htmlman@
+INSTALL          := @LIBTOOL@ --mode=install $(TOP)/install-sh
+INSTALLPREFIX    := @prefix@
+LIBTOOL          := @LIBTOOL@
+LTCLEAN          := ${LIBTOOL} --quiet --mode=clean rm -f
+LTCOMPILE        := ${LIBTOOL} --quiet --mode=compile --tag=CXX ${CXX}
+LTLINK           := ${LIBTOOL} --quiet --tag=CXX --mode=link ${CXX}
+MANDOC           := @MANDOC@
+OSNAME           := @OSNAME@
+PTHREADCXXFLAGS  := @PTHREADCXXFLAGS@
+SHLIB_VERSION    := $(shell ${TOP}/getvers.sh -s)
+SODIUMLIB        := -lsodium
+TARDIR           := @TARDIR@@prefix@
+VERSION          := @DWM_VERSION@
 
 #-----------------------------------------------------------------------------
 #  Function to remove duplicates from a list
@@ -53,3 +58,4 @@ define Compile
  fi
 endef
 
+.DEFAULT_GOAL    := all

@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2022, 2024
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,8 @@
 //!  \brief Dwm::Credence::KeyStash unit tests
 //---------------------------------------------------------------------------
 
+#include <filesystem>
+
 #include "DwmUnitAssert.hh"
 #include "DwmCredenceKeyStash.hh"
 #include "DwmCredenceUtils.hh"
@@ -46,12 +48,28 @@
 using namespace std;
 using namespace Dwm;
 
+static string  g_myDir;
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+static void SetMyDir(const char *argv0)
+{
+  namespace  fs = std::filesystem;
+  
+  g_myDir = fs::path(argv0).parent_path();
+  if (fs::path(g_myDir).filename() == ".libs") {
+    g_myDir = fs::path(g_myDir).parent_path();
+  }
+  return;
+}
+
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
 static void TestExistingKeyStash()
 {
-  Credence::KeyStash  keyStash("./inputs");
+  Credence::KeyStash  keyStash(g_myDir + "/inputs");
   UnitAssert(keyStash.IsValid());
   return;
 }
@@ -61,7 +79,7 @@ static void TestExistingKeyStash()
 //----------------------------------------------------------------------------
 static void TestNonexistentKeyStash()
 {
-  Credence::KeyStash  keyStash("./inputs_foo_de_fooe_fom");
+  Credence::KeyStash  keyStash(g_myDir + "/inputs_foo_de_fooe_fom");
   UnitAssert(! keyStash.IsValid());
   return;
 }
@@ -71,11 +89,13 @@ static void TestNonexistentKeyStash()
 //----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
+  SetMyDir(argv[0]);
+  
   TestExistingKeyStash();
   TestNonexistentKeyStash();
   
   Credence::Ed25519KeyPair  keyPair;
-  Credence::KeyStash        keyStash(".");
+  Credence::KeyStash        keyStash(g_myDir);
 
   UnitAssert(keyPair.IsValid());
 
@@ -87,8 +107,8 @@ int main(int argc, char *argv[])
         UnitAssert(keyPair2 == keyPair);
       }
     }
-    std::remove("./id_ed25519");
-    std::remove("./id_ed25519.pub");
+    std::remove((g_myDir + "/id_ed25519").c_str());
+    std::remove((g_myDir + "/id_ed25519.pub").c_str());
   }
   
   if (Assertions::Total().Failed()) {
