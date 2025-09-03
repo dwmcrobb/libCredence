@@ -1,7 +1,11 @@
 2025-09-03  dwm  <dwm@ria.mcplex.net>
 
-	* classes/tests/TestPeer.cc: Replace ip::address::from_string()
-	with ip::make_address().
+	* Makefile.vars.in, classes/src/Makefile, classes/tests/Makefile:
+	Fix some minor build issues.
+
+	* classes/src/DwmCredenceServerConfigParse.y,
+	  classes/tests/TestPeer.cc:
+	Replace ip::address::from_string() with ip::make_address().
 
 2024-11-06  Daniel W. McRobb  <dwm@spark.mcplex.net>
 

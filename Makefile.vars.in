@@ -8,11 +8,12 @@ CXX              := @CXX@
 CXXFLAGS         := @CXXFLAGS@
 DWMDIR           := @DWMDIR@
 DWMINCS          := @DWMINCS@
-DWMLIBS          := $(dwm_uniqright @DWMLIBS@)
-DWMLIBSONLY      := $(dwm_uniqright @DWMLIBSONLY@)
+DWMLIBS          := $(shell dwmgmk_uniqright @DWMLIBS@)
+DWMLIBSONLY      := $(dwmgmk_uniqright @DWMLIBSONLY@)
 HTMLMAN          := @htmlman@
 INSTALL          := @LIBTOOL@ --mode=install $(TOP)/install-sh
 INSTALLPREFIX    := @prefix@
+LDFLAGS          := -Wl,-rpath,${DWMDIR}/lib
 LIBTOOL          := @LIBTOOL@
 LTCLEAN          := ${LIBTOOL} --quiet --mode=clean rm -f
 LTCOMPILE        := ${LIBTOOL} --quiet --mode=compile --tag=CXX ${CXX}
@@ -20,8 +21,9 @@ LTLINK           := ${LIBTOOL} --quiet --tag=CXX --mode=link ${CXX}
 MANDOC           := @MANDOC@
 OSNAME           := @OSNAME@
 PTHREADCXXFLAGS  := @PTHREADCXXFLAGS@
+PTHREADLDFLAGS   := @PTHREADLDFLAGS@
 SHLIB_VERSION    := $(shell ${TOP}/getvers.sh -s)
-SODIUMLIB        := -lsodium
+SODIUMLIB        := $(shell pkg-config --libs libsodium)
 TARDIR           := @TARDIR@@prefix@
 VERSION          := @DWM_VERSION@
 

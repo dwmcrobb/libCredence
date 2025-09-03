@@ -13,7 +13,7 @@ $(my Link       := ${LTLINK})
 $(my LinkRpath  := -rpath ${INSTALLPREFIX}/lib)
 $(my LibVersion := -version-info ${SHLIB_VERSION})
 $(my ExtLibs    := ${DWMLIBSONLY} ${SODIUMLIB})
-$(my LinkFlags  := $(my LinkRpath) $(my LibVersion) ${LDFLAGS} $(my ExtLibs))
+$(my LinkFlags  := $(my LinkRpath) $(my LibVersion) $(my ExtLibs))
 
 $(eval TARGETS          $(dwm_ifcwd :=,+=) $(my lib.Lib))
 $(eval DEPSTARGETS      $(dwm_ifcwd :=,+=) $(my lib.Deps))
