@@ -83,7 +83,7 @@ void ServerThread(const std::string & plaintext,
 
   io_context                 ioContext;
   boost::system::error_code  ec;
-  ip::tcp::endpoint  endPoint(ip::address::from_string("127.0.0.1"), 7789);
+  ip::tcp::endpoint  endPoint(ip::make_address("127.0.0.1"), 7789);
   ip::tcp::acceptor  acc(ioContext, endPoint);
   boost::asio::ip::tcp::acceptor::reuse_address option(true);
   acc.set_option(option, ec);
@@ -176,7 +176,7 @@ void ServerThread2(const std::string & plaintext,
 
   io_context                 ioContext;
   boost::system::error_code  ec;
-  ip::tcp::endpoint  endPoint(ip::address::from_string("127.0.0.1"), 7789);
+  ip::tcp::endpoint  endPoint(ip::make_address("127.0.0.1"), 7789);
   ip::tcp::acceptor  acc(ioContext, endPoint);
   boost::asio::ip::tcp::acceptor::reuse_address option(true);
   acc.set_option(option, ec);
