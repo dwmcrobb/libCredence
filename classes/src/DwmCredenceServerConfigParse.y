@@ -152,7 +152,7 @@ ServiceAddress: '{' ADDRESS '=' STRING ';' '}'
   else {
     boost::system::error_code  ec;
     boost::asio::ip::address  addr =
-    boost::asio::ip::address::from_string(*$4, ec);
+    boost::asio::ip::make_address(*$4, ec);
     if (ec) {
       credenceservercfgerror("invalid IP address");
       delete $4;
@@ -181,7 +181,7 @@ ServiceAddress: '{' ADDRESS '=' STRING ';' '}'
   }
   else {
     boost::system::error_code  ec;
-    baip::address  addr = baip::address::from_string(*$4, ec);
+    baip::address  addr = baip::make_address(*$4, ec);
     if (ec) {
       credenceservercfgerror("invalid IP address");
       delete $4;
@@ -210,7 +210,7 @@ ServiceAddress: '{' ADDRESS '=' STRING ';' '}'
   }
   else {
     boost::system::error_code  ec;
-    baip::address addr = baip::address::from_string(*$8, ec);
+    baip::address addr = baip::make_address(*$8, ec);
     if (ec) {
       credenceservercfgerror("invalid IP address");
       delete $8;
