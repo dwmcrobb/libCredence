@@ -40,6 +40,7 @@
 //---------------------------------------------------------------------------
 
 #include <atomic>
+#include <filesystem>
 #include <fstream>
 
 #include "DwmUnitAssert.hh"
