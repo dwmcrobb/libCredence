@@ -1,3 +1,11 @@
+2025-09-05  Daniel W. McRobb  <dwm@kiva.mcplex.net>
+
+	* tagged as libDwmCredence-0.2.5
+
+	* configure, configure.ac, dwm.m4: Update for FreeBSD 14.
+
+	* packaging/fbsd_manifest.in: Update libDwm version dependency.
+
 2025-09-04  Daniel McRobb  <dwm@thrip.mcplex.net>
 
 	* tagged as libDwmCredence-0.2.4
