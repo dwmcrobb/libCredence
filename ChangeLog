@@ -1,6 +1,6 @@
 2025-11-21  Daniel W. McRobb  <dwm@spark.mcplex.net>
 
-	* tagged as libDwmCredence-0.1.41
+	* tagged as libDwmCredence-0.2.6
 
 	* Makefile.vars.in, classes/include/DwmCredenceVersion.hh.in,
 	  classes/src/DwmCredenceServerConfigLex.lex,
