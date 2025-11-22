@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
       }
     }
     else if (string(argv[1]) == "-v") {
-      cout << Dwm::Credence::Version.Version() << '\n';
+      cout << Dwm::Credence::version_info.data_view() << '\n';
       return 0;
     }
     else {
