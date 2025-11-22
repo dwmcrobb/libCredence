@@ -1,7 +1,7 @@
 //===========================================================================
 // @(#) $DwmPath$
 //===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2022, 2025
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -39,17 +39,5 @@
 //!  \brief NOT YET DOCUMENTED
 //---------------------------------------------------------------------------
 
-#include <string>
-#include "DwmGitVersion.hh"
 #include "DwmCredenceVersion.hh"
-
-namespace Dwm {
-
-  namespace Credence {
-
-    const GitVersion  Version("@(#) libDwmCredence-" DWM_CREDENCE_VERSION);
-    
-  }  // namespace Credence
-
-}  // namespace Dwm
 

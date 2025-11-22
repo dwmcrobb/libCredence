@@ -42,16 +42,17 @@
 #ifndef _DWMCREDENCEVERSION_HH_
 #define _DWMCREDENCEVERSION_HH_
 
-#include "DwmGitVersion.hh"
-
-#define DWM_CREDENCE_VERSION "@DWM_VERSION@"
+#include "DwmLibDwmVersion.hh"
 
 namespace Dwm {
 
   namespace Credence {
 
-    extern const GitVersion  Version;
-    
+    inline constexpr const Dwm::What::Info __attribute__((used))
+    version_info(DWM_WHAT_TYPE_LIB, @DWM_WHAT_STATUS@, "libDwmCredence",
+                 "@DWM_VERSION@", "Daniel McRobb 2025 " DWM_WHAT_SYM_JACKOLANTERN,
+                 "mcplex.net");
+  
   }  // namespace Credence
 
 }  // namespace Dwm

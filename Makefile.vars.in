@@ -10,6 +10,7 @@ DWMDIR           := @DWMDIR@
 DWMINCS          := @DWMINCS@
 DWMLIBS          := $(shell dwmgmk_uniqright @DWMLIBS@)
 DWMLIBSONLY      := $(dwmgmk_uniqright @DWMLIBSONLY@)
+EXTINCS          := @EXTINCS@
 HTMLMAN          := @htmlman@
 INSTALL          := @LIBTOOL@ --mode=install $(TOP)/install-sh
 INSTALLPREFIX    := @prefix@

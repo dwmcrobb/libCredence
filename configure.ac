@@ -63,6 +63,14 @@ DWMINCS=`pkg-config --cflags libDwm`
 DWMLIBS=`pkg-config --libs libDwm`
 DWMLIBSONLY=`pkg-config --libs-only-L --libs-only-l libDwm`
 
+DWM_CHECK_PKG(dwmwhat,[exit 1])
+
+AC_SUBST(PC_REQ_PKGS)
+PKG_EXTINCS=`pkg-config --cflags-only-I ${PC_PKGS}`
+PKG_EXTLIBS=`pkg-config --libs ${PC_PKGS}`
+EXTINCS=`dwmgmk_uniqleft ${PKG_EXTINCS} ${EXTINCS}`
+AC_SUBST(EXTINCS)
+
 AC_SUBST(DWMDIR)
 AC_SUBST(DWMINCS)
 AC_SUBST(DWMLIBS)
@@ -149,6 +157,9 @@ esac
 AC_SUBST(CXXFLAGS)
 
 DWM_CHECK_LIBSTDCPPFS
+
+DWM_WHAT_STATUS=`./getvers.sh -S`
+AC_SUBST(DWM_WHAT_STATUS)
 
 BUILD_DOCS=""
 AC_ARG_ENABLE([docs],[AS_HELP_STRING([--enable-docs],[build documentation])],
