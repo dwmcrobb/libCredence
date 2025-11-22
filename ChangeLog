@@ -1,10 +1,12 @@
 2025-11-21  Daniel W. McRobb  <dwm@spark.mcplex.net>
 
+	* tagged as libDwmCredence-0.1.41
+
 	* Makefile.vars.in, classes/include/DwmCredenceVersion.hh.in,
 	  classes/src/DwmCredenceServerConfigLex.lex,
 	  classes/src/DwmCredenceServerConfigParse.y,
 	  classes/src/DwmCredenceVersion.cc, configure, configure.ac,
-	  dwm.m4, getvers.sh:
+	  dwm.m4, getvers.sh, apps/credence/credence.cc:
 	First pass at switching to Dwm::What::Info for version
 	information.
 
