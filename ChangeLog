@@ -1,6 +1,6 @@
 2025-12-23  Daniel W. McRobb  <dwm@spark.mcplex.net>
 
-	* tagged as libDwmCredence-0.2.8
+	* tagged as libDwmCredence-0.2.9
 	
 	* classes/include/DwmCredenceShortString.hh: Added
 	StreamedLength() member.
