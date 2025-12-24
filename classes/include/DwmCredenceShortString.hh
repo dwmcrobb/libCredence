@@ -175,6 +175,15 @@ namespace Dwm {
       }
 
       //----------------------------------------------------------------------
+      //!  Returns the number of bytes that would be written if we called a
+      //!  Write() member.
+      //----------------------------------------------------------------------
+      uint64_t StreamedLength() const
+      {
+        return sizeof(TypeFromSize<LEN>) + _s.size();
+      }
+      
+      //----------------------------------------------------------------------
       //!  ostream operator <<
       //----------------------------------------------------------------------
       friend std::ostream & operator << (std::ostream & os,
