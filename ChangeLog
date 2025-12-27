@@ -1,5 +1,15 @@
 2025-12-27  Daniel W. McRobb  <dwm@spark.mcplex.net>
 
+	* tagged as libDwmCredence-0.2.11
+
+	* classes/include/DwmCredenceXChaCha20Poly1305.hh,
+	  classes/src/DwmCredenceXChaCha20Poly1305.cc:
+	In Encrypt(span<char> & s, size_t, const Nonce &, const string &),
+	the span is now an in/out parameter.  On input, s.size()
+	is the full length available in s.  On successful return from
+	Encrypt(), s.size() will be the length of the ciphertext plus
+	the MAC.
+
 	* tagged as libDwmCredence-0.2.10
 
 	* classes/include/DwmCredenceXChaCha20Poly1305.hh,
