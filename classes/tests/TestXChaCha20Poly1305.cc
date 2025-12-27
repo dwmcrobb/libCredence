@@ -63,14 +63,25 @@ int main(int argc, char *argv[])
 
   string  sharedKey = clientKeys.SharedKey(serverKeys.PublicKey().Value());
 
+  string  plainText("An encrypted message.");
   string  cipherText;
   Credence::Nonce  nonce;
   UnitAssert(Credence::XChaCha20Poly1305::Encrypt(cipherText,
-                                                  "An encrypted message.",
+                                                  plainText,
                                                   nonce, sharedKey));
   string  clearText;
   UnitAssert(Credence::XChaCha20Poly1305::Decrypt(clearText, cipherText,
                                                   nonce, sharedKey));
+  UnitAssert(clearText == "An encrypted message.");
+
+  clearText.clear();
+  size_t  origSize = plainText.size();
+  plainText.resize(origSize + 16);
+  auto  sp = std::span{plainText.data(), plainText.size()};
+  UnitAssert(Credence::XChaCha20Poly1305::Encrypt(sp, origSize,
+                                                  nonce, sharedKey));
+  UnitAssert(Credence::XChaCha20Poly1305::Decrypt(sp, nonce, sharedKey));
+  clearText = string(sp.data(),sp.size());
   UnitAssert(clearText == "An encrypted message.");
   
   if (Assertions::Total().Failed()) {
