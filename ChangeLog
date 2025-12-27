@@ -1,7 +1,16 @@
+2025-12-27  Daniel W. McRobb  <dwm@spark.mcplex.net>
+
+	* tagged as libDwmCredence-0.2.10
+
+	* classes/include/DwmCredenceXChaCha20Poly1305.hh,
+	  classes/src/DwmCredenceXChaCha20Poly1305.cc,
+	  classes/tests/TestXChaCha20Poly1305.cc:
+	Added in-place Encrypt() and Decrypt() for std::span<char>.
+
 2025-12-23  Daniel W. McRobb  <dwm@spark.mcplex.net>
 
 	* tagged as libDwmCredence-0.2.9
-	
+
 	* classes/include/DwmCredenceShortString.hh: Added
 	StreamedLength() member.
 
