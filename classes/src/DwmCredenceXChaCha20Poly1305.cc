@@ -1,7 +1,5 @@
 //===========================================================================
-// @(#) $DwmPath$
-//===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022
+//  Copyright (c) Daniel W. McRobb 2022, 2025
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -42,6 +40,8 @@
 extern "C" {
   #include <sodium.h>
 }
+
+#include <cassert>
 
 #include "DwmSysLogger.hh"
 #include "DwmCredenceXChaCha20Poly1305.hh"
@@ -94,6 +94,69 @@ namespace Dwm {
       //----------------------------------------------------------------------
       //!  
       //----------------------------------------------------------------------
+      bool Encrypt(string & cipherText, std::string_view message,
+                   const Nonce & nonce, const string & secretKey)
+      {
+        constexpr auto  xcc20p1305enc =
+          crypto_aead_xchacha20poly1305_ietf_encrypt;
+        
+        bool  rc = false;
+        unsigned long long  cbuflen =
+          message.size() + crypto_aead_xchacha20poly1305_ietf_ABYTES;
+        try {
+          cipherText.resize(cbuflen);
+          if (xcc20p1305enc((uint8_t *)cipherText.data(), &cbuflen,
+                            (const uint8_t *)message.data(),
+                            message.size(),
+                            nullptr, 0,
+                            nullptr, nonce,
+                            (const uint8_t *)secretKey.data())
+              == 0) {
+            rc = true;
+          }
+          else {
+            Syslog(LOG_ERR, "xcc20p1305enc() failed in Encrypt()");
+            cipherText.clear();
+          }
+        }
+        catch (const std::exception & ex) {
+          Syslog(LOG_ERR, "Got exception in Encrypt(): %s", ex.what());
+        }
+        catch (...) {
+          Syslog(LOG_ERR, "Got exception in Encrypt()");
+        }
+        return rc;
+      }
+
+      //----------------------------------------------------------------------
+      bool Encrypt(std::span<char> & s, size_t plainLen, const Nonce & nonce,
+                   const std::string & secretKey)
+      {
+        constexpr auto  xcc20p1305enc =
+          crypto_aead_xchacha20poly1305_ietf_encrypt;
+        
+        bool  rc = false;
+        unsigned long long  cbuflen =
+          plainLen + crypto_aead_xchacha20poly1305_ietf_ABYTES;
+        assert(s.size() >= cbuflen);
+        if (xcc20p1305enc((uint8_t *)s.data(), &cbuflen,
+                          (const uint8_t *)s.data(), plainLen,
+                          nullptr, 0,
+                          nullptr, nonce,
+                          (const uint8_t *)secretKey.data())
+            == 0) {
+          rc = true;
+        }
+        else {
+          Syslog(LOG_ERR, "xcc20p1305enc() failed in Encrypt()");
+        }
+        
+        return rc;
+      }
+    
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
       bool Decrypt(string & message, const string & cipherText,
                    const Nonce & nonce, const string & secretKey)
       {
@@ -128,7 +191,37 @@ namespace Dwm {
         
         return rc;
       }
-    
+
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
+      bool Decrypt(std::span<char> & s, const Nonce & nonce,
+                   const string & secretKey)
+      {
+        constexpr auto  xcc20p1305dec =
+          crypto_aead_xchacha20poly1305_ietf_decrypt;
+      
+        bool  rc = false;
+        if (s.size() >crypto_aead_xchacha20poly1305_ietf_ABYTES) {
+          unsigned long long  msglen =
+            s.size() - crypto_aead_xchacha20poly1305_ietf_ABYTES;
+          if (xcc20p1305dec((uint8_t *)s.data(), &msglen, nullptr,
+                            (const uint8_t *)s.data(),
+                            s.size(),
+                            nullptr, 0,
+                            nonce, (const uint8_t *)secretKey.data())
+              == 0) {
+            rc = true;
+            s = std::span<char>{s.data(), msglen};
+          }
+          else {
+            Syslog(LOG_ERR, "xcc20p1305dec() failed in Decrypt()");
+            s = std::span<char>{s.data(), 0};
+          }
+        }
+        return rc;
+      }
+      
 
     }  // namespace XChaCha20Poly1305
     

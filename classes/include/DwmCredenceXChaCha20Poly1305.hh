@@ -42,6 +42,8 @@
 #ifndef _DWMCREDENCEXCHACHA20POLY1305_HH_
 #define _DWMCREDENCEXCHACHA20POLY1305_HH_
 
+#include <span>
+
 #include "DwmCredenceNonce.hh"
 
 namespace Dwm {
@@ -58,7 +60,19 @@ namespace Dwm {
       //----------------------------------------------------------------------
       bool Encrypt(std::string & cipherText, const std::string & message,
                    const Nonce & nonce, const std::string & secretKey);
-      
+
+      bool Encrypt(std::string & cipherText, std::string_view message,
+                   const Nonce & nonce, const std::string & secretKey);
+
+      //----------------------------------------------------------------------
+      //!  Encrypts the first @c plainLen bytes of the given span @c s in
+      //!  place using the given @c nonce and @c secretKey.  Note that @c s
+      //!  must be at least 16 bytes longer than @c plainLen to accomodate
+      //!  the MAC.  Returns true on success, false on failure.
+      //----------------------------------------------------------------------
+      bool Encrypt(std::span<char> & s, size_t plainLen, const Nonce & nonce,
+                   const std::string & secretKey);
+
       //----------------------------------------------------------------------
       //!  Decrypts the given @c cipherText using the given @c nonce and
       //!  @c secretKey.  On success, stores the result in @c message and
@@ -66,6 +80,17 @@ namespace Dwm {
       //----------------------------------------------------------------------
       bool Decrypt(std::string & message, const std::string & cipherText,
                    const Nonce & nonce, const std::string & secretKey);
+
+      //----------------------------------------------------------------------
+      //!  Decrypts the given span @s in place using the given @c nonce and
+      //!  @c secretKey.  On success, true is returned and @c s will be a
+      //!  span covering the decrypted message.  On failure, false is
+      //!  returned and @c will be an empty span.
+      //!  Note that @c s is expected to contain ciphertext followed by the
+      //!  16-byte MAC when called.
+      //----------------------------------------------------------------------
+      bool Decrypt(std::span<char> & s, const Nonce & nonce,
+                   const std::string & secretKey);
       
     }  // namespace XChaCha20Poly1305
     
