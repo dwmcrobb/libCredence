@@ -146,9 +146,11 @@ namespace Dwm {
                           (const uint8_t *)secretKey.data())
             == 0) {
           rc = true;
+          s = std::span<char>{s.data(), cbuflen};
         }
         else {
           Syslog(LOG_ERR, "xcc20p1305enc() failed in Encrypt()");
+          s = std::span<char>{s.data(), 0};
         }
         
         return rc;

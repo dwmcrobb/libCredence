@@ -68,7 +68,9 @@ namespace Dwm {
       //!  Encrypts the first @c plainLen bytes of the given span @c s in
       //!  place using the given @c nonce and @c secretKey.  Note that @c s
       //!  must be at least 16 bytes longer than @c plainLen to accomodate
-      //!  the MAC.  Returns true on success, false on failure.
+      //!  the MAC.  On success, returns true and sets @c s to span the
+      //!  encrypted span with MAC.  On failure, returns false and sets @c s
+      //!  to an empty span.
       //----------------------------------------------------------------------
       bool Encrypt(std::span<char> & s, size_t plainLen, const Nonce & nonce,
                    const std::string & secretKey);
