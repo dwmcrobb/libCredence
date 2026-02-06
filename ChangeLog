@@ -1,5 +1,7 @@
 2026-02-06  Daniel W. McRobb  <dwm@spark.mcplex.net>
 
+	* tagged as libDwmCredence-0.2.13
+
 	* classes/include/DwmCredenceNonce.hh: Added StreamedLength().
 
 	* classes/include/DwmCredenceShortString.hh: Add copy assignment,
