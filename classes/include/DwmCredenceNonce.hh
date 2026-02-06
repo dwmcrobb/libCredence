@@ -91,7 +91,14 @@ namespace Dwm {
         }
         return os;
       }
-      
+
+      //----------------------------------------------------------------------
+      //!  Returns the number of bytes that will be written if we call the
+      //!  Write() member.
+      //----------------------------------------------------------------------
+      uint64_t StreamedLength() const
+      { return crypto_secretbox_NONCEBYTES; }
+        
       //----------------------------------------------------------------------
       //!  Copy constructor.
       //----------------------------------------------------------------------
