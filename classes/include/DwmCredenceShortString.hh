@@ -1,7 +1,5 @@
 //===========================================================================
-// @(#) $DwmPath$
-//===========================================================================
-//  Copyright (c) Daniel W. McRobb 2022, 2023, 2024
+//  Copyright (c) Daniel W. McRobb 2022-2024, 2026
 //  All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -71,10 +69,20 @@ namespace Dwm {
       ShortString(const ShortString & ss) = default;
 
       //----------------------------------------------------------------------
-      //!  Assignment operator.
+      //!  Move constructor.
+      //----------------------------------------------------------------------
+      ShortString(ShortString &&) = default;
+      
+      //----------------------------------------------------------------------
+      //!  Copy assignment.
       //----------------------------------------------------------------------
       ShortString & operator = (const ShortString & ss) = default;
 
+      //----------------------------------------------------------------------
+      //!  Move assignment.
+      //----------------------------------------------------------------------
+      ShortString & operator = (ShortString &&) = default;
+      
       //----------------------------------------------------------------------
       //!  Assigns the contents of *this from the the contents of @c ss.
       //----------------------------------------------------------------------
