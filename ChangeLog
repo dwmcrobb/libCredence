@@ -1,5 +1,7 @@
 2026-02-09  Daniel W. McRobb  <dwm@spark.mcplex.net>
 
+	* tagged as libDwmCredence-0.2.14
+
 	* packaging/libDwmCredence.pc.in: Remove some redundancy.
 
 	* configure, dwm.m4: Look for /opt/local/libexec/boost/1.88 before
