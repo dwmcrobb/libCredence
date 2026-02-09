@@ -1,3 +1,10 @@
+2026-02-09  Daniel W. McRobb  <dwm@spark.mcplex.net>
+
+	* packaging/libDwmCredence.pc.in: Remove some redundancy.
+
+	* configure, dwm.m4: Look for /opt/local/libexec/boost/1.88 before
+	/opt/local/libexec/boost/1.81 (macOS macports locations).
+
 2026-02-06  Daniel W. McRobb  <dwm@spark.mcplex.net>
 
 	* tagged as libDwmCredence-0.2.13
