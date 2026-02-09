@@ -875,7 +875,8 @@ define(DWM_COMPILE_BOOSTASIO,[
 dnl #------------------------------------------------------------------------
 define(DWM_CHECK_BOOSTASIO,[
   AC_MSG_CHECKING([for Boost asio])
-  for boost_dir in "" "/usr/local" "/opt/local" "/opt/local/libexec/boost/1.81"; do
+  for boost_dir in "" "/usr/local" "/opt/local" \
+      "/opt/local/libexec/boost/1.88" "/opt/local/libexec/boost/1.81"; do
     DWM_COMPILE_BOOSTASIO([${boost_dir}])
     if [[ "${BOOSTDIR}" != "none" ]]; then
       break
