@@ -3,6 +3,7 @@
 	* classes/include/DwmCredenceShortString.hh:
 	* classes/tests/TestShortString.cc:
 	Added BZ2IO functionality.
+	Added GZIO functionality.
 
 2026-02-09  Daniel W. McRobb  <dwm@spark.mcplex.net>
 

@@ -45,6 +45,7 @@
 #include <string>
 
 #include "DwmBZ2IO.hh"
+#include "DwmGZIO.hh"
 #include "DwmStreamIO.hh"
 #include "DwmSysLogger.hh"
 
@@ -184,7 +185,8 @@ namespace Dwm {
       }
 
       //----------------------------------------------------------------------
-      //!  
+      //!  Reads the short string from the given BZFILE @c bzf.  Returns the
+      //!  number of bytes read on success, -1 on failure.
       //----------------------------------------------------------------------
       int BZRead(BZFILE *bzf)
       {
@@ -216,7 +218,8 @@ namespace Dwm {
       }
 
       //----------------------------------------------------------------------
-      //!  
+      //!  Writes the short string to the given BZFILE @c bzf.  Returns the
+      //!  number of bytes written on success, -1 on failure.
       //----------------------------------------------------------------------
       int BZWrite(BZFILE *bzf) const
       {
@@ -229,6 +232,64 @@ namespace Dwm {
             if (len) {
               if (BZ2_bzwrite(bzf, (void *)_s.data(), _s.size())
                   == _s.size()) {
+                rc += _s.size();
+              }
+              else {
+                rc = -1;
+              }
+            }
+          }
+        }
+        return rc;
+      }
+
+      //----------------------------------------------------------------------
+      //!  Reads the short string from the given gzFile @c gzf.  Returns the
+      //!  number of bytes read on success, -1 on failure.
+      //----------------------------------------------------------------------
+      int Read(gzFile gzf)
+      {
+        int  rc = -1;
+        _s.clear();
+        if (gzf) {
+          TypeFromSize<LEN>  len;
+          int  bytesRead = GZIO::Read(gzf, len);
+          if (bytesRead > 0) {
+            rc = bytesRead;
+            if (len) {
+              try {
+                _s.resize(len);
+                if (gzread(gzf, (void *)_s.data(), len) == len) {
+                  rc += len;
+                }
+                else {
+                  rc = -1;
+                }
+              }
+              catch (...) {
+                rc = -1;
+                FSyslog(LOG_ERR, "Failed to allocate {} bytes", len);
+              }
+            }
+          }
+        }
+        return rc;
+      }
+
+      //----------------------------------------------------------------------
+      //!  Writes the short string to the given gzFile @c gzf.  Returns the
+      //!  number of bytes written on success, -1 on failure.
+      //----------------------------------------------------------------------
+      int Write(gzFile gzf) const
+      {
+        int  rc = -1;
+        if (gzf) {
+          TypeFromSize<LEN>  len = _s.size();
+          int  bytesWritten = GZIO::Write(gzf, len);
+          if (bytesWritten > 0) {
+            rc = bytesWritten;
+            if (len) {
+              if (gzwrite(gzf, (void *)_s.data(), _s.size()) == _s.size()) {
                 rc += _s.size();
               }
               else {

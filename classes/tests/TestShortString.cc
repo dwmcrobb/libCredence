@@ -220,11 +220,69 @@ static void TestBZ2IO()
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
+static void TestGZIO()
+{
+  static const char  *STOREFILE = "./TestShortStringGZIO";
+  
+  Credence::ShortString<255> shortString =
+    "0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=";
+  UnitAssert(decltype(shortString)::Size() == 255);
+
+  gzFile  gzf = gzopen(STOREFILE, "wb");
+  if (UnitAssert(gzf)) {
+    UnitAssert(shortString.Write(gzf) > 0);
+    gzclose(gzf);
+    gzf = gzopen(STOREFILE, "rb");
+    if (UnitAssert(gzf)) {
+      Credence::ShortString<255>  shortString_2;
+      if (UnitAssert(shortString_2.Read(gzf))) {
+        UnitAssert(shortString_2 == shortString);
+      }
+      gzclose(gzf);
+    }
+    std::remove(STOREFILE);
+  }
+  
+  Credence::ShortString<65535>  shortString16 =
+    "0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfV"
+    "sOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ"
+    "5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY"
+    "93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPq"
+    "edfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpR"
+    "UVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUF"
+    "qfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vs"
+    "WGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8"
+    "uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq2"
+    "1UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhb"
+    "d2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=";
+  UnitAssert(decltype(shortString16)::Size() == 65535);
+
+  gzf = gzopen(STOREFILE, "wb");
+  if (UnitAssert(gzf)) {
+    UnitAssert(shortString16.Write(gzf) > 0);
+    gzclose(gzf);
+    gzf = gzopen(STOREFILE, "rb");
+    if (UnitAssert(gzf)) {
+      Credence::ShortString<65535>  shortString16_2;
+      if (UnitAssert(shortString16_2.Read(gzf))) {
+        UnitAssert(shortString16_2 == shortString16);
+      }
+      gzclose(gzf);
+    }
+    std::remove(STOREFILE);
+  }
+  return;
+}
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
   TestAssign();
   TestStreamIO();
   TestBZ2IO();
+  TestGZIO();
   TestIstreamOperator();
   
   if (Assertions::Total().Failed()) {
