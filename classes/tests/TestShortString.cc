@@ -163,10 +163,68 @@ static void TestStreamIO()
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
+static void TestBZ2IO()
+{
+  static const char  *STOREFILE = "./TestShortStringBZ2IO";
+  
+  Credence::ShortString<255> shortString =
+    "0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=";
+  UnitAssert(decltype(shortString)::Size() == 255);
+
+  BZFILE  *bzf = BZ2_bzopen(STOREFILE, "wb");
+  if (UnitAssert(bzf)) {
+    UnitAssert(shortString.BZWrite(bzf) > 0);
+    BZ2_bzclose(bzf);
+    bzf = BZ2_bzopen(STOREFILE, "rb");
+    if (UnitAssert(bzf)) {
+      Credence::ShortString<255>  shortString_2;
+      if (UnitAssert(shortString_2.BZRead(bzf))) {
+        UnitAssert(shortString_2 == shortString);
+      }
+      BZ2_bzclose(bzf);
+    }
+    std::remove(STOREFILE);
+  }
+  
+  Credence::ShortString<65535>  shortString16 =
+    "0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfV"
+    "sOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ"
+    "5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY"
+    "93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPq"
+    "edfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpR"
+    "UVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUF"
+    "qfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vs"
+    "WGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8"
+    "uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq2"
+    "1UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhb"
+    "d2vsWGPqedfVsOq21UUFqfSY93U=0YT8uJpRUVnJ5Rhbd2vsWGPqedfVsOq21UUFqfSY93U=";
+  UnitAssert(decltype(shortString16)::Size() == 65535);
+
+  bzf = BZ2_bzopen(STOREFILE, "wb");
+  if (UnitAssert(bzf)) {
+    UnitAssert(shortString16.BZWrite(bzf) > 0);
+    BZ2_bzclose(bzf);
+    bzf = BZ2_bzopen(STOREFILE, "rb");
+    if (UnitAssert(bzf)) {
+      Credence::ShortString<65535>  shortString16_2;
+      if (UnitAssert(shortString16_2.BZRead(bzf))) {
+        UnitAssert(shortString16_2 == shortString16);
+      }
+      BZ2_bzclose(bzf);
+    }
+    std::remove(STOREFILE);
+  }
+  return;
+}
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
   TestAssign();
   TestStreamIO();
+  TestBZ2IO();
   TestIstreamOperator();
   
   if (Assertions::Total().Failed()) {

@@ -44,6 +44,7 @@
 #include <iomanip>       // for setw()
 #include <string>
 
+#include "DwmBZ2IO.hh"
 #include "DwmStreamIO.hh"
 #include "DwmSysLogger.hh"
 
@@ -182,6 +183,63 @@ namespace Dwm {
         return os;
       }
 
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
+      int BZRead(BZFILE *bzf)
+      {
+        int  rc = -1;
+        _s.clear();
+        if (bzf) {
+          TypeFromSize<LEN>  len;
+          int  bytesRead = BZ2IO::BZRead(bzf, len);
+          if (bytesRead > 0) {
+            rc = bytesRead;
+            if (len) {
+              try {
+                _s.resize(len);
+                if (BZ2_bzread(bzf, (void *)_s.data(), len) == len) {
+                  rc += len;
+                }
+                else {
+                  rc = -1;
+                }
+              }
+              catch (...) {
+                rc = -1;
+                FSyslog(LOG_ERR, "Failed to allocate {} bytes", len);
+              }
+            }
+          }
+        }
+        return rc;
+      }
+
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
+      int BZWrite(BZFILE *bzf) const
+      {
+        int  rc = -1;
+        if (bzf) {
+          TypeFromSize<LEN>  len = _s.size();
+          int  bytesWritten = BZ2IO::BZWrite(bzf, len);
+          if (bytesWritten > 0) {
+            rc = bytesWritten;
+            if (len) {
+              if (BZ2_bzwrite(bzf, (void *)_s.data(), _s.size())
+                  == _s.size()) {
+                rc += _s.size();
+              }
+              else {
+                rc = -1;
+              }
+            }
+          }
+        }
+        return rc;
+      }
+      
       //----------------------------------------------------------------------
       //!  Returns the number of bytes that would be written if we called a
       //!  Write() member.
