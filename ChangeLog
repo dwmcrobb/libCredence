@@ -1,3 +1,9 @@
+2026-02-19  Daniel W. McRobb  <dwm@spark.mcplex.net>
+
+	* classes/include/DwmCredenceShortString.hh:
+	* classes/tests/TestShortString.cc:
+	Added BZ2IO functionality.
+
 2026-02-09  Daniel W. McRobb  <dwm@spark.mcplex.net>
 
 	* tagged as libDwmCredence-0.2.14
