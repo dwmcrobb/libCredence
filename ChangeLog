@@ -1,3 +1,7 @@
+2026-03-30  Daniel McRobb  <dwm@thrip.mcplex.net>
+
+	* packaging/debcontrol.in: Explicitly set Multi-Arch to 'no'.
+
 2026-02-19  Daniel W. McRobb  <dwm@spark.mcplex.net>
 
 	* tagged as libDwmCredence-0.2.15
