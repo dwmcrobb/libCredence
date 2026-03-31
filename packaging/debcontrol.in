@@ -7,4 +7,5 @@ Homepage: http://www.mcplex.net
 Package: libDwmCredence
 Version: @TAGVERSION@
 Architecture: @DEBARCH@
+Multi-Arch: no
 Description: C++ classes for encryption and authentication.
