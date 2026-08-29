@@ -128,6 +128,11 @@ namespace Dwm {
         _ios = make_unique<ip::tcp::iostream>();
         if (nullptr != _ios) {
           _ios->expires_after(timeOut);
+          struct timeval  to;
+          to.tv_sec = timeOut.count() / 1000;
+          to.tv_usec = (timeOut.count() - (to.tv_sec * 1000)) * 1000;
+          setsockopt(_ios->socket().native_handle(), SOL_SOCKET, SO_SNDTIMEO,
+                     &to, sizeof(to));
           try {
             _ios->connect(host, to_string(port));
           }
@@ -135,7 +140,13 @@ namespace Dwm {
             _ios = nullptr;
             return rc;
           }
+          
           _ios->expires_after(std::chrono::milliseconds(60000));
+          to.tv_sec = 60;
+          to.tv_usec = 0;
+          setsockopt(_ios->socket().native_handle(), SOL_SOCKET, SO_SNDTIMEO,
+                     &to, sizeof(to));
+          
           boost::system::error_code  ec;
           _endPoint = _ios->socket().remote_endpoint(ec);
           if (! ec) {
