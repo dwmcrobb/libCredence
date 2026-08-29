@@ -1,5 +1,7 @@
 2026-08-28  dwm  <dwm@nomnom.mcplex.net>
 
+	* tagged as libDwmCredence-0.2.17
+
 	* classes/src/DwmCredencePeer.cc
 	Set SO_SNDTIMEO on native socket in Connect().
 
